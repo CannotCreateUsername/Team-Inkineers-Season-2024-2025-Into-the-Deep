@@ -11,7 +11,7 @@ abstract class RightSideAuto extends LinearOpMode {
     ArmSubsystem armSubsystem = new ArmSubsystem(hardwareMap);
 
     void run() {
-        // Put Code Here
+        // Put Code Here for autonomous
     }
 
     @Override
