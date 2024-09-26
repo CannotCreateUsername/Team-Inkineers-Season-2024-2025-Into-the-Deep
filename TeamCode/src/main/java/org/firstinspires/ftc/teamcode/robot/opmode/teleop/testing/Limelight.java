@@ -18,24 +18,15 @@ public class Limelight extends LinearOpMode {
 
         telemetry.setMsTransmissionInterval(11);
 
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(1);
 
         /*
          * Starts polling for data.
          */
         limelight.start();
-
+        waitForStart();
         while (opModeIsActive()) {
             LLResult result = limelight.getLatestResult();
-            if (result != null) {
-                if (result.isValid()) {
-                    Pose3D botpose = result.getBotpose();
-                    telemetry.addData("tx", result.getTx());
-                    telemetry.addData("ty", result.getTy());
-                    telemetry.addData("Botpose", botpose.toString());
-
-                }
-            }
             // print some data for each detected target
             if (result.isValid()) {
                 // Access fiducial results
@@ -50,7 +41,8 @@ public class Limelight extends LinearOpMode {
                     telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
                 }
             }
+            telemetry.addLine("This is cringe");
+            telemetry.update();
         }
-
     }
 }
