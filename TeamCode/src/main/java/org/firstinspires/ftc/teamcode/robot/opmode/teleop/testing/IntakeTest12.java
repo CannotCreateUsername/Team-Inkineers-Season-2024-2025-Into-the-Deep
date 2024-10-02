@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "#12 Intake Test", group = "Testing")
 public class IntakeTest12 extends LinearOpMode {
-    private enum WristState {
+    private enum ExtendState {
         REST,
         EXTENDED
     }
@@ -19,7 +19,7 @@ public class IntakeTest12 extends LinearOpMode {
     /** @noinspection FieldCanBeLocal*/
     private final double EXTEND_POSITION = 1;
 
-    WristState wristState;
+    ExtendState extendState;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -29,23 +29,23 @@ public class IntakeTest12 extends LinearOpMode {
         GamepadEx gamepadEx1 = new GamepadEx(gamepad1);
 
         extender.setPosition(0);
-        wristState = WristState.REST;
+        extendState = ExtendState.REST;
 
         waitForStart();
         while (opModeIsActive()) {
 
             // Extend/retract intake using button A.
-            switch (wristState) {
+            switch (extendState) {
                 case REST:
                     extender.setPosition(REST_POSITION);
                     if (gamepadEx1.wasJustReleased(GamepadKeys.Button.A)) {
-                        wristState = WristState.EXTENDED;
+                        extendState = ExtendState.EXTENDED;
                     }
                     break;
                 case EXTENDED:
                     extender.setPosition(EXTEND_POSITION);
                     if (gamepadEx1.wasJustReleased(GamepadKeys.Button.A)) {
-                        wristState = WristState.REST;
+                        extendState = ExtendState.REST;
                     }
                     break;
             }
@@ -54,7 +54,7 @@ public class IntakeTest12 extends LinearOpMode {
         // Spins IN when right trigger is held, and OUT if left trigger is held. If both are down at the same time, the power should cancel out to be zero.
         intake.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
 
-        telemetry.addData("Extension State", wristState);
+        telemetry.addData("Extension State", extendState);
         telemetry.update();
     }
 }

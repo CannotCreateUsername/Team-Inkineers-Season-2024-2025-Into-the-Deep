@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-@TeleOp
+@TeleOp(name = "Arm Testing", group = "Testing")
 public class ArmTest extends LinearOpMode {
     DcMotor armMotor = null;
 
@@ -20,8 +20,12 @@ public class ArmTest extends LinearOpMode {
                 armMotor.setPower(0.5);
             } else if (gamepad1.b) {
                 armMotor.setPower(-0.5);
+            } else {
+                armMotor.setPower(0);
             }
         }
 
+        telemetry.addData("Blah blah", "Ja ja");
+        telemetry.update();
     }
 }
