@@ -82,7 +82,11 @@ public class BeelineDrive extends LinearOpMode {
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightBack = hardwareMap.get(DcMotor.class, "rightBack");
-        armMotor   = hardwareMap.get(DcMotor.class, "left_arm"); //the arm motor
+        armMotor   = hardwareMap.get(DcMotor.class, "arm"); //the arm motor
+
+        /* Define and initialize servos.*/
+        intake = hardwareMap.get(CRServo.class, "intake");
+        wrist  = hardwareMap.get(Servo.class, "wrist");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
@@ -92,9 +96,10 @@ public class BeelineDrive extends LinearOpMode {
         rightFront.setDirection(DcMotor.Direction.REVERSE);
         rightBack.setDirection(DcMotor.Direction.REVERSE);
 
-         /* Setting zeroPowerBehavior to BRAKE enables a "brake mode". This causes the motor to slow down
-        much faster when it is coasting. This creates a much more controllable drivetrain. As the robot
-        stops much quicker. */
+         /* Setting zeroPowerBehavior to BRAKE enables a "brake mode".
+         The motor stops and then brakes, actively resisting any external force
+         which attempts to turn the motor. This creates a much more controllable drivetrain.
+         As the robot stops much quicker. */
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -112,9 +117,6 @@ public class BeelineDrive extends LinearOpMode {
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        /* Define and initialize servos.*/
-        intake = hardwareMap.get(CRServo.class, "intake");
-        wrist  = hardwareMap.get(Servo.class, "wrist");
 
         /* Make sure that the intake is off, and the wrist is folded in. */
         intake.setPower(INTAKE_OFF);
@@ -178,6 +180,8 @@ public class BeelineDrive extends LinearOpMode {
             leftBack.setPower(leftPower);
             rightFront.setPower(rightPower);
             rightBack.setPower(rightPower);
+
+
 
             // Show the elapsed game time, arm position, and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
