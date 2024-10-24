@@ -16,9 +16,11 @@ public class IntakeSubsystem {
     }
 
     public void run(Gamepad gamepad) {
+        // Use triggers to control intake power/direction
         intake.setPower(gamepad.right_trigger - gamepad.left_trigger);
     }
 
+    // Returns the current direction of the intake
     public String getIntakeTelemetry() {
         if (intake.getPower() > 0) {
             return "IN";
