@@ -79,6 +79,10 @@ public class ArmSubsystem {
         arm_motor.setPower(1.0);
     }
 
+    public int getSlidesPosition() {
+        return slideMotors.get(0).getCurrentPosition();
+    }
+
     ElapsedTime buttonTimer1 = new ElapsedTime();
     int buttonCount1 = 0;
     public void run(GamepadEx gamepad) {
@@ -136,13 +140,13 @@ public class ArmSubsystem {
                         buttonTimer1.reset();
                     }
                     targetSlidePosition = REST_POSITION_SLIDES;
-                } else if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                } else if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) && getSlidesPosition() > 10) {
                     // Manual control down
-                    targetSlidePosition = slideMotors.get(0).getCurrentPosition() - 100;
+                    targetSlidePosition = getSlidesPosition() - 100;
                     slideDisplayText = "Going Down!";
-                } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER) && getSlidesPosition() < 2000) {
                     // Manual control up
-                    targetSlidePosition = slideMotors.get(0).getCurrentPosition() + 100;
+                    targetSlidePosition = getSlidesPosition() + 100;
                     slideDisplayText = "Going Up!";
                 } else {
                     slideDisplayText = "Elevated";
