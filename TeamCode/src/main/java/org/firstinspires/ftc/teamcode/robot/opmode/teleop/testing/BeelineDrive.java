@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.robot.opmode.teleop.testing;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,7 +12,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-
+@Disabled
 @TeleOp (name = "BeelineDrive", group = "Linear OpMode")
 public class BeelineDrive extends LinearOpMode {
     /* This constant is the number of encoder ticks for each degree of rotation of the arm.
