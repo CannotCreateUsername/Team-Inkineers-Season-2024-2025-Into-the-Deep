@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robot.subsystem;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -27,12 +28,16 @@ public class ArmSubsystem {
     private int targetSlidePosition;
 
     // Needs to be adjusted based on testing
+    // Arm
     private final int REST_POSITION_ARM = 100;
     private final int INTAKE_POSITION = 0;
     private final int OUTTAKE_POSITION = 1000;
 
+    // Linear Slides
     private final int REST_POSITION_SLIDES = 0;
-    private final int EXTEND_POSITION = 1000;
+    private final int EXTEND_POSITION = 2000;
+    private final int MAX_EXTEND_POSITION = 3000;
+    private final int MANUAL_INCREMENT = 100;
 
     private final DcMotorEx arm_motor;
     private final List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
@@ -48,6 +53,7 @@ public class ArmSubsystem {
 
         // Set Motor Modes
         for (DcMotorEx m : slideMotors) {
+            m.setDirection(DcMotorSimple.Direction.REVERSE);
             m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
             m.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         }
@@ -140,13 +146,13 @@ public class ArmSubsystem {
                         buttonTimer1.reset();
                     }
                     targetSlidePosition = REST_POSITION_SLIDES;
-                } else if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) && getSlidesPosition() > 10) {
+                } else if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) && getSlidesPosition() > MANUAL_INCREMENT) {
                     // Manual control down
-                    targetSlidePosition = getSlidesPosition() - 100;
+                    targetSlidePosition = getSlidesPosition() - MANUAL_INCREMENT;
                     slideDisplayText = "Going Down!";
-                } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER) && getSlidesPosition() < 2000) {
+                } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER) && armState == ArmState.OUTTAKE && getSlidesPosition() < MAX_EXTEND_POSITION) {
                     // Manual control up
-                    targetSlidePosition = getSlidesPosition() + 100;
+                    targetSlidePosition = getSlidesPosition() + MANUAL_INCREMENT;
                     slideDisplayText = "Going Up!";
                 } else {
                     slideDisplayText = "Elevated";
