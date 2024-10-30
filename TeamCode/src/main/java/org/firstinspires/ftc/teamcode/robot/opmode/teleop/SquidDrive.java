@@ -40,6 +40,8 @@ public class SquidDrive extends LinearOpMode {
             gamepadEx1.readButtons();
             telemetry.addData("Arm Telemetry", armSubsystem.armDisplayText);
             telemetry.addData("Slide Telemetry", armSubsystem.slideDisplayText);
+            telemetry.addData("Slide Position", armSubsystem.getSlidesPosition());
+            telemetry.addData("Slide Target", armSubsystem.targetSlidePosition);
             telemetry.addData("Intake Telemetry", intakeSubsystem.getIntakeTelemetry());
             telemetry.update();
         }

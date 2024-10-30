@@ -1,9 +1,14 @@
 package org.firstinspires.ftc.teamcode.robot.subsystem;
 
+import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.kPslides;
+import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.threshold_slides;
+
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -25,18 +30,18 @@ public class ArmSubsystem {
     SlideState slideState;
 
     private int targetArmPosition;
-    private int targetSlidePosition;
+    public int targetSlidePosition;
 
     // Needs to be adjusted based on testing
     // Arm
-    private final int REST_POSITION_ARM = 100;
-    private final int INTAKE_POSITION = 0;
-    private final int OUTTAKE_POSITION = 1000;
+    private final int REST_POSITION_ARM = 500;
+    private final int INTAKE_POSITION = -200;
+    private final int OUTTAKE_POSITION = 2000;
 
     // Linear Slides
     private final int REST_POSITION_SLIDES = 0;
     private final int EXTEND_POSITION = 2000;
-    private final int MAX_EXTEND_POSITION = 3000;
+    private final int MAX_EXTEND_POSITION = 3800;
     private final int MANUAL_INCREMENT = 100;
 
     private final DcMotorEx arm_motor;
@@ -55,8 +60,12 @@ public class ArmSubsystem {
         for (DcMotorEx m : slideMotors) {
             m.setDirection(DcMotorSimple.Direction.REVERSE);
             m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-            m.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
+        arm_motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        arm_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Initialize Positions; Start at REST
         armState = ArmState.REST;
@@ -70,19 +79,23 @@ public class ArmSubsystem {
     }
 
     // Method to run slide motors to position
-    private void runSlideMotors(int position) {
+    private void runSlideMotors(double power) {
+        double error = targetSlidePosition - getSlidesPosition();
         for (DcMotorEx m : slideMotors) {
-            m.setTargetPosition(position);
-            m.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            m.setPower(1.0);
+            if (Math.abs(error) > threshold_slides) {
+                // setting negative power because MOTOR IS FREAKING BROKEN AHHHHHHHHHHHHHHHHHHHHHHHhhh
+                m.setPower(-(error * kPslides)*power);
+            } else {
+                m.setPower(0.0);
+            }
         }
     }
 
     // Method to run arm motor to position
-    private void runArmMotor(int position) {
-        arm_motor.setTargetPosition(position);
+    private void runArmMotor(double power) {
+        arm_motor.setTargetPosition(targetArmPosition);
         arm_motor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-        arm_motor.setPower(1.0);
+        arm_motor.setPower(power);
     }
 
     public int getSlidesPosition() {
@@ -129,6 +142,7 @@ public class ArmSubsystem {
         // Linear slide control logic
         switch (slideState) {
             case REST:
+                targetSlidePosition = REST_POSITION_SLIDES;
                 if (gamepad.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
                     slideDisplayText = "Elevated";
                     targetSlidePosition = EXTEND_POSITION;
@@ -166,8 +180,18 @@ public class ArmSubsystem {
         }
 
         // Run methods to go to the target position
-        runArmMotor(targetArmPosition);
-        runSlideMotors(targetSlidePosition);
+        runArmMotor(1.0);
+        runSlideMotors(0.5);
+    }
+
+    public void runReset(Gamepad gamepad) {
+        if (gamepad.right_bumper) {
+            arm_motor.setPower(-0.5);
+        } else if (gamepad.left_bumper) {
+            arm_motor.setPower(0.5);
+        } else {
+            arm_motor.setPower(0);
+        }
     }
 
     public String armDisplayText = "";
