@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.robot.subsystem;
 
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -9,6 +10,7 @@ public class IntakeSubsystem {
 
     public IntakeSubsystem(HardwareMap hardwareMap) {
         intake = hardwareMap.get(CRServo.class, "intake");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void killItself() {

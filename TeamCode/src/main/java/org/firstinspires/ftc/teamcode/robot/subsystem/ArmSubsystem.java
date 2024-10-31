@@ -35,14 +35,14 @@ public class ArmSubsystem {
     // Needs to be adjusted based on testing
     // Arm
     private final int REST_POSITION_ARM = 500;
-    private final int INTAKE_POSITION = -200;
-    private final int OUTTAKE_POSITION = 2000;
+    private final int INTAKE_POSITION = -240;
+    private final int OUTTAKE_POSITION = 2600;
 
     // Linear Slides
     private final int REST_POSITION_SLIDES = 0;
-    private final int EXTEND_POSITION = 2000;
-    private final int MAX_EXTEND_POSITION = 3800;
-    private final int MANUAL_INCREMENT = 100;
+    private final int EXTEND_POSITION = 1500;
+    private final int MAX_EXTEND_POSITION = 3500;
+    private final int MANUAL_INCREMENT = 20;
 
     private final DcMotorEx arm_motor;
     private final List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
@@ -76,6 +76,7 @@ public class ArmSubsystem {
 
         // Reset Timers
         buttonTimer1.reset();
+        limitTimer.reset();
     }
 
     // Method to run slide motors to position
@@ -103,6 +104,7 @@ public class ArmSubsystem {
     }
 
     ElapsedTime buttonTimer1 = new ElapsedTime();
+    ElapsedTime limitTimer = new ElapsedTime();
     int buttonCount1 = 0;
     public void run(GamepadEx gamepad) {
         // Arm control logic
@@ -120,10 +122,8 @@ public class ArmSubsystem {
                 targetArmPosition = INTAKE_POSITION;
                 if (gamepad.wasJustReleased(GamepadKeys.Button.A)) {
                     // Move arm to outtake position if A is pressed
-                    armState = ArmState.OUTTAKE;
-                } else if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
-                    // Move arm to rest position if B is pressed
                     armState = ArmState.REST;
+                    targetSlidePosition = REST_POSITION_SLIDES;
                 }
                 break;
             case OUTTAKE:
@@ -132,9 +132,11 @@ public class ArmSubsystem {
                 if (gamepad.wasJustReleased(GamepadKeys.Button.A)) {
                     // Move arm to intake position if A is pressed
                     armState = ArmState.INTAKE;
+                    targetSlidePosition = REST_POSITION_SLIDES;
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
                     // Move arm to rest position if B is pressed
                     armState = ArmState.REST;
+                    targetSlidePosition = REST_POSITION_SLIDES;
                 }
                 break;
         }
@@ -143,6 +145,12 @@ public class ArmSubsystem {
         switch (slideState) {
             case REST:
                 targetSlidePosition = REST_POSITION_SLIDES;
+                if (limitTimer.seconds() > 2.5) {
+                    for (DcMotorEx m : slideMotors) {
+                        m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                        m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    }
+                }
                 if (gamepad.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
                     slideDisplayText = "Elevated";
                     targetSlidePosition = EXTEND_POSITION;
@@ -152,21 +160,18 @@ public class ArmSubsystem {
             case EXTEND:
                 // Retract slides if left bumper is pressed
                 if (gamepad.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-                    if (buttonTimer1.seconds() < 0.4) {
-                        buttonCount1++;
-                    } else {
-                        buttonCount1 = 0;
-                        buttonCount1++;
+                    if (buttonTimer1.seconds() > 0.4) {
                         buttonTimer1.reset();
+                        buttonCount1 = 0;
                     }
-                    targetSlidePosition = REST_POSITION_SLIDES;
+                    buttonCount1++;
                 } else if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) && getSlidesPosition() > MANUAL_INCREMENT) {
                     // Manual control down
-                    targetSlidePosition = getSlidesPosition() - MANUAL_INCREMENT;
+                    targetSlidePosition -= MANUAL_INCREMENT;
                     slideDisplayText = "Going Down!";
-                } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER) && armState == ArmState.OUTTAKE && getSlidesPosition() < MAX_EXTEND_POSITION) {
+                } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER) && armState == ArmState.OUTTAKE) {
                     // Manual control up
-                    targetSlidePosition = getSlidesPosition() + MANUAL_INCREMENT;
+                    targetSlidePosition += MANUAL_INCREMENT;
                     slideDisplayText = "Going Up!";
                 } else {
                     slideDisplayText = "Elevated";
@@ -174,11 +179,17 @@ public class ArmSubsystem {
                 // If left bumper double pressed, retract slides
                 if (buttonTimer1.seconds() < 0.4 && buttonCount1 > 1) {
                     slideDisplayText = "Retracted";
+                    // Reset entire arm
+                    armState = ArmState.REST;
                     slideState = SlideState.REST;
+                    limitTimer.reset();
                 }
                 break;
         }
-
+        // Prevent linear slides from over-rotating
+        if (targetSlidePosition > MAX_EXTEND_POSITION) {
+            targetSlidePosition = MAX_EXTEND_POSITION;
+        }
         // Run methods to go to the target position
         runArmMotor(1.0);
         runSlideMotors(0.5);
