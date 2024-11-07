@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot.subsystem;
+package org.firstinspires.ftc.teamcode.robot.subsystem.meet0;
 
 import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.kPslides;
 import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.threshold_slides;
@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /** @noinspection FieldCanBeLocal*/
-public class ArmSubsystem {
+public class ArmSubsystemZero {
     private enum ArmState {
         REST,
         INTAKE,
@@ -50,7 +50,7 @@ public class ArmSubsystem {
     private final DcMotorEx arm_motor;
     private final List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
 
-    public ArmSubsystem(HardwareMap hardwareMap) {
+    public ArmSubsystemZero(HardwareMap hardwareMap) {
         // Map Motors
         arm_motor = hardwareMap.get(DcMotorEx.class, "worm_motor");
         //noinspection ArraysAsListWithZeroOrOneArgument

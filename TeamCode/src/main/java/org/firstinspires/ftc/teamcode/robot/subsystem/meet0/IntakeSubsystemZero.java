@@ -1,14 +1,14 @@
-package org.firstinspires.ftc.teamcode.robot.subsystem;
+package org.firstinspires.ftc.teamcode.robot.subsystem.meet0;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class IntakeSubsystem {
+public class IntakeSubsystemZero {
     private final CRServo intake;
 
-    public IntakeSubsystem(HardwareMap hardwareMap) {
+    public IntakeSubsystemZero(HardwareMap hardwareMap) {
         intake = hardwareMap.get(CRServo.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
     }
