@@ -1,14 +1,19 @@
-package org.firstinspires.ftc.teamcode.robot.subsystem.meet0;
+package org.firstinspires.ftc.teamcode.robot.subsystem;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-public class IntakeSubsystemZero {
+public class IntakeSubsystem {
     private final CRServo intake;
 
-    public IntakeSubsystemZero(HardwareMap hardwareMap) {
+    public IntakeSubsystem(HardwareMap hardwareMap) {
         intake = hardwareMap.get(CRServo.class, "intake");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
     }
@@ -31,5 +36,25 @@ public class IntakeSubsystemZero {
         } else {
             return "IDLE";
         }
+    }
+
+
+    // Autonomous Actions
+
+    ElapsedTime autoTimer = new ElapsedTime();
+
+    public Action spinIntake() {
+        return new Action() {
+            private boolean set = false;
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!set) {
+                    autoTimer.reset();
+                    set = true;
+                }
+                intake.setPower(1);
+                return autoTimer.seconds() < 2;
+            }
+        };
     }
 }

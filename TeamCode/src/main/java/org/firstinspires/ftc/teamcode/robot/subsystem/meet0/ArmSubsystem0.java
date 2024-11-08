@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /** @noinspection FieldCanBeLocal*/
-public class ArmSubsystemZero {
+public class ArmSubsystem0 {
     private enum ArmState {
         REST,
         INTAKE,
@@ -50,7 +50,7 @@ public class ArmSubsystemZero {
     private final DcMotorEx arm_motor;
     private final List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
 
-    public ArmSubsystemZero(HardwareMap hardwareMap) {
+    public ArmSubsystem0(HardwareMap hardwareMap) {
         // Map Motors
         arm_motor = hardwareMap.get(DcMotorEx.class, "worm_motor");
         //noinspection ArraysAsListWithZeroOrOneArgument

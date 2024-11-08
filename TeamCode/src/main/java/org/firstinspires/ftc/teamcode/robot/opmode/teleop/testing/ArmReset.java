@@ -5,14 +5,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.robot.subsystem.meet0.ArmSubsystemZero;
+import org.firstinspires.ftc.teamcode.robot.subsystem.meet0.ArmSubsystem0;
 
 @Disabled
 @TeleOp(name = "Arm Reset", group = "Testing")
 public class ArmReset extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        ArmSubsystemZero armSubsystem = new ArmSubsystemZero(hardwareMap);
+        ArmSubsystem0 armSubsystem = new ArmSubsystem0(hardwareMap);
         armSubsystem.initReset();
         GamepadEx gamepadEx = new GamepadEx(gamepad1);
         waitForStart();

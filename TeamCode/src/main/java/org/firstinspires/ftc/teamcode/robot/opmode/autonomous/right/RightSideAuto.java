@@ -5,11 +5,11 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.TankDrive;
-import org.firstinspires.ftc.teamcode.robot.subsystem.meet0.IntakeSubsystemZero;
+import org.firstinspires.ftc.teamcode.robot.subsystem.meet0.IntakeSubsystem0;
 
 abstract class RightSideAuto extends LinearOpMode {
 
-    IntakeSubsystemZero intakeSubsystem = new IntakeSubsystemZero(hardwareMap);
+    IntakeSubsystem0 intakeSubsystem = new IntakeSubsystem0(hardwareMap);
     TankDrive drive = new TankDrive(hardwareMap, new Pose2d(0, 0, 0));
 
     Action runToChamber = drive.actionBuilder(new Pose2d(0, 0, 0))
