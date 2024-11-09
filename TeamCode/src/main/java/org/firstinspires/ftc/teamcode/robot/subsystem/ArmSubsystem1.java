@@ -9,11 +9,11 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.gamepad.TriggerReader;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -42,9 +42,16 @@ public class ArmSubsystem1 {
         DOWN
     }
 
+    private enum HangState {
+        REST,
+        READY,
+        HANGING
+    }
+
     ArmState armState;
     IntakeState intakeState;
     WristState wristState;
+    HangState hangState;
 
     public int targetSlidePosition;
 
@@ -61,6 +68,7 @@ public class ArmSubsystem1 {
 
     private final Servo wrist;
     private final CRServo intake;
+    private final CRServo intake2;
 
     private final DcMotorEx hangMotor;
     private final Servo hangServo;
@@ -73,6 +81,7 @@ public class ArmSubsystem1 {
                 hardwareMap.get(DcMotorEx.class, "slide2")
         );
         intake = hardwareMap.get(CRServo.class, "intake");
+        intake2 = hardwareMap.get(CRServo.class, "intake2");
         wrist = hardwareMap.get(Servo.class, "wrist");
         hangMotor = hardwareMap.get(DcMotorEx.class, "hang_motor");
         hangServo = hardwareMap.get(Servo.class, "hang_servo");
@@ -86,15 +95,20 @@ public class ArmSubsystem1 {
         }
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        wrist.setDirection(Servo.Direction.REVERSE);
 
         hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        hangMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Initialize Positions; Start at REST
         armState = ArmState.REST;
         intakeState = IntakeState.IDLE;
         wristState = WristState.UP;
+        hangState = HangState.REST;
 
         targetSlidePosition = REST_POSITION_SLIDES;
+        wrist.setPosition(WRIST_UP);
     }
 
     // Method to run slide motors to position
@@ -119,26 +133,25 @@ public class ArmSubsystem1 {
         // Arm control logic
         switch (armState) {
             case REST:
-                slideDisplayText = "Retracted";
+                slideDisplayText = "REST";
                 targetSlidePosition = REST_POSITION_SLIDES;
-                if (gamepad.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+                if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     armState = ArmState.INTAKE;
                 }
                 break;
             case INTAKE:
-                slideDisplayText = "Intake";
+                slideDisplayText = "INTAKE";
                 targetSlidePosition = INTAKE_POSITION_SLIDES;
-                if (gamepad.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+                if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     armState = ArmState.OUTTAKE;
                 }
                 break;
             case OUTTAKE:
-                slideDisplayText = "Outtake";
+                slideDisplayText = "OUTTAKE";
                 targetSlidePosition = OUTTAKE_POSITION_SLIDES;
                 if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                     targetSlidePosition -= MANUAL_INCREMENT;
-                }
-                if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
+                } else if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     armState = ArmState.REST;
                 }
                 break;
@@ -157,37 +170,45 @@ public class ArmSubsystem1 {
         runSlideMotors(0.5);
     }
 
-    public void runIntake(GamepadEx gamepad) {
-        TriggerReader rtReader = new TriggerReader(gamepad, GamepadKeys.Trigger.RIGHT_TRIGGER);
-        TriggerReader ltReader = new TriggerReader(gamepad, GamepadKeys.Trigger.LEFT_TRIGGER);
+    public void runIntake(Gamepad gamepad) {
         switch (intakeState) {
             case IDLE:
+                intake.setPower(0);
+                intake2.setPower(0);
+                intakeDisplayText = "IDLE";
+
                 // Default Wrist States
                 if (armState == ArmState.REST) {
                     wristState = WristState.UP;
                 } else {
                     wristState = WristState.NEUTRAL;
                 }
-                if (rtReader.isDown() && armState == ArmState.REST) {
+                if (gamepad.right_trigger > 0) {
                     intakeState = IntakeState.IN;
-                    wristState = WristState.DOWN;
-                } else if (rtReader.isDown()) {
-                    intakeState = IntakeState.IN;
+                    if (armState == ArmState.REST) {
+                        wristState = WristState.DOWN;
+                    }
                 }
-                if (ltReader.isDown()) {
+                if (gamepad.left_trigger > 0) {
                     intakeState = IntakeState.OUT;
                     wristState = WristState.NEUTRAL;
                 }
                 break;
             case IN:
                 intake.setPower(1);
-                if (rtReader.wasJustReleased()) {
+                intake2.setPower(1);
+                intakeDisplayText = "IN";
+
+                if (gamepad.right_trigger == 0) {
                     intakeState = IntakeState.IDLE;
                 }
                 break;
             case OUT:
                 intake.setPower(-1);
-                if (ltReader.wasJustReleased()) {
+                intake2.setPower(-1);
+                intakeDisplayText = "OuT";
+
+                if (gamepad.left_trigger == 0) {
                     intakeState = IntakeState.IDLE;
                 }
                 break;
@@ -195,24 +216,66 @@ public class ArmSubsystem1 {
         runWrist();
     }
 
-    private void runWrist() {
-        // Max Rotation for 2000-0025-0002 Torque Servo: 300*
-        // 90 degrees is position +- 90/300
+    // Max Rotation for 2000-0025-0002 Torque Servo: 300 degrees
+    // 90 degrees is position +- 90/300
+    private final double WRIST_NEUTRAL = 0.5;
+    private final double WRIST_UP = 0.5+90.0/300;
+    private final double WRIST_DOWN = 0.5-90.0/300;
+
+    public void runWrist() {
+        // Max Rotation for 2000-0025-0002 Torque Servo: 300 degrees
         switch (wristState) {
             case NEUTRAL:
-                wrist.setPosition(0.5);
+                wristDisplayText = "Neutral";
+                wrist.setPosition(WRIST_NEUTRAL);
                 break;
             case UP:
-                wrist.setPosition(0.5+90.0/300);
+                wristDisplayText = "Up";
+                wrist.setPosition(WRIST_UP);
                 break;
             case DOWN:
-                wrist.setPosition(0.5-90.0/300);
+                wristDisplayText = "Down";
+                wrist.setPosition(WRIST_DOWN);
                 break;
         }
     }
 
-    public String slideDisplayText = "WEEWOOWEEWOOWEEWOOWEEWOOWEEEEEEEEEEEEEEEEEEEEEEE";
+    private final int HANG_UP = 3000;
+    private final int HANG_DOWN = 1000;
+    private final int HANG_REST = 0;
 
+    public void runHang(GamepadEx gamepad) {
+        switch (hangState) {
+            case REST:
+                hangMotor.setTargetPosition(HANG_REST);
+
+                if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_UP)) {
+                    hangState = HangState.READY;
+                }
+                break;
+            case READY:
+                hangMotor.setTargetPosition(HANG_UP);
+
+                if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_DOWN)) {
+                    hangState = HangState.HANGING;
+                } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                    hangState = HangState.REST;
+                }
+                break;
+            case HANGING:
+                hangMotor.setTargetPosition(HANG_DOWN);
+
+                if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                    hangState = HangState.REST;
+                }
+                break;
+        }
+        hangMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public String slideDisplayText = "WEEWOOWEEWOOWEEWOOWEEWOOWEEEEEEEEEEEEEEEEEEEEEEE";
+    public String intakeDisplayText = "NOMMMMMMMMMMMMMMMMM";
+    public String wristDisplayText = "YEEEEEEEEEEEEEEET";
 
     // Autonomous Actions for RoadRunner
 
