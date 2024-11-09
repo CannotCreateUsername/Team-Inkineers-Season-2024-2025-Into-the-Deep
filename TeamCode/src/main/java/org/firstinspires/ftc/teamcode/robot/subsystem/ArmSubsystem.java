@@ -82,8 +82,9 @@ public abstract class ArmSubsystem {
     abstract void init(HardwareMap hardwareMap, boolean isRedAlliance);
 
     // Method to run slide motors to position
+    double error;
     public void runSlideMotorsPID(double power) {
-        double error = targetSlidePosition - getSlidesPosition();
+        error = targetSlidePosition - getSlidesPosition();
         for (DcMotorEx m : slideMotors) {
             if (Math.abs(error) > threshold_slides) {
                 // setting negative power because MOTOR IS FREAKING BROKEN AHHHHHHHHHHHHHHHHHHHHHHHhhh
@@ -97,6 +98,14 @@ public abstract class ArmSubsystem {
     // Method to simplify getting the current linear slides position
     public int getSlidesPosition() {
         return slideMotors.get(0).getCurrentPosition();
+    }
+
+    public boolean getValidColor() {
+        if (redSide) {
+            return racist.red() > racist.blue();
+        } else {
+            return racist.blue() > racist.red();
+        }
     }
 
     boolean eject = false;

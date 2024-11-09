@@ -101,14 +101,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         runSlideMotorsPID(0.5);
     }
 
-    public boolean getValidColor() {
-        if (redSide) {
-            return racist.red() > racist.blue();
-        } else {
-            return racist.blue() > racist.red();
-        }
-    }
-
     private boolean intaked = false;
     public void runIntake(Gamepad gamepad) {
         switch (intakeState) {
