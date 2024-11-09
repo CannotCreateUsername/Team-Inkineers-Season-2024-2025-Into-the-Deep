@@ -17,24 +17,25 @@ import java.util.Arrays;
 public class ArmSubsystemAuto extends ArmSubsystem {
 
     @Override
-    void init(HardwareMap hardwareMap, boolean isRedAlliance) {
+    public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
         redSide = isRedAlliance;
         // Map the actuators
         slideMotors = Arrays.asList(
-                hardwareMap.get(DcMotorEx.class, "slide1"),
-                hardwareMap.get(DcMotorEx.class, "slide2")
+                hardwareMap.get(DcMotorEx.class, "belt_slide"),
+                hardwareMap.get(DcMotorEx.class, "non_slide")
         );
         intake = hardwareMap.get(CRServo.class, "intake");
         intake2 = hardwareMap.get(CRServo.class, "intake2");
         wrist = hardwareMap.get(Servo.class, "wrist");
 
-        // Set Motor Modes & Directions
+        // Set Motor Modes
         for (DcMotorEx m : slideMotors) {
-            m.setDirection(DcMotorSimple.Direction.REVERSE);
             m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
             m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
+        // Reverse Encoder Motor
+        slideMotors.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
         wrist.setDirection(Servo.Direction.REVERSE);
@@ -127,7 +128,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         };
     }
 
-    public Action spinIntake() {
+    public Action spinIntake(double time) {
         return new Action() {
             private boolean set = false;
             @Override
@@ -138,12 +139,12 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 }
 
                 intake.setPower(1);
-                return autoTimer.seconds() < 2;
+                return autoTimer.seconds() < time;
             }
         };
     }
 
-    public Action spinOut() {
+    public Action spinOut(double time) {
         return new Action() {
             private boolean set = false;
             @Override
@@ -154,7 +155,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 }
 
                 intake.setPower(-1);
-                return autoTimer.seconds() < 0.8;
+                return autoTimer.seconds() < time;
             }
         };
     }

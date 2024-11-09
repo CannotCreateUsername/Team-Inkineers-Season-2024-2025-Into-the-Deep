@@ -79,7 +79,7 @@ public abstract class ArmSubsystem {
     ColorSensor racist;
 
     boolean redSide = false;
-    abstract void init(HardwareMap hardwareMap, boolean isRedAlliance);
+    abstract public void init(HardwareMap hardwareMap, boolean isRedAlliance);
 
     // Method to run slide motors to position
     double error;
