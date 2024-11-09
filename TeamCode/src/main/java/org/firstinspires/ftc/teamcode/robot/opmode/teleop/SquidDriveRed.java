@@ -9,11 +9,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystem1;
+import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTeleOp;
 import org.firstinspires.ftc.teamcode.robot.subsystem.GamepadHelper;
 
 @TeleOp(name = "Squid Drive", group = "Linear Opmode")
-public class SquidDrive extends LinearOpMode {
+public class SquidDriveRed extends LinearOpMode {
 
     double leftXInput;
     double leftYInput;
@@ -22,11 +22,12 @@ public class SquidDrive extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
-        ArmSubsystem1 armSubsystem = new ArmSubsystem1(hardwareMap);
+        ArmSubsystemTeleOp armSubsystem = new ArmSubsystemTeleOp();
+        armSubsystem.init(hardwareMap, true);
 
         // More Gamepad functionality
         GamepadEx gamepadEx1 = new GamepadEx(gamepad1);
-        GamepadEx gamepadEx2 = new GamepadEx(gamepad2);
+//        GamepadEx gamepadEx2 = new GamepadEx(gamepad2);
 
         GamepadHelper leftYHelper = new GamepadHelper();
         GamepadHelper leftXHelper = new GamepadHelper();
