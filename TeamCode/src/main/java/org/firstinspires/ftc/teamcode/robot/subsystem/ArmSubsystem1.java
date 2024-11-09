@@ -196,15 +196,17 @@ public class ArmSubsystem1 {
     }
 
     private void runWrist() {
+        // Max Rotation for 2000-0025-0002 Torque Servo: 300*
+        // 90 degrees is position +- 90/300
         switch (wristState) {
             case NEUTRAL:
                 wrist.setPosition(0.5);
                 break;
             case UP:
-                wrist.setPosition(1);
+                wrist.setPosition(0.5+90.0/300);
                 break;
             case DOWN:
-                wrist.setPosition(0);
+                wrist.setPosition(0.5-90.0/300);
                 break;
         }
     }
