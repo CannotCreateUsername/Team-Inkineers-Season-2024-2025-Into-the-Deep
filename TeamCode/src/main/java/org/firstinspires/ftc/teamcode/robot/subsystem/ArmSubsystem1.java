@@ -248,6 +248,7 @@ public class ArmSubsystem1 {
         switch (hangState) {
             case REST:
                 hangMotor.setTargetPosition(HANG_REST);
+                hangServo.setPosition(0);
 
                 if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_UP)) {
                     hangState = HangState.READY;
@@ -255,6 +256,7 @@ public class ArmSubsystem1 {
                 break;
             case READY:
                 hangMotor.setTargetPosition(HANG_UP);
+                hangServo.setPosition(.1);
 
                 if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_DOWN)) {
                     hangState = HangState.HANGING;
