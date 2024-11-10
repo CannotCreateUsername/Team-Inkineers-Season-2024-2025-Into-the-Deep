@@ -5,7 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class PIDConstants {
     // PID constants for viper slides
-    public static double kPslides = 0.004;
+    public static double kPslides = 0.008;
     public static double kDslides = 0.02;
     public static double threshold_slides = 5;
 }

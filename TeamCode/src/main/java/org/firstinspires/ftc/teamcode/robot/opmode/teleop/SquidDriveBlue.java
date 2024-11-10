@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTeleOp;
 import org.firstinspires.ftc.teamcode.robot.subsystem.GamepadHelper;
 
-@TeleOp(name = "Squid Drive", group = "Linear Opmode")
+@TeleOp(name = "Squid Drive Blue", group = "Linear Opmode")
 public class SquidDriveBlue extends LinearOpMode {
 
     double leftXInput;
@@ -35,7 +35,7 @@ public class SquidDriveBlue extends LinearOpMode {
 
         // Initialization Telemetry
         ElapsedTime initTimer = new ElapsedTime();
-        while (!isStopRequested() && initTimer.seconds() < 2.0) {
+        while (!isStopRequested() && initTimer.seconds() < 1.0) {
             telemetry.addLine("Initializing...");
             telemetry.update();
         }

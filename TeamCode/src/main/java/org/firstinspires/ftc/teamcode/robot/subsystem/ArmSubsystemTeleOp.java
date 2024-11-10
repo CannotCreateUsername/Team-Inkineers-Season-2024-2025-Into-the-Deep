@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.Arrays;
 
@@ -23,8 +24,8 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
         // Map the actuators
         slideMotors = Arrays.asList(
-                hardwareMap.get(DcMotorEx.class, "slide1"),
-                hardwareMap.get(DcMotorEx.class, "slide2")
+                hardwareMap.get(DcMotorEx.class, "belt_slide"),
+                hardwareMap.get(DcMotorEx.class, "non_slide")
         );
         intake = hardwareMap.get(CRServo.class, "intake");
         intake2 = hardwareMap.get(CRServo.class, "intake2");
@@ -59,10 +60,14 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         wrist.setPosition(WRIST_UP);
     }
 
+    ElapsedTime stallTimer = new ElapsedTime();
     public void runArm(GamepadEx gamepad) {
         // Arm control logic
         switch (armState) {
             case REST:
+                if (stallTimer.seconds() > 1.5) {
+                    resetSlideEncoders();
+                }
                 slideDisplayText = "REST";
                 targetSlidePosition = REST_POSITION_SLIDES;
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
@@ -74,16 +79,17 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 targetSlidePosition = INTAKE_POSITION_SLIDES;
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     armState = ArmState.OUTTAKE;
+                    targetSlidePosition = OUTTAKE_POSITION_SLIDES;
                 }
                 break;
             case OUTTAKE:
                 slideDisplayText = "OUTTAKE";
-                targetSlidePosition = OUTTAKE_POSITION_SLIDES;
                 if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                     targetSlidePosition -= MANUAL_INCREMENT;
                 } else if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     // Spin outtake and move back down to rest
                     eject();
+                    stallTimer.reset();
                     armState = ArmState.REST;
                 }
                 break;

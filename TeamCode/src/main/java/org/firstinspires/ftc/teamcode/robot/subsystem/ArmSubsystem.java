@@ -53,7 +53,7 @@ public abstract class ArmSubsystem {
     final int INTAKE_POSITION_SLIDES = 1000;
     final int OUTTAKE_POSITION_SLIDES = 2000;
     final int MAX_EXTEND_POSITION = 3500;
-    final int MANUAL_INCREMENT = 20;
+    final int MANUAL_INCREMENT = 50;
 
     // Max Rotation for 2000-0025-0002 Torque Servo: 300 degrees
     // 90 degrees is position +- 90/300
@@ -92,6 +92,13 @@ public abstract class ArmSubsystem {
             } else {
                 m.setPower(0.0);
             }
+        }
+    }
+
+    public void resetSlideEncoders() {
+        for (DcMotorEx m : slideMotors) {
+            m.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+            m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
     }
 
