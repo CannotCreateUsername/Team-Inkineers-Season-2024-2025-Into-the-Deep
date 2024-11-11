@@ -50,8 +50,8 @@ public abstract class ArmSubsystem {
     // Needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    final int INTAKE_POSITION_SLIDES = 1000;
-    final int OUTTAKE_POSITION_SLIDES = 2000;
+    final int INTAKE_POSITION_SLIDES = 600;
+    final int OUTTAKE_POSITION_SLIDES = 2200;
     final int MAX_EXTEND_POSITION = 3500;
     final int MANUAL_INCREMENT = 50;
 
@@ -59,7 +59,7 @@ public abstract class ArmSubsystem {
     // 90 degrees is position +- 90/300
     final double WRIST_NEUTRAL = 0.5;
     final double WRIST_UP = 0.5+90.0/300;
-    final double WRIST_DOWN = 0.5-90.0/300;
+    final double WRIST_DOWN = 0.5-72.0/300;
 
     // Linear Actuator
     final int HANG_UP = 3000;
@@ -107,11 +107,12 @@ public abstract class ArmSubsystem {
         return slideMotors.get(0).getCurrentPosition();
     }
 
-    public boolean getValidColor() {
+    public boolean getInvalidColor() {
+        // Yellow samples are more red, make sure difference is great to pick up yellow
         if (redSide) {
-            return racist.red() > racist.blue();
+            return racist.blue() > 200 && racist.blue() > 3.5*racist.red();
         } else {
-            return racist.blue() > racist.red();
+            return racist.red() > 200 && racist.red() > 3.5*racist.blue();
         }
     }
 

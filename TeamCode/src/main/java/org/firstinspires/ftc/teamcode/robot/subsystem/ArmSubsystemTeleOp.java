@@ -80,17 +80,22 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     armState = ArmState.OUTTAKE;
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
+                } else if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
+                    stallTimer.reset();
+                    armState = ArmState.REST;
                 }
                 break;
             case OUTTAKE:
                 slideDisplayText = "OUTTAKE";
-                if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                     targetSlidePosition -= MANUAL_INCREMENT;
-                } else if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
+                } else if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
                     // Spin outtake and move back down to rest
                     eject();
                     stallTimer.reset();
                     armState = ArmState.REST;
+                } else if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    targetSlidePosition += MANUAL_INCREMENT;
                 }
                 break;
             case HANG:
@@ -123,7 +128,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     wristState = WristState.NEUTRAL;
                 }
 
-                if (!getValidColor() && intaked) {
+                if (getInvalidColor() && intaked) {
                     eject();
                 } else if (gamepad.left_trigger > 0) {
                     intakeState = IntakeState.OUT;
@@ -140,7 +145,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 intake2.setPower(1);
                 intakeDisplayText = "IN";
 
-                if (gamepad.right_trigger == 0) {
+                if (gamepad.right_trigger == 0 || !getInvalidColor()) {
                     intakeState = IntakeState.IDLE;
                     intaked = true;
                 }
