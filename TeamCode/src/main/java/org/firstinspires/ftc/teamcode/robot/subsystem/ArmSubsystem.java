@@ -50,7 +50,7 @@ public abstract class ArmSubsystem {
     // Needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    final int INTAKE_POSITION_SLIDES = 600;
+    final int INTAKE_POSITION_SLIDES = 380;
     final int OUTTAKE_POSITION_SLIDES = 2200;
     final int MAX_EXTEND_POSITION = 3500;
     final int MANUAL_INCREMENT = 50;

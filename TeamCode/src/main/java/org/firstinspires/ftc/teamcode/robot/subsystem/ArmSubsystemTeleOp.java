@@ -94,8 +94,8 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     eject();
                     stallTimer.reset();
                     armState = ArmState.REST;
-                } else if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
-                    targetSlidePosition += MANUAL_INCREMENT;
+                } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    targetSlidePosition += (MANUAL_INCREMENT-10);
                 }
                 break;
             case HANG:
@@ -128,9 +128,10 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     wristState = WristState.NEUTRAL;
                 }
 
-                if (getInvalidColor() && intaked) {
-                    eject();
-                } else if (gamepad.left_trigger > 0) {
+//                if (getInvalidColor() && intaked) {
+//                    eject();
+//                } else
+                    if (gamepad.left_trigger > 0) {
                     intakeState = IntakeState.OUT;
                     wristState = WristState.NEUTRAL;
                 } else if (gamepad.right_trigger > 0) {
@@ -145,7 +146,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 intake2.setPower(1);
                 intakeDisplayText = "IN";
 
-                if (gamepad.right_trigger == 0 || !getInvalidColor()) {
+                if (gamepad.right_trigger == 0 ) { // || !getInvalidColor()
                     intakeState = IntakeState.IDLE;
                     intaked = true;
                 }
