@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -24,9 +25,10 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 hardwareMap.get(DcMotorEx.class, "belt_slide"),
                 hardwareMap.get(DcMotorEx.class, "non_slide")
         );
-        intake = hardwareMap.get(CRServo.class, "intake");
-        intake2 = hardwareMap.get(CRServo.class, "intake2");
+        intake = hardwareMap.get(CRServo.class, "right");
+        intake2 = hardwareMap.get(CRServo.class, "left");
         wrist = hardwareMap.get(Servo.class, "wrist");
+        racist = hardwareMap.get(ColorSensor.class, "racist");
 
         // Set Motor Modes
         for (DcMotorEx m : slideMotors) {
@@ -52,31 +54,19 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     ElapsedTime autoTimer = new ElapsedTime();
     public boolean finished = false;
 
-    public Action controlSlides() {
+    public Action controlActuators() {
         return new Action() {
             private boolean set = false;
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
+                    finished = false;
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
-                    set = true;
-                }
-
-                runSlideMotorsPID(0.5);
-                return !finished;
-            }
-        };
-    }
-
-    public Action controlWrist() {
-        return new Action() {
-            private boolean set = false;
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (!set) {
                     wristState = WristState.NEUTRAL;
                     set = true;
                 }
+
+                runSlideMotorsPID(0.4);
                 switch (wristState) {
                     case NEUTRAL:
                         wrist.setPosition(WRIST_NEUTRAL);
@@ -88,7 +78,18 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                         wrist.setPosition(WRIST_DOWN);
                         break;
                 }
-                return finished;
+                return !finished;
+            }
+        };
+    }
+
+    public Action readySpecimen() {
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                targetSlidePosition = OUTTAKE_POSITION_SLIDES;
+                wristState = WristState.NEUTRAL;
+                return false;
             }
         };
     }
@@ -98,13 +99,13 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             private boolean set = false;
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                // Initialized
+                // Initialize
                 if (!set) {
                     targetSlidePosition = INTAKE_POSITION_SLIDES;
                     set = true;
                 }
 
-                return Math.abs(error) > 20;
+                return Math.abs(error) > 100;
             }
         };
     }
@@ -114,7 +115,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             private boolean set = false;
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                // Initialized
+                // Initialize
                 if (!set) {
                     autoTimer.reset();
                     targetSlidePosition = REST_POSITION_SLIDES;
@@ -128,13 +129,14 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         };
     }
 
-    public Action spinIntake(double time) {
+    public Action spinIn(double time) {
         return new Action() {
             private boolean set = false;
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
+                    wristState = WristState.DOWN;
                     set = true;
                 }
 
@@ -151,11 +153,43 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
+                    wristState = WristState.NEUTRAL;
                     set = true;
                 }
 
                 intake.setPower(-1);
                 return autoTimer.seconds() < time;
+            }
+        };
+    }
+
+    public Action pickUpSpecimen() {
+        return new Action() {
+            private boolean set = false;
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!set) {
+                    autoTimer.reset();
+                    targetSlidePosition = INTAKE_POSITION_SLIDES;
+                    wristState = WristState.NEUTRAL;
+                    set = true;
+                }
+                intake.setPower(1);
+                return autoTimer.seconds() < 3;
+            }
+        };
+    }
+
+    public boolean getSpecimenPickUp() {
+        return intakedSpecial();
+    }
+
+    public Action terminate() {
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                finished = true;
+                return !finished;
             }
         };
     }

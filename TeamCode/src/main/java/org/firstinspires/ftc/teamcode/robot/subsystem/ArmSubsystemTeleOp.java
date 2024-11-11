@@ -27,8 +27,8 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 hardwareMap.get(DcMotorEx.class, "belt_slide"),
                 hardwareMap.get(DcMotorEx.class, "non_slide")
         );
-        intake = hardwareMap.get(CRServo.class, "intake");
-        intake2 = hardwareMap.get(CRServo.class, "intake2");
+        intake = hardwareMap.get(CRServo.class, "right");
+        intake2 = hardwareMap.get(CRServo.class, "left");
         wrist = hardwareMap.get(Servo.class, "wrist");
         hangMotor = hardwareMap.get(DcMotorEx.class, "hang_motor");
         hangServo = hardwareMap.get(Servo.class, "hang_servo");

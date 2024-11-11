@@ -115,6 +115,10 @@ public abstract class ArmSubsystem {
         }
     }
 
+    public boolean intakedSpecial() {
+        return (racist.red() > 200) || (racist.blue() > 200);
+    }
+
     boolean eject = false;
     ElapsedTime ejectTimer = new ElapsedTime();
     public void eject() {
