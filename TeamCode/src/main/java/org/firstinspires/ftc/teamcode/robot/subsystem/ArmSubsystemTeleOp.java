@@ -51,7 +51,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         hangMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Initialize Positions; Start at REST
-        armState = ArmState.REST;
+        armState = ArmState.INTAKE;
         intakeState = IntakeState.IDLE;
         wristState = WristState.UP;
         hangState = HangState.REST;
@@ -64,25 +64,18 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
     public void runArm(GamepadEx gamepad) {
         // Arm control logic
         switch (armState) {
-            case REST:
+            case INTAKE:
                 if (stallTimer.seconds() > 1.5) {
                     resetSlideEncoders();
                 }
-                slideDisplayText = "REST";
-                targetSlidePosition = REST_POSITION_SLIDES;
-                if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
-                    armState = ArmState.INTAKE;
-                }
-                break;
-            case INTAKE:
                 slideDisplayText = "INTAKE";
+                targetSlidePosition = REST_POSITION_SLIDES;
+                break;
+            case REST:
+                slideDisplayText = "REST";
                 targetSlidePosition = INTAKE_POSITION_SLIDES;
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     armState = ArmState.OUTTAKE;
-                    targetSlidePosition = OUTTAKE_POSITION_SLIDES;
-                } else if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
-                    stallTimer.reset();
-                    armState = ArmState.REST;
                 }
                 break;
             case OUTTAKE:
@@ -92,8 +85,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 } else if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
                     // Spin outtake and move back down to rest
                     eject();
-                    stallTimer.reset();
-                    armState = ArmState.REST;
+                    armState = ArmState.INTAKE;
                 } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                     targetSlidePosition += (MANUAL_INCREMENT-10);
                 }
@@ -117,44 +109,41 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
     public void runIntake(Gamepad gamepad) {
         switch (intakeState) {
             case IDLE:
+                intakeDisplayText = "IDLE";
                 intake.setPower(0);
                 intake2.setPower(0);
-                intakeDisplayText = "IDLE";
 
                 // Default Wrist States
-                if (armState == ArmState.REST) {
-                    wristState = WristState.UP;
-                } else {
-                    wristState = WristState.NEUTRAL;
-                }
+                wristState = WristState.NEUTRAL;
 
 //                if (getInvalidColor() && intaked) {
 //                    eject();
 //                } else
                     if (gamepad.left_trigger > 0) {
                     intakeState = IntakeState.OUT;
-                    wristState = WristState.NEUTRAL;
+                    wristState = WristState.RELEASE;
                 } else if (gamepad.right_trigger > 0) {
+                    stallTimer.reset();
                     intakeState = IntakeState.IN;
-                    if (armState == ArmState.REST) {
-                        wristState = WristState.DOWN;
-                    }
+                    wristState = WristState.DOWN;
+                    armState = ArmState.REST;
                 }
                 break;
             case IN:
+                intakeDisplayText = "IN";
                 intake.setPower(1);
                 intake2.setPower(1);
-                intakeDisplayText = "IN";
 
                 if (gamepad.right_trigger == 0 ) { // || !getInvalidColor()
                     intakeState = IntakeState.IDLE;
+                    armState = ArmState.INTAKE;
                     intaked = true;
                 }
                 break;
             case OUT:
+                intakeDisplayText = "OuT";
                 intake.setPower(-1);
                 intake2.setPower(-1);
-                intakeDisplayText = "OuT";
 
                 if (gamepad.left_trigger == 0 && !eject) {
                     intakeState = IntakeState.IDLE;
@@ -186,6 +175,9 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 wristDisplayText = "Down";
                 wrist.setPosition(WRIST_DOWN);
                 break;
+            case RELEASE:
+                wristDisplayText = "Release";
+                wrist.setPosition(WRIST_RELEASE);
         }
     }
 

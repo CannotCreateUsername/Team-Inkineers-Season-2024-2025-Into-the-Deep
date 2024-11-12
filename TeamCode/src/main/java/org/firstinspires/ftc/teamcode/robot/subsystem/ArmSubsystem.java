@@ -31,7 +31,8 @@ public abstract class ArmSubsystem {
     public enum WristState {
         NEUTRAL,
         UP,
-        DOWN
+        DOWN,
+        RELEASE
     }
 
     public enum HangState {
@@ -60,6 +61,7 @@ public abstract class ArmSubsystem {
     final double WRIST_NEUTRAL = 0.5;
     final double WRIST_UP = 0.5+90.0/300;
     final double WRIST_DOWN = 0.5-72.0/300;
+    final double WRIST_RELEASE = 0.5+20.0/300;
 
     // Linear Actuator
     final int HANG_UP = 3000;
