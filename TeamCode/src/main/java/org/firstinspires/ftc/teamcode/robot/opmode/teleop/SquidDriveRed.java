@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robot.opmode.teleop;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -48,13 +49,18 @@ public class SquidDriveRed extends LinearOpMode {
             leftXInput = leftXHelper.getRampingValue(gamepad1.left_stick_x);
             rightXInput = rightXHelper.getRampingValue(gamepad1.right_stick_x);
 
+            Vector2d driveVector = new Vector2d(-leftYInput, -leftXInput);
+            Rotation2d rotationAmount = drive.pose.heading.inverse().plus(0);
+            Vector2d rotatedInput = rotationAmount.times(driveVector);
+
             drive.setDrivePowers(
                     new PoseVelocity2d(
-                            new Vector2d(-leftYInput, -leftXInput), -rightXInput)
+                            rotatedInput, -rightXInput)
             );
+            drive.updatePoseEstimate();
 
             armSubsystem.runArm(gamepadEx1);
-            armSubsystem.runIntake(gamepad1);
+            armSubsystem.runIntake(gamepad1, gamepadEx1);
             armSubsystem.runHang(gamepadEx1);
 
             gamepadEx1.readButtons();
