@@ -51,12 +51,12 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         hangMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Initialize Positions; Start at REST
-        armState = ArmState.INTAKE;
+        armState = ArmState.REST;
         intakeState = IntakeState.IDLE;
-        wristState = WristState.UP;
+        wristState = WristState.NEUTRAL;
         hangState = HangState.REST;
 
-        targetSlidePosition = REST_POSITION_SLIDES;
+        targetSlidePosition = INTAKE_POSITION_SLIDES;
         wrist.setPosition(WRIST_UP);
     }
 
@@ -76,6 +76,8 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 targetSlidePosition = INTAKE_POSITION_SLIDES;
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     armState = ArmState.OUTTAKE;
+                    targetSlidePosition = OUTTAKE_POSITION_SLIDES;
+                    wristState = WristState.NEUTRAL;
                 }
                 break;
             case OUTTAKE:
@@ -84,10 +86,9 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     targetSlidePosition -= MANUAL_INCREMENT;
                 } else if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
                     // Spin outtake and move back down to rest
-                    eject();
-                    armState = ArmState.INTAKE;
+                    armState = ArmState.REST;
                 } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-                    targetSlidePosition += (MANUAL_INCREMENT-10);
+                    targetSlidePosition += (MANUAL_INCREMENT);
                 }
                 break;
             case HANG:
@@ -105,28 +106,28 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         runSlideMotorsPID(0.5);
     }
 
-    private boolean intaked = false;
-    public void runIntake(Gamepad gamepad) {
+    public void runIntake(Gamepad gamepad, GamepadEx gamepadEx) {
+        runWrist(gamepadEx);
         switch (intakeState) {
             case IDLE:
                 intakeDisplayText = "IDLE";
                 intake.setPower(0);
                 intake2.setPower(0);
 
-                // Default Wrist States
-                wristState = WristState.NEUTRAL;
-
 //                if (getInvalidColor() && intaked) {
 //                    eject();
 //                } else
                     if (gamepad.left_trigger > 0) {
                     intakeState = IntakeState.OUT;
-                    wristState = WristState.RELEASE;
+                    wristState = WristState.NEUTRAL;
                 } else if (gamepad.right_trigger > 0) {
-                    stallTimer.reset();
-                    intakeState = IntakeState.IN;
-                    wristState = WristState.DOWN;
-                    armState = ArmState.REST;
+                    if (wristState == WristState.DOWN) {
+                        stallTimer.reset();
+                        intakeState = IntakeState.IN;
+                        armState = ArmState.INTAKE;
+                    } else {
+                        intakeState = IntakeState.IN;
+                    }
                 }
                 break;
             case IN:
@@ -136,36 +137,37 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
                 if (gamepad.right_trigger == 0 ) { // || !getInvalidColor()
                     intakeState = IntakeState.IDLE;
-                    armState = ArmState.INTAKE;
-                    intaked = true;
+                    if (wristState == WristState.DOWN)
+                        armState = ArmState.REST;
                 }
                 break;
             case OUT:
                 intakeDisplayText = "OuT";
-                intake.setPower(-1);
-                intake2.setPower(-1);
+                intake.setPower(-.4);
+                intake2.setPower(-.4);
 
                 if (gamepad.left_trigger == 0 && !eject) {
                     intakeState = IntakeState.IDLE;
-                    intaked = false;
+                    wristState = WristState.NEUTRAL;
                 } else {
                     if (eject && ejectTimer.seconds() > 0.8) {
                         intakeState = IntakeState.IDLE;
-                        intaked = false;
                         eject = false;
                     }
                 }
                 break;
         }
-        runWrist();
     }
 
-    public void runWrist() {
+    public void runWrist(GamepadEx gamepad) {
         // Max Rotation for 2000-0025-0002 Torque Servo: 300 degrees
         switch (wristState) {
             case NEUTRAL:
                 wristDisplayText = "Neutral";
                 wrist.setPosition(WRIST_NEUTRAL);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+                    wristState = WristState.DOWN;
+                }
                 break;
             case UP:
                 wristDisplayText = "Up";
@@ -174,10 +176,10 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case DOWN:
                 wristDisplayText = "Down";
                 wrist.setPosition(WRIST_DOWN);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+                    wristState = WristState.NEUTRAL;
+                }
                 break;
-            case RELEASE:
-                wristDisplayText = "Release";
-                wrist.setPosition(WRIST_RELEASE);
         }
     }
 
