@@ -66,7 +66,7 @@ public class SquidDriveRed extends LinearOpMode {
             armSubsystem.runIntake(gamepad1, gamepadEx1);
             armSubsystem.runHang(gamepadEx1);
             // Troll
-            windmill.setPower(rotatedInput.x);
+            windmill.setPower(rotatedInput.x+rightXInput);
 
             gamepadEx1.readButtons();
             telemetry.addData("Slide Telemetry", armSubsystem.slideDisplayText);
