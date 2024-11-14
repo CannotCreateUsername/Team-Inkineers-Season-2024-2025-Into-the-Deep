@@ -30,7 +30,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         intake = hardwareMap.get(CRServo.class, "right");
         intake2 = hardwareMap.get(CRServo.class, "left");
         wrist = hardwareMap.get(Servo.class, "wrist");
-        hangMotor = hardwareMap.get(DcMotorEx.class, "hang_motor");
+        hangMotor = hardwareMap.get(DcMotor.class, "hang_motor");
         hangServo = hardwareMap.get(Servo.class, "hang_servo");
         racist = hardwareMap.get(ColorSensor.class, "racist");
 
@@ -48,7 +48,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
         hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        hangMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        hangMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Initialize Positions; Start at REST
         armState = ArmState.REST;
@@ -90,8 +90,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                     targetSlidePosition += (MANUAL_INCREMENT);
                 }
-                break;
-            case HANG:
                 break;
         }
 
@@ -183,10 +181,20 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         }
     }
 
+    public void hangPID(double power) {
+        double error = hangMotor.getTargetPosition() - hangMotor.getCurrentPosition();
+        if (Math.abs(error) > 20) {
+            hangMotor.setPower((error * 0.02)*power);
+        } else {
+            hangMotor.setPower(0.0);
+        }
+    }
+
     // Additional Hanging Code
     public void runHang(GamepadEx gamepad) {
         switch (hangState) {
             case REST:
+                hangDisplayText = "REST";
                 hangMotor.setTargetPosition(HANG_REST);
                 hangServo.setPosition(0);
 
@@ -195,6 +203,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 break;
             case READY:
+                hangDisplayText = "READY";
                 hangMotor.setTargetPosition(HANG_UP);
                 hangServo.setPosition(.1);
 
@@ -203,15 +212,18 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     hangState = HangState.REST;
                 }
+                wristState = WristState.UP;
                 break;
             case HANGING:
+                hangDisplayText = "X to cancel";
                 hangMotor.setTargetPosition(HANG_DOWN);
 
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
-                    hangState = HangState.REST;
+                    hangState = HangState.READY;
                 }
+                wristState = WristState.UP;
                 break;
         }
-        hangMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        hangPID(1);
     }
 }

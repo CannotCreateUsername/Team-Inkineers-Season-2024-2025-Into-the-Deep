@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
@@ -25,6 +26,8 @@ public class SquidDriveBlue extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
         ArmSubsystemTeleOp armSubsystem = new ArmSubsystemTeleOp();
         armSubsystem.init(hardwareMap, false);
+
+        CRServo windmill = hardwareMap.get(CRServo.class, "windmill");
 
         // More Gamepad functionality
         GamepadEx gamepadEx1 = new GamepadEx(gamepad1);
@@ -62,6 +65,8 @@ public class SquidDriveBlue extends LinearOpMode {
             armSubsystem.runArm(gamepadEx1);
             armSubsystem.runIntake(gamepad1, gamepadEx1);
             armSubsystem.runHang(gamepadEx1);
+            // Troll
+            windmill.setPower(rotatedInput.x);
 
             gamepadEx1.readButtons();
             telemetry.addData("Slide Telemetry", armSubsystem.slideDisplayText);
@@ -69,6 +74,7 @@ public class SquidDriveBlue extends LinearOpMode {
             telemetry.addData("Slide Target", armSubsystem.targetSlidePosition);
             telemetry.addData("Wrist Telemetry", armSubsystem.wristDisplayText);
             telemetry.addData("Intake Telemetry", armSubsystem.intakeDisplayText);
+            telemetry.addData("Ascent Telemetry", armSubsystem.hangDisplayText);
             telemetry.addData("Drive Heading", drive.pose.heading);
             telemetry.update();
         }

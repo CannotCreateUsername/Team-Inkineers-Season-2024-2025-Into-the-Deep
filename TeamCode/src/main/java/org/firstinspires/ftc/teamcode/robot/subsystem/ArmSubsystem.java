@@ -6,6 +6,7 @@ import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.thresh
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -19,7 +20,6 @@ public abstract class ArmSubsystem {
         REST,
         INTAKE,
         OUTTAKE,
-        HANG
     }
 
     public enum IntakeState {
@@ -62,8 +62,8 @@ public abstract class ArmSubsystem {
     final double WRIST_DOWN = 0.5-72.0/300;
 
     // Linear Actuator
-    final int HANG_UP = 3000;
-    final int HANG_DOWN = 1000;
+    final int HANG_UP = 3050;
+    final int HANG_DOWN = 1100;
     final int HANG_REST = 0;
 
     // Declare actuator variables
@@ -73,7 +73,7 @@ public abstract class ArmSubsystem {
     public CRServo intake;
     public CRServo intake2;
 
-    public DcMotorEx hangMotor;
+    public DcMotor hangMotor;
     public Servo hangServo;
 
     ColorSensor racist;
@@ -82,13 +82,12 @@ public abstract class ArmSubsystem {
     abstract public void init(HardwareMap hardwareMap, boolean isRedAlliance);
 
     // Method to run slide motors to position
-    double error;
+    double slideError;
     public void runSlideMotorsPID(double power) {
-        error = targetSlidePosition - getSlidesPosition();
+        slideError = targetSlidePosition - getSlidesPosition();
         for (DcMotorEx m : slideMotors) {
-            if (Math.abs(error) > threshold_slides) {
-                // setting negative power because MOTOR IS FREAKING BROKEN AHHHHHHHHHHHHHHHHHHHHHHHhhh
-                m.setPower((error * kPslides)*power);
+            if (Math.abs(slideError) > threshold_slides) {
+                m.setPower((slideError * kPslides)*power);
             } else {
                 m.setPower(0.0);
             }
@@ -132,4 +131,5 @@ public abstract class ArmSubsystem {
     public String slideDisplayText = "WEEWOOWEEWOOWEEWOOWEEWOOWEEEEEEEEEEEEEEEEEEEEEEE";
     public String intakeDisplayText = "NOMMMMMMMMMMMMMMMMM";
     public String wristDisplayText = "YEEEEEEEEEEEEEEET";
+    public String hangDisplayText = "RRRRRRRRRRRRRRRRe";
 }
