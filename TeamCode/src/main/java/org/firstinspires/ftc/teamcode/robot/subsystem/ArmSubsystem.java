@@ -31,7 +31,8 @@ public abstract class ArmSubsystem {
     public enum WristState {
         NEUTRAL,
         UP,
-        DOWN
+        DOWN,
+        SCORE
     }
 
     public enum HangState {
@@ -58,8 +59,9 @@ public abstract class ArmSubsystem {
     // Max Rotation for 2000-0025-0002 Torque Servo: 300 degrees
     // 90 degrees is position +- 90/300
     final double WRIST_NEUTRAL = 0.5;
-    final double WRIST_UP = 0.5+90.0/300;
-    final double WRIST_DOWN = 0.5-72.0/300;
+    final double WRIST_UP = WRIST_NEUTRAL+90.0/300;
+    final double WRIST_DOWN = WRIST_NEUTRAL-72.0/300;
+    final double WRIST_SCORE = WRIST_NEUTRAL-20.0/300;
 
     // Linear Actuator
     final int HANG_UP = 3050;
