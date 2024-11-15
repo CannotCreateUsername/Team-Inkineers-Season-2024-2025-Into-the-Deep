@@ -44,7 +44,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         slideMotors.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
-        wrist.setDirection(Servo.Direction.REVERSE);
 
         hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
