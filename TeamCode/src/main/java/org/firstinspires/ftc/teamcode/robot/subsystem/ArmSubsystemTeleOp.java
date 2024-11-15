@@ -65,7 +65,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         // Arm control logic
         switch (armState) {
             case INTAKE:
-                if (stallTimer.seconds() > 1.5) {
+                if (stallTimer.seconds() > 0.8) {
                     resetSlideEncoders();
                 }
                 slideDisplayText = "INTAKE";
@@ -218,7 +218,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 hangDisplayText = "X to cancel";
                 hangMotor.setTargetPosition(HANG_DOWN);
 
-                if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
                     hangState = HangState.READY;
                 }
                 wristState = WristState.UP;

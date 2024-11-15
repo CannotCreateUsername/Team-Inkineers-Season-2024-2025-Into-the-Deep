@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -61,6 +62,13 @@ public class SquidDriveRed extends LinearOpMode {
                             rotatedInput, -rightXInput)
             );
             drive.updatePoseEstimate();
+
+            // Reset heading if started in wrong orientation
+            telemetry.addData("Reset Heading", "Press Back");
+            telemetry.addLine();
+            if (gamepadEx1.wasJustPressed(GamepadKeys.Button.BACK)) {
+                drive.pose = new Pose2d(0, 0, 0);
+            }
 
             armSubsystem.runArm(gamepadEx1);
             armSubsystem.runIntake(gamepad1, gamepadEx1);
