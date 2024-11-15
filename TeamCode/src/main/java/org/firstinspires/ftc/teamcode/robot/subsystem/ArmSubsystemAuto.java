@@ -107,7 +107,8 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 // Initialize
                 if (!set) {
                     autoTimer.reset();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES;
+                    targetSlidePosition = INTAKE_POSITION_SLIDES+SLIDES_OFFSET;
+                    wristState = WristState.DOWN;
                     set = true;
                 }
 
