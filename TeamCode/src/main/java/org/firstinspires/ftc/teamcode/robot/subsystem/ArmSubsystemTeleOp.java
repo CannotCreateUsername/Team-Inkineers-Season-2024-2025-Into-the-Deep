@@ -60,11 +60,14 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         wrist.setPosition(WRIST_UP);
     }
 
+    public double driveMultiplier = 1;
+
     ElapsedTime stallTimer = new ElapsedTime();
     public void runArm(GamepadEx gamepad) {
         // Arm control logic
         switch (armState) {
             case INTAKE:
+                driveMultiplier = 1;
                 if (stallTimer.seconds() > 0.5) {
                     resetSlideEncoders();
                 }
@@ -72,15 +75,17 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 targetSlidePosition = REST_POSITION_SLIDES;
                 break;
             case REST:
+                driveMultiplier = 1;
                 slideDisplayText = "REST";
                 targetSlidePosition = INTAKE_POSITION_SLIDES;
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     armState = ArmState.OUTTAKE;
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
-                    wristState = WristState.NEUTRAL;
+                    wristState = WristState.SCORE;
                 }
                 break;
             case OUTTAKE:
+                driveMultiplier = 0.6;
                 slideDisplayText = "OUTTAKE";
                 if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                     targetSlidePosition -= MANUAL_INCREMENT;
@@ -118,7 +123,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 //                } else
                     if (gamepad.left_trigger > 0) {
                     intakeState = IntakeState.OUT;
-                    wristState = WristState.NEUTRAL;
                 } else if (gamepad.right_trigger > 0) {
                     if (wristState == WristState.DOWN) {
                         stallTimer.reset();
@@ -182,6 +186,9 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     wristState = WristState.NEUTRAL;
                 }
                 break;
+            case SCORE:
+                wristDisplayText = "Scoring";
+                wrist.setPosition(WRIST_SCORE);
         }
     }
 

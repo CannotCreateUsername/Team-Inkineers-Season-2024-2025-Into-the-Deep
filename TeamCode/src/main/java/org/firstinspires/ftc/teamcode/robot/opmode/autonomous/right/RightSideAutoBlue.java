@@ -39,7 +39,8 @@ public class RightSideAutoBlue extends LinearOpMode {
                 .waitSeconds(1)
                 .build();
 
-        telemetry.addLine("Ready! ^-^");
+
+        telemetry.addLine("Wait for wrist! ^-^");
         telemetry.update();
         waitForStart();
         if (isStopRequested()) return;
@@ -75,7 +76,7 @@ public class RightSideAutoBlue extends LinearOpMode {
             );
             // Offset two inches to the left of previous scoring position
             // to avoid placing on top of scored specimen. Also +.5 in for padding
-            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x+1, coords.scoreSpecimenPos.y + i*2);
+            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x+1.5, coords.scoreSpecimenPos.y + i*2);
             Action runToChamber = drive.actionBuilder(new Pose2d(coords.specimenPickupPos, coords.ROTATED))
                     .strafeToLinearHeading(newScorePos, coords.STRAIGHT)
                     .build();
