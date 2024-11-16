@@ -44,6 +44,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         slideMotors.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        wrist.setDirection(Servo.Direction.REVERSE);
 
         hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -86,6 +87,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 } else if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
                     // Spin outtake and move back down to rest
                     armState = ArmState.REST;
+                    wristState = WristState.UP;
                 } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                     targetSlidePosition += (MANUAL_INCREMENT);
                 }
@@ -183,7 +185,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
     public void hangPID(double power) {
         double error = hangMotor.getTargetPosition() - hangMotor.getCurrentPosition();
         if (Math.abs(error) > 20) {
-            hangMotor.setPower((error * 0.02)*power);
+            hangMotor.setPower((error * 0.01)*power);
         } else {
             hangMotor.setPower(0.0);
         }

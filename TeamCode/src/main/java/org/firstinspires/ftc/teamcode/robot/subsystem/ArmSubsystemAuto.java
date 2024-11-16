@@ -40,6 +40,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         slideMotors.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        wrist.setDirection(Servo.Direction.REVERSE);
 
         // Initialize Positions; Start at REST
         armState = ArmState.REST;

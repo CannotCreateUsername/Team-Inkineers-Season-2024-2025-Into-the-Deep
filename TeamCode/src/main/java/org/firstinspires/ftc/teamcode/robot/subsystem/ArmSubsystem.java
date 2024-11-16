@@ -56,12 +56,12 @@ public abstract class ArmSubsystem {
     final int MAX_EXTEND_POSITION = 3500;
     final int MANUAL_INCREMENT = 20;
 
-    // Max Rotation for 2000-0025-0002 Torque Servo: 300 degrees
-    // 90 degrees is position +- 90/300
+    // Default Rotation for Axon MAX+ Servo: 180 degrees
+    // 90 degrees is position +- 90/180.9
     final double WRIST_NEUTRAL = 0.5;
-    final double WRIST_UP = WRIST_NEUTRAL+90.0/300;
-    final double WRIST_DOWN = WRIST_NEUTRAL-72.0/300;
-    final double WRIST_SCORE = WRIST_NEUTRAL-20.0/300;
+    final double WRIST_UP = WRIST_NEUTRAL+90.0/180.9;
+    final double WRIST_DOWN = WRIST_NEUTRAL-72.0/180.9;
+    final double WRIST_SCORE = WRIST_NEUTRAL-20.0/180.9;
 
     // Linear Actuator
     final int HANG_UP = 3050;
