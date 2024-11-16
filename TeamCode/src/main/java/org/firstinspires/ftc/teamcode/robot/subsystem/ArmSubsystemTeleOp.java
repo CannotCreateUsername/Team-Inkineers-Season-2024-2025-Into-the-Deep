@@ -171,6 +171,9 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case UP:
                 wristDisplayText = "Up";
                 wrist.setPosition(WRIST_UP);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+                    wristState = WristState.NEUTRAL;
+                }
                 break;
             case DOWN:
                 wristDisplayText = "Down";
@@ -227,5 +230,9 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
         }
         hangPID(1);
+    }
+
+    public int getHangPosition() {
+        return hangMotor.getCurrentPosition();
     }
 }

@@ -83,6 +83,8 @@ public class SquidDriveBlue extends LinearOpMode {
             telemetry.addData("Wrist Telemetry", armSubsystem.wristDisplayText);
             telemetry.addData("Intake Telemetry", armSubsystem.intakeDisplayText);
             telemetry.addData("Ascent Telemetry", armSubsystem.hangDisplayText);
+            telemetry.addData("Hang Position:", armSubsystem.getHangPosition());
+            telemetry.addLine();
             telemetry.addData("Drive Heading", drive.pose.heading);
             telemetry.update();
         }
