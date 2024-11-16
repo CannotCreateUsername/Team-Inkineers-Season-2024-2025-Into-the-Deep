@@ -61,7 +61,7 @@ public abstract class ArmSubsystem {
     final double WRIST_NEUTRAL = 0.5;
     final double WRIST_UP = WRIST_NEUTRAL+90.0/180.9;
     final double WRIST_DOWN = WRIST_NEUTRAL-72.0/180.9;
-    final double WRIST_SCORE = WRIST_NEUTRAL-20.0/180.9;
+    final double WRIST_SCORE = WRIST_NEUTRAL-25.0/180.9;
 
     // Linear Actuator
     final int HANG_UP = 3050;

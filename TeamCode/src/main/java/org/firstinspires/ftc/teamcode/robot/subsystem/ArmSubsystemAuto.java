@@ -52,9 +52,9 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     }
 
     ElapsedTime autoTimer = new ElapsedTime();
-    private final int SLIDES_OFFSET = 200;
+    private final int SLIDES_OFFSET = 850;
     public boolean finished = false;
-    double autoSlidePow = 0.5;
+    double autoSlidePow = 0.4;
 
     public Action controlActuators() {
         return new Action() {
@@ -107,7 +107,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 // Initialize
                 if (!set) {
                     autoTimer.reset();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES+SLIDES_OFFSET+750;
+                    targetSlidePosition = INTAKE_POSITION_SLIDES+SLIDES_OFFSET;
                     set = true;
                 }
                 return autoTimer.seconds() < 0.6;
@@ -129,12 +129,12 @@ public class ArmSubsystemAuto extends ArmSubsystem {
 
                 if (autoTimer.seconds() > 0.8)
                     targetSlidePosition = REST_POSITION_SLIDES;
-                if (autoTimer.seconds() > 1.4 && !finished) {
+                if (autoTimer.seconds() > 1.8 && !finished) {
                     resetSlideEncoders();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES;
+                    targetSlidePosition = INTAKE_POSITION_SLIDES-50;
                 }
 
-                return autoTimer.seconds() < 1.5;
+                return autoTimer.seconds() < 2;
             }
         };
     }
@@ -146,7 +146,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES;
+                    targetSlidePosition = INTAKE_POSITION_SLIDES-50;
                     wristState = WristState.NEUTRAL;
                     set = true;
                 }
