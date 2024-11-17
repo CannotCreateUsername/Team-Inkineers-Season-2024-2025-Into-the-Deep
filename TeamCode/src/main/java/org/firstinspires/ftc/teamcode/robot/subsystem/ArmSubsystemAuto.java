@@ -63,7 +63,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     finished = false;
-                    targetSlidePosition = OUTTAKE_POSITION_SLIDES;
+                    targetSlidePosition = OUTTAKE_POSITION_SLIDES+100;
                     wristState = WristState.SCORE;
                     set = true;
                 }
@@ -131,7 +131,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     targetSlidePosition = REST_POSITION_SLIDES;
                 if (autoTimer.seconds() > 1.8 && !finished) {
                     resetSlideEncoders();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES-50;
+                    targetSlidePosition = INTAKE_POSITION_SLIDES-60;
                 }
 
                 return autoTimer.seconds() < 2;
@@ -146,7 +146,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES-50;
+                    targetSlidePosition = INTAKE_POSITION_SLIDES-60;
                     wristState = WristState.NEUTRAL;
                     set = true;
                 }

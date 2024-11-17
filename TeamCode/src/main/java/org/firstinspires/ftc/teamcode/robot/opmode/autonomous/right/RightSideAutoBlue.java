@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemAuto;
 
-@Autonomous(name = "Blue Auto", group = "Autonomous")
+@Autonomous(name = "Right Auto", group = "Autonomous")
 public class RightSideAutoBlue extends LinearOpMode {
 
     @Override
@@ -76,7 +76,7 @@ public class RightSideAutoBlue extends LinearOpMode {
             );
             // Offset two inches to the left of previous scoring position
             // to avoid placing on top of scored specimen. Also +.5 in for padding
-            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x+i*0.4, coords.scoreSpecimenPos.y + i*2);
+            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x+i*1.2, coords.scoreSpecimenPos.y + i*2);
             Action runToChamber = drive.actionBuilder(new Pose2d(coords.specimenPickupPos, coords.ROTATED))
                     .strafeToLinearHeading(newScorePos, coords.STRAIGHT)
                     .build();

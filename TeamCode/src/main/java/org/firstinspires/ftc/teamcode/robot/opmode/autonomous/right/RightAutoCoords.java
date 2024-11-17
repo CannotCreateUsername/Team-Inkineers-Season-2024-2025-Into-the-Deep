@@ -4,7 +4,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 
 public class RightAutoCoords {
     // To make final adjustments quickly
-    public final double X_OFFSET = 1;
+    public final double X_OFFSET = 0.8;
 
     // VECTOR2D (FORWARD, SIDEWAYS)
     // NEGATIVE SIDEWAYS FOR RIGHT, POSITIVE FOR LEFT
@@ -12,7 +12,7 @@ public class RightAutoCoords {
     public double ROTATED = Math.toRadians(180);
     public double STRAIGHT = Math.toRadians(0);
 
-    public Vector2d scoreSpecimenPos = new Vector2d(25 - X_OFFSET, 5);
+    public Vector2d scoreSpecimenPos = new Vector2d(25.8 - X_OFFSET, 5);
     public Vector2d backUpPos = new Vector2d(16 - X_OFFSET, -12);
 
     public Vector2d samplePos1 = new Vector2d(26 - X_OFFSET, -36);

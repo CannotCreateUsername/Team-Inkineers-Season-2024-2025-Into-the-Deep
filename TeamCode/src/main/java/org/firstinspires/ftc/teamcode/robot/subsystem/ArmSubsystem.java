@@ -51,10 +51,10 @@ public abstract class ArmSubsystem {
     // Needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    final int INTAKE_POSITION_SLIDES = 240;
-    final int OUTTAKE_POSITION_SLIDES = 2400;
+    final int INTAKE_POSITION_SLIDES = 270;
+    final int OUTTAKE_POSITION_SLIDES = 2460;
     final int MAX_EXTEND_POSITION = 3000;
-    final int MANUAL_INCREMENT = 25;
+    final int MANUAL_INCREMENT = 40;
 
     // Default Rotation for Axon MAX+ Servo: 180 degrees
     // 90 degrees is position +- 90/180.9
