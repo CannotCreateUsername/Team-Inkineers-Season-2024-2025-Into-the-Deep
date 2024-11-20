@@ -41,32 +41,32 @@ public abstract class ArmSubsystem {
         HANGING
     }
 
-    ArmState armState;
-    IntakeState intakeState;
-    WristState wristState;
-    HangState hangState;
+    public ArmState armState;
+    public IntakeState intakeState;
+    public WristState wristState;
+    public HangState hangState;
 
     public int targetSlidePosition;
 
     // Needs to be adjusted based on testing
     // Linear Slides
-    final int REST_POSITION_SLIDES = 0;
-    final int INTAKE_POSITION_SLIDES = 270;
-    final int OUTTAKE_POSITION_SLIDES = 2460;
-    final int MAX_EXTEND_POSITION = 3000;
-    final int MANUAL_INCREMENT = 40;
+    public final int REST_POSITION_SLIDES = 0;
+    public final int INTAKE_POSITION_SLIDES = 270;
+    public final int OUTTAKE_POSITION_SLIDES = 2460;
+    public final int MAX_EXTEND_POSITION = 3000;
+    public final int MANUAL_INCREMENT = 40;
 
     // Default Rotation for Axon MAX+ Servo: 180 degrees
     // 90 degrees is position +- 90/180.9
-    final double WRIST_NEUTRAL = 0.5;
-    final double WRIST_UP = WRIST_NEUTRAL+90.0/180.9;
-    final double WRIST_DOWN = WRIST_NEUTRAL-72.0/180.9;
-    final double WRIST_SCORE = WRIST_NEUTRAL-25.0/180.9;
+    public final double WRIST_NEUTRAL = 0.5;
+    public final double WRIST_UP = WRIST_NEUTRAL+90.0/180.9;
+    public final double WRIST_DOWN = WRIST_NEUTRAL-72.0/180.9;
+    public final double WRIST_SCORE = WRIST_NEUTRAL-25.0/180.9;
 
     // Linear Actuator
-    final int HANG_UP = 3050;
-    final int HANG_DOWN = 1100;
-    final int HANG_REST = 0;
+    public final int HANG_UP = 3050;
+    public final int HANG_DOWN = 1100;
+    public final int HANG_REST = 0;
 
     // Declare actuator variables
     public List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
@@ -78,9 +78,9 @@ public abstract class ArmSubsystem {
     public DcMotor hangMotor;
     public Servo hangServo;
 
-    ColorSensor racist;
+    public ColorSensor racist;
 
-    boolean redSide = false;
+    public boolean redSide = false;
     abstract public void init(HardwareMap hardwareMap, boolean isRedAlliance);
 
     // Method to run slide motors to position
@@ -121,8 +121,8 @@ public abstract class ArmSubsystem {
         return (racist.red() > 200) || (racist.blue() > 200);
     }
 
-    boolean eject = false;
-    ElapsedTime ejectTimer = new ElapsedTime();
+    public boolean eject = false;
+    public ElapsedTime ejectTimer = new ElapsedTime();
     public void eject() {
         eject = true;
         ejectTimer.reset();
