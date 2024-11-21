@@ -13,11 +13,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystem;
-
 import java.util.Arrays;
 
-public class ArmSubsystemAuto1 extends ArmSubsystem {
+public class ArmSubsystemAuto1 extends ArmSubsystem1 {
 
     @Override
     public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
@@ -58,6 +56,7 @@ public class ArmSubsystemAuto1 extends ArmSubsystem {
     public boolean finished = false;
     double autoSlidePow = 0.4;
 
+    @Deprecated
     public Action controlActuators() {
         return new Action() {
             private boolean set = false;
@@ -90,17 +89,16 @@ public class ArmSubsystemAuto1 extends ArmSubsystem {
         };
     }
 
+    @Deprecated
     public Action readySpecimen() {
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                targetSlidePosition = OUTTAKE_POSITION_SLIDES;
-                wristState = WristState.SCORE;
-                return false;
-            }
+        return telemetryPacket -> {
+            targetSlidePosition = OUTTAKE_POSITION_SLIDES;
+            wristState = WristState.SCORE;
+            return false;
         };
     }
 
+    @Deprecated
     public Action score() {
         return new Action() {
             private boolean set = false;
@@ -117,6 +115,7 @@ public class ArmSubsystemAuto1 extends ArmSubsystem {
         };
     }
 
+    @Deprecated
     public Action slidesReset(boolean finished) {
         return new Action() {
             private boolean set = false;
@@ -141,6 +140,7 @@ public class ArmSubsystemAuto1 extends ArmSubsystem {
         };
     }
 
+    @Deprecated
     public Action pickUpSpecimen(double time) {
         return new Action() {
             private boolean set = false;
@@ -163,13 +163,11 @@ public class ArmSubsystemAuto1 extends ArmSubsystem {
         };
     }
 
+    @Deprecated
     public Action terminate() {
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                finished = true;
-                return !finished;
-            }
+        return telemetryPacket -> {
+            finished = true;
+            return false;
         };
     }
 

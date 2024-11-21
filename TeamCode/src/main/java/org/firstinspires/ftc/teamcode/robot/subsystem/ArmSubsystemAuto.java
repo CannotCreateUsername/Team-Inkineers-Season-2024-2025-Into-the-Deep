@@ -89,13 +89,10 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     }
 
     public Action readySpecimen() {
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                targetSlidePosition = OUTTAKE_POSITION_SLIDES;
-                wristState = WristState.SCORE;
-                return false;
-            }
+        return telemetryPacket -> {
+            targetSlidePosition = OUTTAKE_POSITION_SLIDES;
+            wristState = WristState.SCORE;
+            return false;
         };
     }
 
@@ -162,12 +159,9 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     }
 
     public Action terminate() {
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                finished = true;
-                return !finished;
-            }
+        return telemetryPacket -> {
+            finished = true;
+            return false;
         };
     }
 

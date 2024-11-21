@@ -12,12 +12,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystem;
-
 import java.util.Arrays;
 
 /** @noinspection FieldCanBeLocal*/
-public class ArmSubsystemTeleOp1 extends ArmSubsystem {
+public class ArmSubsystemTeleOp1 extends ArmSubsystem1 {
 
     @Override
     public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
@@ -65,6 +63,7 @@ public class ArmSubsystemTeleOp1 extends ArmSubsystem {
     public double driveMultiplier = 1;
 
     ElapsedTime stallTimer = new ElapsedTime();
+    @Deprecated
     public void runArm(GamepadEx gamepad) {
         // Arm control logic
         switch (armState) {
@@ -112,6 +111,7 @@ public class ArmSubsystemTeleOp1 extends ArmSubsystem {
         runSlideMotorsPID(0.5);
     }
 
+    @Deprecated
     public void runIntake(Gamepad gamepad, GamepadEx gamepadEx) {
         runWrist(gamepadEx);
         switch (intakeState) {
@@ -204,6 +204,7 @@ public class ArmSubsystemTeleOp1 extends ArmSubsystem {
     }
 
     // Additional Hanging Code
+    @Deprecated
     public void runHang(GamepadEx gamepad) {
         switch (hangState) {
             case REST:
@@ -241,6 +242,7 @@ public class ArmSubsystemTeleOp1 extends ArmSubsystem {
         hangPID(1);
     }
 
+    @Deprecated
     public int getHangPosition() {
         return hangMotor.getCurrentPosition();
     }
