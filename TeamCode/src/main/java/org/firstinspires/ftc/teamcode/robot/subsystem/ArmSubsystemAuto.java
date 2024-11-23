@@ -4,52 +4,9 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import java.util.Arrays;
-
 public class ArmSubsystemAuto extends ArmSubsystem {
-
-    @Override
-    public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
-        redSide = isRedAlliance;
-        // Map the actuators
-        slideMotors = Arrays.asList(
-                hardwareMap.get(DcMotorEx.class, "belt_slide"),
-                hardwareMap.get(DcMotorEx.class, "non_slide")
-        );
-        intake = hardwareMap.get(CRServo.class, "right");
-        intake2 = hardwareMap.get(CRServo.class, "left");
-        wrist = hardwareMap.get(Servo.class, "wrist");
-        racist = hardwareMap.get(ColorSensor.class, "racist");
-
-        // Set Motor Modes
-        for (DcMotorEx m : slideMotors) {
-            m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        }
-        // Reverse Encoder Motor
-        slideMotors.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
-
-        intake.setDirection(DcMotorSimple.Direction.REVERSE);
-        wrist.setDirection(Servo.Direction.REVERSE);
-
-        // Initialize Positions; Start at REST
-        armState = ArmState.REST;
-        intakeState = IntakeState.IDLE;
-        wristState = WristState.UP;
-
-        targetSlidePosition = REST_POSITION_SLIDES;
-        wrist.setPosition(WRIST_UP);
-    }
 
     ElapsedTime autoTimer = new ElapsedTime();
     private final int SLIDES_OFFSET = 850;
@@ -147,11 +104,9 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     wristState = WristState.NEUTRAL;
                     set = true;
                 }
-                intake.setPower(1);
-                intake2.setPower(1);
+                setIntakePowers(1);
                 if (autoTimer.seconds() > time-0.2) {
-                    intake.setPower(0);
-                    intake2.setPower(0);
+                    setIntakePowers(0);
                 }
                 return autoTimer.seconds() < time;
             }
@@ -166,7 +121,6 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     }
 
     // UNUSED ACTIONS
-
     @Deprecated
     public Action spinIn(double time) {
         return new Action() {
@@ -180,8 +134,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     set = true;
                 }
 
-                intake.setPower(1);
-                intake2.setPower(1);
+                setIntakePowers(1);
                 return autoTimer.seconds() < time;
             }
         };
@@ -199,8 +152,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     set = true;
                 }
 
-                intake.setPower(-1);
-                intake2.setPower(-1);
+                setIntakePowers(-1);
                 return autoTimer.seconds() < time;
             }
         };

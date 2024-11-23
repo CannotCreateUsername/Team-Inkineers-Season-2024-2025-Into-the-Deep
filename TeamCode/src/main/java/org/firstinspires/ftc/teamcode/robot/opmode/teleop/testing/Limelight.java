@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
+@Disabled
 @TeleOp(name = "Limelight", group = "Testing")
 public class Limelight extends LinearOpMode {
 
@@ -61,6 +62,8 @@ public class Limelight extends LinearOpMode {
                 List<LLResultTypes.ColorResult> colorResults = result.getColorResults();
                 for (LLResultTypes.ColorResult cr : colorResults) {
                     telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
+                    telemetry.addData("Area", cr.getTargetArea());
+                    telemetry.addData("Weird?", cr.getTargetYPixels());
                 }
             }
             telemetry.addLine("This is cringe");

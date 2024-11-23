@@ -4,17 +4,21 @@ import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.kPslid
 import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.threshold_slides;
 
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.util.Arrays;
 import java.util.List;
 
 /** @noinspection FieldCanBeLocal*/
+@Config
 public abstract class ArmSubsystem {
     public enum ArmState {
         REST,
@@ -41,47 +45,151 @@ public abstract class ArmSubsystem {
         HANGING
     }
 
-    public ArmState armState;
-    public IntakeState intakeState;
-    public WristState wristState;
-    public HangState hangState;
+    ArmState armState;
+    IntakeState intakeState;
+    WristState wristState;
+    HangState hangState;
 
     public int targetSlidePosition;
 
-    // Needs to be adjusted based on testing
+    // Constants, needs to be adjusted based on testing
     // Linear Slides
-    public final int REST_POSITION_SLIDES = 0;
-    public final int INTAKE_POSITION_SLIDES = 270;
-    public final int OUTTAKE_POSITION_SLIDES = 2460;
-    public final int MAX_EXTEND_POSITION = 3000;
-    public final int MANUAL_INCREMENT = 40;
+    final int REST_POSITION_SLIDES = 0;
+    final int INTAKE_POSITION_SLIDES = 270;
+    final int OUTTAKE_POSITION_SLIDES = 2460;
+    final int MAX_EXTEND_POSITION = 3000;
+    final int MANUAL_INCREMENT = 40;
 
     // Default Rotation for Axon MAX+ Servo: 180 degrees
     // 90 degrees is position +- 90/180.9
-    public final double WRIST_NEUTRAL = 0.5;
-    public final double WRIST_UP = WRIST_NEUTRAL+90.0/180.9;
-    public final double WRIST_DOWN = WRIST_NEUTRAL-72.0/180.9;
-    public final double WRIST_SCORE = WRIST_NEUTRAL-25.0/180.9;
+    final double WRIST_NEUTRAL = 0.5;
+    final double WRIST_UP = WRIST_NEUTRAL+90.0/180.9;
+    final double WRIST_DOWN = WRIST_NEUTRAL-72.0/180.9;
+    final double WRIST_SCORE = WRIST_NEUTRAL-25.0/180.9;
+
+    // Coaxial V4B positions
+    // TODO: find servo rotation range for upper and lower V4B actuators
+    final double V4B_CENTER_A = 0.5,                    V4B_CENTER_B = 0.5;
+    final double V4B_LEFT_A = V4B_CENTER_A-90.0/180.9,  V4B_LEFT_B = V4B_CENTER_B-90.0/180.9;
+    final double V4B_RIGHT_A = V4B_CENTER_A+90.0/180.9, V4B_RIGHT_B = V4B_CENTER_B+90.0/180.9;;
 
     // Linear Actuator
-    public final int HANG_UP = 3050;
-    public final int HANG_DOWN = 1100;
-    public final int HANG_REST = 0;
+    final int HANG_2_UP = 3050;
+    final int HANG_2_DOWN = 1100;
+    final int HANG_2_REST = 0;
+    // Worm Gear
+    // TODO: fine tune worm gear positions
+    final int HANG_3_REST = 0;
+    final int HANG_3_UP = 1000;
 
     // Declare actuator variables
     public List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
-
+    public List<CRServo> intakeServos;
+    public List<Servo> lowerBar;
+    public Servo upperBar;
     public Servo wrist;
-    public CRServo intake;
-    public CRServo intake2;
 
     public DcMotor hangMotor;
+    public DcMotor wormMotor;
     public Servo hangServo;
 
     public ColorSensor racist;
 
-    public boolean redSide = false;
-    abstract public void init(HardwareMap hardwareMap, boolean isRedAlliance);
+    boolean redSide = false;
+    /** @noinspection ArraysAsListWithZeroOrOneArgument*/
+    public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
+        // For color sensor
+        redSide = isRedAlliance;
+        // Map the actuators
+        slideMotors = Arrays.asList(
+                hardwareMap.get(DcMotorEx.class, "belt_slide"),
+                hardwareMap.get(DcMotorEx.class, "non_slide")
+        );
+        intakeServos = Arrays.asList(
+                hardwareMap.get(CRServo.class, "right"),
+                hardwareMap.get(CRServo.class, "left")
+        );
+        lowerBar = Arrays.asList(
+                hardwareMap.get(Servo.class, "lower_bar")
+        );
+        upperBar = hardwareMap.get(Servo.class, "upper_bar");
+        wrist = hardwareMap.get(Servo.class, "wrist");
+
+        hangMotor = hardwareMap.get(DcMotor.class, "hang_motor");
+        wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
+        hangServo = hardwareMap.get(Servo.class, "hang_servo");
+
+        // Map sensors
+        racist = hardwareMap.get(ColorSensor.class, "racist");
+
+        // Set Motor Modes & Directions
+        // Reverse slide motors. Depends on orientation of Bevel Gear
+        for (DcMotorEx m : slideMotors) {
+            m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+            m.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
+
+        // Reverse right intake servo
+        intakeServos.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
+        // Reverse wrist servo
+        wrist.setDirection(Servo.Direction.REVERSE);
+        // TODO: Reverse V4B servos if needed. Bottom and top.
+
+        // Hanging Stuff
+        hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        hangMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        wormMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Initialize Positions; Start at REST
+        armState = ArmState.REST;
+        intakeState = IntakeState.IDLE;
+        wristState = WristState.NEUTRAL;
+        hangState = HangState.REST;
+
+        targetSlidePosition = INTAKE_POSITION_SLIDES;
+        wrist.setPosition(WRIST_UP);
+    }
+
+    // For manual adjustment in a separate OpMode
+    public void initManualTesting(HardwareMap hardwareMap) {
+        slideMotors = Arrays.asList(
+                hardwareMap.get(DcMotorEx.class, "belt_slide"),
+                hardwareMap.get(DcMotorEx.class, "non_slide")
+        );
+        hangMotor = hardwareMap.get(DcMotor.class, "hang_motor");
+        wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
+
+        // Set Motor Modes & Directions
+        // TODO: Reverse slide motor encoders. Depends on orientation of Bevel Gear
+        for (DcMotorEx m : slideMotors) {
+            m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+            m.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
+
+        // Hanging Stuff
+        hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        hangMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        wormMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    // Method to run intake servos
+    public void setIntakePowers(double power) {
+        for (CRServo s : intakeServos) {
+            s.setPower(power);
+        }
+    }
 
     // Method to run slide motors to position
     double slideError;
@@ -121,8 +229,8 @@ public abstract class ArmSubsystem {
         return (racist.red() > 200) || (racist.blue() > 200);
     }
 
-    public boolean eject = false;
-    public ElapsedTime ejectTimer = new ElapsedTime();
+    boolean eject = false;
+    ElapsedTime ejectTimer = new ElapsedTime();
     public void eject() {
         eject = true;
         ejectTimer.reset();

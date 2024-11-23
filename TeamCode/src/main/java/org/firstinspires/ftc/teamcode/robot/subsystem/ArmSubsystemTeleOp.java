@@ -2,63 +2,17 @@ package org.firstinspires.ftc.teamcode.robot.subsystem;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.Arrays;
 
 /** @noinspection FieldCanBeLocal*/
 public class ArmSubsystemTeleOp extends ArmSubsystem {
-
-    @Override
-    public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
-        // For color sensor
-        redSide = isRedAlliance;
-
-        // Map the actuators
-        slideMotors = Arrays.asList(
-                hardwareMap.get(DcMotorEx.class, "belt_slide"),
-                hardwareMap.get(DcMotorEx.class, "non_slide")
-        );
-        intake = hardwareMap.get(CRServo.class, "right");
-        intake2 = hardwareMap.get(CRServo.class, "left");
-        wrist = hardwareMap.get(Servo.class, "wrist");
-        hangMotor = hardwareMap.get(DcMotor.class, "hang_motor");
-        hangServo = hardwareMap.get(Servo.class, "hang_servo");
-        racist = hardwareMap.get(ColorSensor.class, "racist");
-
-        // Set Motor Modes & Directions
-        for (DcMotorEx m : slideMotors) {
-            m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        }
-        // Reverse Encoder Motor
-        slideMotors.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
-
-        intake.setDirection(DcMotorSimple.Direction.REVERSE);
-        wrist.setDirection(Servo.Direction.REVERSE);
-
-        hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        hangMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // Initialize Positions; Start at REST
-        armState = ArmState.REST;
-        intakeState = IntakeState.IDLE;
-        wristState = WristState.NEUTRAL;
-        hangState = HangState.REST;
-
-        targetSlidePosition = INTAKE_POSITION_SLIDES;
-        wrist.setPosition(WRIST_UP);
-    }
 
     public double driveMultiplier = 1;
 
@@ -115,8 +69,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         switch (intakeState) {
             case IDLE:
                 intakeDisplayText = "IDLE";
-                intake.setPower(0);
-                intake2.setPower(0);
+                setIntakePowers(0);
 
 //                if (getInvalidColor() && intaked) {
 //                    eject();
@@ -135,8 +88,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case IN:
                 intakeDisplayText = "IN";
-                intake.setPower(1);
-                intake2.setPower(1);
+                setIntakePowers(1);
 
                 if (gamepad.right_trigger == 0 ) { // || !getInvalidColor()
                     intakeState = IntakeState.IDLE;
@@ -146,8 +98,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case OUT:
                 intakeDisplayText = "OuT";
-                intake.setPower(-.4);
-                intake2.setPower(-.4);
+                setIntakePowers(-0.4);
 
                 if (gamepad.left_trigger == 0 && !eject) {
                     intakeState = IntakeState.IDLE;
@@ -206,7 +157,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         switch (hangState) {
             case REST:
                 hangDisplayText = "REST";
-                hangMotor.setTargetPosition(HANG_REST);
+                hangMotor.setTargetPosition(HANG_2_REST);
                 hangServo.setPosition(0);
 
                 if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_UP)) {
@@ -215,7 +166,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case READY:
                 hangDisplayText = "READY";
-                hangMotor.setTargetPosition(HANG_UP);
+                hangMotor.setTargetPosition(HANG_2_UP);
                 hangServo.setPosition(.1);
                 wristState = WristState.UP;
 
@@ -228,7 +179,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case HANGING:
                 hangDisplayText = "X to cancel";
-                hangMotor.setTargetPosition(HANG_DOWN);
+                hangMotor.setTargetPosition(HANG_2_DOWN);
                 wristState = WristState.UP;
 
                 if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
@@ -241,5 +192,38 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
     public int getHangPosition() {
         return hangMotor.getCurrentPosition();
+    }
+
+    private void setSlidePowers(double power) {
+        for (DcMotorEx m : slideMotors) {
+            m.setPower(power);
+        }
+    }
+
+    public void runManualTesting(GamepadEx gamepad) {
+        // Viper Slide Motion
+        if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+            setSlidePowers(1);
+        } else if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+            setSlidePowers(-1);
+        } else {
+            setSlidePowers(0);
+        }
+
+        // Worm Gear Motion
+        if (gamepad.isDown(GamepadKeys.Button.Y)) {
+            wormMotor.setPower(0.8);
+        } else if (gamepad.isDown(GamepadKeys.Button.X)) {
+            wormMotor.setPower(-0.8);
+        } else {
+            wormMotor.setPower(0);
+        }
+
+        // Hang Motor Motion
+        if (gamepad.isDown(GamepadKeys.Button.DPAD_UP)) {
+            hangMotor.setPower(1);
+        } else if (gamepad.isDown(GamepadKeys.Button.DPAD_DOWN)) {
+            hangMotor.setPower(-1);
+        }
     }
 }
