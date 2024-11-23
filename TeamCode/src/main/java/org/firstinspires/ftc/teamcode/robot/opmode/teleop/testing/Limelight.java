@@ -10,8 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
-@Disabled
-@TeleOp
+@TeleOp(name = "Limelight", group = "Testing")
 public class Limelight extends LinearOpMode {
 
     @Override
@@ -20,8 +19,29 @@ public class Limelight extends LinearOpMode {
 
         telemetry.setMsTransmissionInterval(11);
 
-        limelight.pipelineSwitch(1);
-
+        boolean selected = false;
+        while (!selected) {
+            if (gamepad1.a) {
+                limelight.pipelineSwitch(0);
+                selected = true;
+            } else if (gamepad1.x) {
+                limelight.pipelineSwitch(1);
+                selected = true;
+            } else if (gamepad1.y) {
+                limelight.pipelineSwitch(2);
+                selected = true;
+            } else if (gamepad1.b) {
+                limelight.pipelineSwitch(3);
+                selected = true;
+            }
+            telemetry.addLine("Select:");
+            telemetry.addLine("A - Yellow Sample");
+            telemetry.addLine("X - Blue Bar");
+            telemetry.addLine("Y - Red Bar");
+            telemetry.update();
+        }
+        telemetry.addLine("Selected!");
+        telemetry.update();
         /*
          * Starts polling for data.
          */
