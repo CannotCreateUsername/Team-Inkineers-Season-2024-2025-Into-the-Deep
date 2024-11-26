@@ -22,7 +22,15 @@ public class WormGearReset extends LinearOpMode {
             telemetry.addData("Move Arm", "Right/Left Bumpers");
             telemetry.addData("Arm Telemetry", arm.slideDisplayText);
             telemetry.addData("Slides Telemetry", arm.slideDisplayText);
-            telemetry.addData("Hang Telemetry", arm.getHangPosition());
+            telemetry.addLine();
+            telemetry.addData("Hang Position", arm.hangMotor.getCurrentPosition());
+            telemetry.addData("Hang Target", arm.hangMotor.getTargetPosition());
+            telemetry.addLine();
+            telemetry.addData("Worm Gear Position", arm.wormMotor.getCurrentPosition());
+            telemetry.addData("Worm Gear Target", arm.wormMotor.getTargetPosition());
+            telemetry.addLine();
+            telemetry.addData("Slides Position", arm.getSlidesPosition());
+            telemetry.addData("Slides Target", arm.targetSlidePosition);
             telemetry.update();
         }
     }

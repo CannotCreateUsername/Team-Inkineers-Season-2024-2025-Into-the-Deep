@@ -2,14 +2,9 @@ package org.firstinspires.ftc.teamcode.robot.subsystem;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import java.util.Arrays;
 
 /** @noinspection FieldCanBeLocal*/
 public class ArmSubsystemTeleOp extends ArmSubsystem {
@@ -71,10 +66,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 intakeDisplayText = "IDLE";
                 setIntakePowers(0);
 
-//                if (getInvalidColor() && intaked) {
-//                    eject();
-//                } else
-                    if (gamepad.left_trigger > 0) {
+                if (gamepad.left_trigger > 0) {
                     intakeState = IntakeState.OUT;
                 } else if (gamepad.right_trigger > 0) {
                     if (wristState == WristState.DOWN) {
@@ -119,23 +111,14 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case NEUTRAL:
                 wristDisplayText = "Neutral";
                 wrist.setPosition(WRIST_NEUTRAL);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    wristState = WristState.DOWN;
-                }
                 break;
             case UP:
                 wristDisplayText = "Up";
                 wrist.setPosition(WRIST_UP);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    wristState = WristState.NEUTRAL;
-                }
                 break;
             case DOWN:
                 wristDisplayText = "Down";
                 wrist.setPosition(WRIST_DOWN);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    wristState = WristState.NEUTRAL;
-                }
                 break;
             case SCORE:
                 wristDisplayText = "Scoring";
@@ -188,10 +171,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
         }
         hangPID(1);
-    }
-
-    public int getHangPosition() {
-        return hangMotor.getCurrentPosition();
     }
 
     private void setSlidePowers(double power) {

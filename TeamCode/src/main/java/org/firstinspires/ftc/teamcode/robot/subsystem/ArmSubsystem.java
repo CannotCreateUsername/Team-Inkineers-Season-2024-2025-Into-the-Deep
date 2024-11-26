@@ -64,14 +64,27 @@ public abstract class ArmSubsystem {
     // 90 degrees is position +- 90/180.9
     final double WRIST_NEUTRAL = 0.5;
     final double WRIST_UP = WRIST_NEUTRAL+90.0/180.9;
-    final double WRIST_DOWN = WRIST_NEUTRAL-72.0/180.9;
+    final double WRIST_DOWN = WRIST_NEUTRAL-100.0/180.9;
     final double WRIST_SCORE = WRIST_NEUTRAL-25.0/180.9;
 
     // Coaxial V4B positions
     // TODO: find servo rotation range for upper and lower V4B actuators
-    final double V4B_CENTER_A = 0.5,                    V4B_CENTER_B = 0.5;
-    final double V4B_LEFT_A = V4B_CENTER_A-90.0/180.9,  V4B_LEFT_B = V4B_CENTER_B-90.0/180.9;
-    final double V4B_RIGHT_A = V4B_CENTER_A+90.0/180.9, V4B_RIGHT_B = V4B_CENTER_B+90.0/180.9;;
+    // Lower servos
+    final double V4B_CENTER_0 = 0.5;
+    final double V4B_LEFT_0 = V4B_CENTER_0 -90.0/180.9;
+    final double V4B_RIGHT_0 = V4B_CENTER_0 +90.0/180.9;
+
+    // Upper servo
+    final double V4B_CENTER_1 = 0.5;
+    final double V4B_LEFT_1 = V4B_CENTER_1 -90.0/180.9;
+    final double V4B_RIGHT_1 = V4B_CENTER_1 +90.0/180.9;
+
+    // 0 is lower servo position. 1 is upper servo position.
+    // TODO
+    final double[] LEFT_INTAKE_EXTENDED = {V4B_LEFT_0, V4B_LEFT_1};
+    final double[] LEFT_INTAKE_RETRACTED = {V4B_LEFT_0, V4B_CENTER_0};
+    final double[] V4B_POSITION_RIGHT = {V4B_RIGHT_0, V4B_RIGHT_1};
+
 
     // Linear Actuator
     final int HANG_2_UP = 3050;
@@ -106,8 +119,7 @@ public abstract class ArmSubsystem {
                 hardwareMap.get(DcMotorEx.class, "non_slide")
         );
         intakeServos = Arrays.asList(
-                hardwareMap.get(CRServo.class, "right"),
-                hardwareMap.get(CRServo.class, "left")
+                hardwareMap.get(CRServo.class, "intake")
         );
         lowerBar = Arrays.asList(
                 hardwareMap.get(Servo.class, "lower_bar")
@@ -131,11 +143,15 @@ public abstract class ArmSubsystem {
             m.setDirection(DcMotorSimple.Direction.REVERSE);
         }
 
-        // Reverse right intake servo
+        // Reverse right intake servo. Default rotation is clockwise (CW).
         intakeServos.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
         // Reverse wrist servo
         wrist.setDirection(Servo.Direction.REVERSE);
-        // TODO: Reverse V4B servos if needed. Bottom and top.
+        // Reverse V4B servos, both upper and lower since they face the same direction.
+        upperBar.setDirection(Servo.Direction.REVERSE);
+        for (Servo s : lowerBar) {
+            s.setDirection(Servo.Direction.REVERSE);
+        }
 
         // Hanging Stuff
         hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -216,6 +232,13 @@ public abstract class ArmSubsystem {
         return slideMotors.get(0).getCurrentPosition();
     }
 
+    public void setV4BPosition(double[] position) {
+        for (Servo s : lowerBar) {
+            s.setPosition(position[0]);
+        }
+        upperBar.setPosition(position[1]);
+    }
+
     public boolean getInvalidColor() {
         // Yellow samples are more red, make sure difference is great to pick up yellow
         if (redSide) {
@@ -223,10 +246,6 @@ public abstract class ArmSubsystem {
         } else {
             return racist.red() > 200 && racist.red() > 3.5*racist.blue();
         }
-    }
-
-    public boolean intakedSpecial() {
-        return (racist.red() > 200) || (racist.blue() > 200);
     }
 
     boolean eject = false;
