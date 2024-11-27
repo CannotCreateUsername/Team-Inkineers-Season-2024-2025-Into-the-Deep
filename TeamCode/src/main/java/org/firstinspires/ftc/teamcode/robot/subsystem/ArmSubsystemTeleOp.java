@@ -12,9 +12,9 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
     public double driveMultiplier = 1;
 
     ElapsedTime stallTimer = new ElapsedTime();
-    public void runArm(GamepadEx gamepad) {
+    public void runSlides(GamepadEx gamepad) {
         // Arm control logic
-        switch (armState) {
+        switch (slideState) {
             case INTAKE:
                 driveMultiplier = 1;
                 if (stallTimer.seconds() > 0.5) {
@@ -28,7 +28,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 slideDisplayText = "REST";
                 targetSlidePosition = INTAKE_POSITION_SLIDES;
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
-                    armState = ArmState.OUTTAKE;
+                    slideState = SlideState.OUTTAKE;
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
                     wristState = WristState.SCORE;
                 }
@@ -40,11 +40,14 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     targetSlidePosition -= MANUAL_INCREMENT;
                 } else if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
                     // Spin outtake and move back down to rest
-                    armState = ArmState.REST;
+                    slideState = SlideState.REST;
                     wristState = WristState.UP;
                 } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                     targetSlidePosition += (MANUAL_INCREMENT);
                 }
+                break;
+            case HANG:
+                // Controls are moved to the Hanging control loop
                 break;
         }
 
@@ -57,6 +60,23 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
         // Run methods to go to the target position
         runSlideMotorsPID(0.5);
+    }
+
+    public void runArm(GamepadEx gamepad) {
+        switch (armState) {
+            case INTAKE_CLOSE:
+                armDisplayText = "INTAKE CLOSE";
+                setV4BPosition(LEFT_INTAKE_CLOSE);
+                break;
+            case INTAKE_FAR:
+                armDisplayText = "INTAKE FAR";
+                setV4BPosition(LEFT_INTAKE_FAR);
+                break;
+            case REST:
+                armDisplayText = "REST";
+                setV4BPosition(V4B_POSITION_REST);
+                break;
+        }
     }
 
     public void runIntake(Gamepad gamepad, GamepadEx gamepadEx) {
@@ -72,7 +92,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     if (wristState == WristState.DOWN) {
                         stallTimer.reset();
                         intakeState = IntakeState.IN;
-                        armState = ArmState.INTAKE;
+                        slideState = SlideState.INTAKE;
                     } else {
                         intakeState = IntakeState.IN;
                     }
@@ -85,7 +105,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (gamepad.right_trigger == 0 ) { // || !getInvalidColor()
                     intakeState = IntakeState.IDLE;
                     if (wristState == WristState.DOWN)
-                        armState = ArmState.REST;
+                        slideState = SlideState.REST;
                 }
                 break;
             case OUT:
@@ -140,7 +160,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         switch (hangState) {
             case REST:
                 hangDisplayText = "REST";
-                hangMotor.setTargetPosition(HANG_2_REST);
+                hangMotor.setTargetPosition(HANG_LINEAR_REST);
                 hangServo.setPosition(0);
 
                 if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_UP)) {
@@ -148,27 +168,60 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 break;
             case READY:
-                hangDisplayText = "READY";
-                hangMotor.setTargetPosition(HANG_2_UP);
-                hangServo.setPosition(.1);
+                hangDisplayText = "X to cancel";
+                hangMotor.setTargetPosition(HANG_LINEAR_UP);
+                hangServo.setPosition(.5);
                 wristState = WristState.UP;
 
+                // DPAD Down to Ascend Level 2
                 if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_DOWN)) {
-                    hangState = HangState.HANGING;
+                    // Run worm gear to ready
+                    hangState = HangState.LEVEL2;
+                    // Cancel
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     hangState = HangState.REST;
                     wristState = WristState.NEUTRAL;
                 }
                 break;
-            case HANGING:
-                hangDisplayText = "X to cancel";
-                hangMotor.setTargetPosition(HANG_2_DOWN);
+            case LEVEL2:
+                hangDisplayText = "DPAD UP to Ascend";
+                slideState = SlideState.HANG;
                 wristState = WristState.UP;
+                hangMotor.setTargetPosition(HANG_LINEAR_DOWN);
 
+                // Manual adjust worm gear
+                if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                    wormMotor.setPower(0.8);
+                } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    wormMotor.setPower(-0.8);
+                } else {
+                    wormMotor.setPower(0);
+                }
+
+                // DPAD Up to start Ascend Level 3
                 if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-                    hangState = HangState.READY;
+                    // Run slides to hang position once to allow for manual control later
+                    targetSlidePosition = HANG_POSITION_SLIDES;
+                    hangState = HangState.LEVEL3;
                 }
                 break;
+            case LEVEL3:
+                hangDisplayText = "DPAD Down to Suspend";
+                // Manual adjust worm gear
+                // Manual adjust worm gear
+                if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                    wormMotor.setPower(0.8);
+                } else if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    wormMotor.setPower(-0.8);
+                } else {
+                    wormMotor.setPower(0);
+                }
+                // Move the slides up or down
+                if (gamepad.isDown(GamepadKeys.Button.DPAD_DOWN)) {
+                    targetSlidePosition -= (MANUAL_INCREMENT+20);
+                } else if (gamepad.isDown(GamepadKeys.Button.DPAD_UP)) {
+                    targetSlidePosition += (MANUAL_INCREMENT+20);
+                }
         }
         hangPID(1);
     }
@@ -177,6 +230,14 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         for (DcMotorEx m : slideMotors) {
             m.setPower(power);
         }
+    }
+
+
+    public void runSubsystem(GamepadEx gamepadEx, Gamepad gamepad) {
+        runSlides(gamepadEx);
+        runArm(gamepadEx);
+        runIntake(gamepad, gamepadEx);
+        runHang(gamepadEx);
     }
 
     public void runManualTesting(GamepadEx gamepad) {
@@ -203,6 +264,8 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             hangMotor.setPower(1);
         } else if (gamepad.isDown(GamepadKeys.Button.DPAD_DOWN)) {
             hangMotor.setPower(-1);
+        } else {
+            hangMotor.setPower(0);
         }
     }
 }

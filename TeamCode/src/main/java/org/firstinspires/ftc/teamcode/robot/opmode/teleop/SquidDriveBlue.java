@@ -70,9 +70,8 @@ public class SquidDriveBlue extends LinearOpMode {
                 drive.pose = new Pose2d(0, 0, 0);
             }
 
-            armSubsystem.runArm(gamepadEx1);
-            armSubsystem.runIntake(gamepad1, gamepadEx1);
-            armSubsystem.runHang(gamepadEx1);
+            // Run the ARM
+            armSubsystem.runSubsystem(gamepadEx1, gamepad1);
             // Troll
             windmill.setPower(rotatedInput.x+rightXInput);
 
@@ -83,7 +82,7 @@ public class SquidDriveBlue extends LinearOpMode {
             telemetry.addData("Wrist Telemetry", armSubsystem.wristDisplayText);
             telemetry.addData("Intake Telemetry", armSubsystem.intakeDisplayText);
             telemetry.addData("Ascent Telemetry", armSubsystem.hangDisplayText);
-            telemetry.addData("Hang Position:", armSubsystem.getHangPosition());
+            telemetry.addData("Hang Position:", armSubsystem.hangMotor.getCurrentPosition());
             telemetry.addLine();
             telemetry.addData("Drive Heading", drive.pose.heading);
             telemetry.update();

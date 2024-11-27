@@ -20,10 +20,17 @@ import java.util.List;
 /** @noinspection FieldCanBeLocal*/
 @Config
 public abstract class ArmSubsystem {
-    public enum ArmState {
+    public enum SlideState {
         REST,
         INTAKE,
         OUTTAKE,
+        HANG
+    }
+
+    public enum ArmState {
+        REST,
+        INTAKE_CLOSE,
+        INTAKE_FAR,
     }
 
     public enum IntakeState {
@@ -42,9 +49,11 @@ public abstract class ArmSubsystem {
     public enum HangState {
         REST,
         READY,
-        HANGING
+        LEVEL2,
+        LEVEL3
     }
 
+    SlideState slideState;
     ArmState armState;
     IntakeState intakeState;
     WristState wristState;
@@ -57,6 +66,7 @@ public abstract class ArmSubsystem {
     final int REST_POSITION_SLIDES = 0;
     final int INTAKE_POSITION_SLIDES = 270;
     final int OUTTAKE_POSITION_SLIDES = 2460;
+    final int HANG_POSITION_SLIDES = 2000;
     final int MAX_EXTEND_POSITION = 3000;
     final int MANUAL_INCREMENT = 40;
 
@@ -68,32 +78,30 @@ public abstract class ArmSubsystem {
     final double WRIST_SCORE = WRIST_NEUTRAL-25.0/180.9;
 
     // Coaxial V4B positions
-    // TODO: find servo rotation range for upper and lower V4B actuators
-    // Lower servos
+    // Lower servos. Axon, standard rotation of 180.9 degrees.
     final double V4B_CENTER_0 = 0.5;
     final double V4B_LEFT_0 = V4B_CENTER_0 -90.0/180.9;
     final double V4B_RIGHT_0 = V4B_CENTER_0 +90.0/180.9;
 
-    // Upper servo
+    // Upper servo. goBILDA, max rotation of 300 degrees.
     final double V4B_CENTER_1 = 0.5;
-    final double V4B_LEFT_1 = V4B_CENTER_1 -90.0/180.9;
-    final double V4B_RIGHT_1 = V4B_CENTER_1 +90.0/180.9;
+    final double V4B_LEFT_1 = V4B_CENTER_1 -90.0/300;
+    final double V4B_RIGHT_1 = V4B_CENTER_1 +90.0/300;
 
     // 0 is lower servo position. 1 is upper servo position.
     // TODO
-    final double[] LEFT_INTAKE_EXTENDED = {V4B_LEFT_0, V4B_LEFT_1};
-    final double[] LEFT_INTAKE_RETRACTED = {V4B_LEFT_0, V4B_CENTER_0};
-    final double[] V4B_POSITION_RIGHT = {V4B_RIGHT_0, V4B_RIGHT_1};
+    final double[] LEFT_INTAKE_FAR = {V4B_LEFT_0, V4B_LEFT_1};
+    final double[] LEFT_INTAKE_CLOSE = {V4B_LEFT_0, V4B_CENTER_0};
+    final double[] V4B_POSITION_REST = {V4B_LEFT_0, V4B_LEFT_1};
 
 
     // Linear Actuator
-    final int HANG_2_UP = 3050;
-    final int HANG_2_DOWN = 1100;
-    final int HANG_2_REST = 0;
+    final int HANG_LINEAR_REST = 0;
+    final int HANG_LINEAR_UP = 3050;
+    final int HANG_LINEAR_DOWN = 1100;
     // Worm Gear
-    // TODO: fine tune worm gear positions
-    final int HANG_3_REST = 0;
-    final int HANG_3_UP = 1000;
+    // Manually Controlled
+//    final int HANG_WORM_READY = 500;
 
     // Declare actuator variables
     public List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
@@ -115,8 +123,8 @@ public abstract class ArmSubsystem {
         redSide = isRedAlliance;
         // Map the actuators
         slideMotors = Arrays.asList(
-                hardwareMap.get(DcMotorEx.class, "belt_slide"),
-                hardwareMap.get(DcMotorEx.class, "non_slide")
+                hardwareMap.get(DcMotorEx.class, "left_slide"),
+                hardwareMap.get(DcMotorEx.class, "right_slide")
         );
         intakeServos = Arrays.asList(
                 hardwareMap.get(CRServo.class, "intake")
@@ -140,7 +148,6 @@ public abstract class ArmSubsystem {
             m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
             m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-            m.setDirection(DcMotorSimple.Direction.REVERSE);
         }
 
         // Reverse right intake servo. Default rotation is clockwise (CW).
@@ -160,9 +167,11 @@ public abstract class ArmSubsystem {
 
         wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wormMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Initialize Positions; Start at REST
+        slideState = SlideState.REST;
         armState = ArmState.REST;
         intakeState = IntakeState.IDLE;
         wristState = WristState.NEUTRAL;
@@ -175,19 +184,17 @@ public abstract class ArmSubsystem {
     // For manual adjustment in a separate OpMode
     public void initManualTesting(HardwareMap hardwareMap) {
         slideMotors = Arrays.asList(
-                hardwareMap.get(DcMotorEx.class, "belt_slide"),
-                hardwareMap.get(DcMotorEx.class, "non_slide")
+                hardwareMap.get(DcMotorEx.class, "left_slide"),
+                hardwareMap.get(DcMotorEx.class, "right_slide")
         );
         hangMotor = hardwareMap.get(DcMotor.class, "hang_motor");
         wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
 
         // Set Motor Modes & Directions
-        // TODO: Reverse slide motor encoders. Depends on orientation of Bevel Gear
         for (DcMotorEx m : slideMotors) {
             m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
             m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-            m.setDirection(DcMotorSimple.Direction.REVERSE);
         }
 
         // Hanging Stuff
@@ -197,8 +204,16 @@ public abstract class ArmSubsystem {
 
         wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wormMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
+
+//    // Method to run worm gear motor to position
+//    public void runWormGear(double power) {
+//        wormMotor.setTargetPosition(targetWormPosition);
+//        wormMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+//        wormMotor.setPower(power);
+//    }
 
     // Method to run intake servos
     public void setIntakePowers(double power) {
@@ -258,6 +273,7 @@ public abstract class ArmSubsystem {
     }
 
     public String slideDisplayText = "WEEWOOWEEWOOWEEWOOWEEWOOWEEEEEEEEEEEEEEEEEEEEEEE";
+    public String armDisplayText = "HEEEEEEEEEEEEEEEEEEEEYAWxd";
     public String intakeDisplayText = "NOMMMMMMMMMMMMMMMMM";
     public String wristDisplayText = "YEEEEEEEEEEEEEEET";
     public String hangDisplayText = "RRRRRRRRRRRRRRRRe";
