@@ -54,7 +54,7 @@ public class SquidDriveBlue extends LinearOpMode {
             rightXInput = rightXHelper.getRampingValue(gamepad1.right_stick_x) * armSubsystem.driveMultiplier;
 
             Vector2d driveVector = new Vector2d(-leftYInput, -leftXInput);
-            Rotation2d rotationAmount = drive.pose.heading.inverse().plus(0);
+            Rotation2d rotationAmount = drive.pose.heading.inverse().plus(Math.toRadians(90)); // Offset 90 Degrees due to new drive orientation
             Vector2d rotatedInput = rotationAmount.times(driveVector);
 
             drive.setDrivePowers(
@@ -85,6 +85,8 @@ public class SquidDriveBlue extends LinearOpMode {
             telemetry.addData("Hang Position:", armSubsystem.hangMotor.getCurrentPosition());
             telemetry.addLine();
             telemetry.addData("Drive Heading", drive.pose.heading);
+            telemetry.addData("Drive X", drive.pose.position.x);
+            telemetry.addData("Drive Y", drive.pose.position.y);
             telemetry.update();
         }
     }
