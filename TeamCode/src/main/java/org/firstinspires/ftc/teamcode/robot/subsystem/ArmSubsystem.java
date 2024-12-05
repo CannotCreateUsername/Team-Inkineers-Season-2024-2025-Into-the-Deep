@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.robot.subsystem;
 
+import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.kDslides;
 import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.kPslides;
 import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.threshold_slides;
 
@@ -29,21 +30,31 @@ public abstract class ArmSubsystem {
 
     public enum ArmState {
         REST,
-        INTAKE_CLOSE,
-        INTAKE_FAR,
+        LEFT_FAR,
+        RIGHT_FAR;
+
+        public ArmState getNextState() {
+            return (this == ArmState.LEFT_FAR) ? ArmState.RIGHT_FAR : ArmState.LEFT_FAR;
+        }
+    }
+
+    public enum AreaState {
+        CLOSE,
+        FAR
     }
 
     public enum IntakeState {
         IDLE,
         IN,
-        OUT
+        OUT,
+        HANG
     }
 
     public enum WristState {
         NEUTRAL,
         UP,
         DOWN,
-        SCORE
+        SCORE;
     }
 
     public enum HangState {
@@ -55,6 +66,7 @@ public abstract class ArmSubsystem {
 
     SlideState slideState;
     ArmState armState;
+    AreaState areaState;
     IntakeState intakeState;
     WristState wristState;
     HangState hangState;
@@ -64,44 +76,46 @@ public abstract class ArmSubsystem {
     // Constants, needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    final int INTAKE_POSITION_SLIDES = 270;
-    final int OUTTAKE_POSITION_SLIDES = 2460;
-    final int HANG_POSITION_SLIDES = 2000;
+    public static int INTAKE_POSITION_SLIDES = 270;
+    public static int OUTTAKE_POSITION_SLIDES = 2460;
+    public static int HANG_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
     final int MANUAL_INCREMENT = 40;
+    public static double DEFAULT_SLIDE_POWER = 0.5;
 
     // Default Rotation for Axon MAX+ Servo: 180 degrees
     // 90 degrees is position +- 90/180.9
     final double WRIST_NEUTRAL = 0.5;
-    final double WRIST_UP = WRIST_NEUTRAL+90.0/180.9;
-    final double WRIST_DOWN = WRIST_NEUTRAL-100.0/180.9;
-    final double WRIST_SCORE = WRIST_NEUTRAL-25.0/180.9;
+    final double WRIST_UP = WRIST_NEUTRAL + 90.0/180.9;
+    final double WRIST_DOWN = WRIST_NEUTRAL - 100.0/180.9;
+    final double WRIST_SCORE = WRIST_NEUTRAL - 25.0/180.9;
 
     // Coaxial V4B positions
-    // Lower servos. Axon, standard rotation of 180.9 degrees.
-    final double V4B_CENTER_0 = 0.5;
-    final double V4B_LEFT_0 = V4B_CENTER_0 -90.0/180.9;
-    final double V4B_RIGHT_0 = V4B_CENTER_0 +90.0/180.9;
+    // Lower servos. Axon, standard rotation of 180.98 degrees.
+    final double V4B_LOWER_CENTER = 0.5;
+    final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/180.9;
+    final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/180.9;
 
     // Upper servo. goBILDA, max rotation of 300 degrees.
-    final double V4B_CENTER_1 = 0.5;
-    final double V4B_LEFT_1 = V4B_CENTER_1 -90.0/300;
-    final double V4B_RIGHT_1 = V4B_CENTER_1 +90.0/300;
+    final double V4B_UPPER_CENTER = 0.5;
+    final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 90.0/300;
+    final double V4B_UPPER_REST = V4B_UPPER_CENTER + 50.0/300;
+    final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 90.0/300;
 
     // 0 is lower servo position. 1 is upper servo position.
     // TODO
-    final double[] LEFT_INTAKE_FAR = {V4B_LEFT_0, V4B_LEFT_1};
-    final double[] LEFT_INTAKE_CLOSE = {V4B_LEFT_0, V4B_CENTER_0};
-    final double[] V4B_POSITION_REST = {V4B_LEFT_0, V4B_LEFT_1};
+    final double[] ARM_LEFT_POS = {V4B_LOWER_LEFT, V4B_UPPER_LEFT, WRIST_DOWN};
+    final double[] ARM_REST_POS = {V4B_LOWER_LEFT, V4B_UPPER_REST, WRIST_UP};
+    final double[] ARM_RIGHT_POS = {V4B_LOWER_RIGHT, V4B_UPPER_RIGHT, WRIST_DOWN};
 
 
     // Linear Actuator
     final int HANG_LINEAR_REST = 0;
-    final int HANG_LINEAR_UP = 3050;
+    final int HANG_LINEAR_UP = 2900;
     final int HANG_LINEAR_DOWN = 1100;
     // Worm Gear
     // Manually Controlled
-//    final int HANG_WORM_READY = 500;
+    // final int HANG_WORM_READY = 500;
 
     // Declare actuator variables
     public List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
@@ -112,7 +126,7 @@ public abstract class ArmSubsystem {
 
     public DcMotor hangMotor;
     public DcMotor wormMotor;
-    public Servo hangServo;
+    public Servo latchServo;
 
     public ColorSensor racist;
 
@@ -137,7 +151,7 @@ public abstract class ArmSubsystem {
 
         hangMotor = hardwareMap.get(DcMotor.class, "hang_motor");
         wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
-        hangServo = hardwareMap.get(Servo.class, "hang_servo");
+        latchServo = hardwareMap.get(Servo.class, "latch");
 
         // Map sensors
         racist = hardwareMap.get(ColorSensor.class, "racist");
@@ -173,6 +187,7 @@ public abstract class ArmSubsystem {
         // Initialize Positions; Start at REST
         slideState = SlideState.REST;
         armState = ArmState.REST;
+        areaState = AreaState.CLOSE;
         intakeState = IntakeState.IDLE;
         wristState = WristState.NEUTRAL;
         hangState = HangState.REST;
@@ -208,13 +223,6 @@ public abstract class ArmSubsystem {
         wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-//    // Method to run worm gear motor to position
-//    public void runWormGear(double power) {
-//        wormMotor.setTargetPosition(targetWormPosition);
-//        wormMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-//        wormMotor.setPower(power);
-//    }
-
     // Method to run intake servos
     public void setIntakePowers(double power) {
         for (CRServo s : intakeServos) {
@@ -228,7 +236,7 @@ public abstract class ArmSubsystem {
         slideError = targetSlidePosition - getSlidesPosition();
         for (DcMotorEx m : slideMotors) {
             if (Math.abs(slideError) > threshold_slides) {
-                m.setPower((slideError * kPslides)*power);
+                m.setPower((slideError * kPslides + kDslides)*power);
             } else {
                 m.setPower(0.0);
             }
@@ -247,11 +255,30 @@ public abstract class ArmSubsystem {
         return slideMotors.get(0).getCurrentPosition();
     }
 
+    // Method to move the arm.
+    /* Order:
+     * 0: Lower Bar
+     * 1: Upper Bar
+     * 2: Wrist
+     */
     public void setV4BPosition(double[] position) {
-        for (Servo s : lowerBar) {
-            s.setPosition(position[0]);
+        if (position.length > 0) {
+            for (Servo s : lowerBar) {
+                s.setPosition(position[0]);
+            }
         }
-        upperBar.setPosition(position[1]);
+        if (position.length > 1) {
+            upperBar.setPosition(position[1]);
+        }
+        if (position.length > 2) {
+            wrist.setPosition(position[2]);
+        }
+    }
+    public void setV4BPosition(double upperPos, double lowerPos) {
+        upperBar.setPosition(upperPos);
+        for (Servo s : lowerBar) {
+            s.setPosition(lowerPos);
+        }
     }
 
     public boolean getInvalidColor() {
