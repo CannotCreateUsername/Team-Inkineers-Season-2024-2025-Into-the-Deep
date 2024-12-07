@@ -11,7 +11,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     ElapsedTime autoTimer = new ElapsedTime();
     private final int SLIDES_OFFSET = 850;
     public boolean finished = false;
-    double autoSlidePow = 0.4;
+    double autoSlidePow = DEFAULT_SLIDE_POWER;
 
     public Action controlActuators() {
         return new Action() {

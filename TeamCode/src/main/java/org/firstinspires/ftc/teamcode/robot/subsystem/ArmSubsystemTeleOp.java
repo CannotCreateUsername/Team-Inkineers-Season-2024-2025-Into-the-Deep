@@ -27,7 +27,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         switch (slideState) {
             case INTAKE:
                 driveMultiplier = 1;
-                if (stallTimer.seconds() > 0.5) {
+                if (stallTimer.seconds() > 0.5 || slideSwitch.isPressed()) {
                     resetSlideEncoders();
                 }
                 slideDisplayText = "INTAKE";
@@ -93,33 +93,48 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         }
 
         switch (armState) {
+            //  Y < (driver front) intake
+            // X B < (driver left, right) wrist, rest
+            //  A < (driver right)
             case REST:
                 armDisplayText = "Rest";
                 setV4BPosition(ARM_REST_POS);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
                     armState = ArmState.LEFT_FAR;
-                } else if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
+                    wristState = WristState.NEUTRAL;
+                } else if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     armState = ArmState.RIGHT_FAR;
+                    wristState = WristState.NEUTRAL;
+                } else if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
+                    armState = ArmState.MEGA_REST;
                 }
                 break;
             case LEFT_FAR:
                 armDisplayText = "Left Extended";
-                setV4BPosition(ARM_LEFT_POS);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
+                setV4BPosition(ARM_LEFT_POS, WristState.DOWN);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
                     armState = ArmState.REST;
-                } else if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
+                    wristState = WristState.UP;
+                } else if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     armState = ArmState.RIGHT_FAR;
                 }
                 break;
             case RIGHT_FAR:
                 armDisplayText = "Right Extended";
-                setV4BPosition(ARM_RIGHT_POS);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
+                setV4BPosition(ARM_RIGHT_POS, WristState.DOWN);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
                     armState = ArmState.REST;
-                } if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                    wristState = WristState.UP;
+                } if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
                     armState = ArmState.LEFT_FAR;
                 }
                 break;
+            case MEGA_REST:
+                armDisplayText = "Mega Rest";
+                setV4BPosition(MEGA_REST_POS);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
+                    armState = ArmState.REST;
+                }
         }
 
 
@@ -127,27 +142,28 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case NEUTRAL:
                 wristDisplayText = "Neutral";
                 wrist.setPosition(WRIST_NEUTRAL);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+                if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.DOWN;
                 }
                 break;
             case UP:
                 wristDisplayText = "Up";
                 wrist.setPosition(WRIST_UP);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+                if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.NEUTRAL;
                 }
                 break;
             case DOWN:
                 wristDisplayText = "Down";
                 wrist.setPosition(WRIST_DOWN);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+                if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.NEUTRAL;
                 }
                 break;
             case SCORE:
                 wristDisplayText = "Scoring";
                 wrist.setPosition(WRIST_SCORE);
+                break;
         }
 
 
@@ -328,6 +344,44 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             hangMotor.setPower(-1);
         } else {
             hangMotor.setPower(0);
+        }
+    }
+
+    private boolean yeah = false;
+    public void runV4BTesting(GamepadEx gamepad) {
+        if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
+            armDisplayText = "REST Position";
+            setV4BPosition(ARM_REST_POS);
+        } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+            armDisplayText = "LEFT Position";
+            setV4BPosition(ARM_LEFT_POS);
+        } else if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
+            armDisplayText = "RIGHT Position";
+            setV4BPosition(ARM_RIGHT_POS);
+        }
+
+        if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+            armDisplayText = "Upper Testing";
+            if (yeah) {
+                setV4BPosition(V4B_LOWER_CENTER, V4B_UPPER_LEFT);
+                yeah = false;
+            } else {
+                setV4BPosition(V4B_LOWER_CENTER, V4B_UPPER_RIGHT);
+                yeah = true;
+            }
+        }
+
+        if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+            armDisplayText = "Lower Testing Left";
+            setV4BPosition(V4B_LOWER_LEFT, V4B_UPPER_CENTER);
+        } else if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+            armDisplayText = "Lower Testing Right";
+            setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_CENTER);
+        }
+
+        if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
+            armDisplayText = "Mega Rest";
+            setV4BPosition(MEGA_REST_POS);
         }
     }
 }

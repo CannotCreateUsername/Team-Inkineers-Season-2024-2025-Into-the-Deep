@@ -1,33 +1,34 @@
 package org.firstinspires.ftc.teamcode.robot.opmode.teleop.testing;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-@Disabled
+import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTeleOp;
+
+//@Disabled
 @TeleOp(name = "Arm Testing", group = "Testing")
 public class ArmTest extends LinearOpMode {
     DcMotor armMotor = null;
 
     public void runOpMode(){
-        armMotor   = hardwareMap.get(DcMotor.class, "arm"); //the arm motor
-        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        armMotor.setTargetPosition(0);
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        ArmSubsystemTeleOp armSubsystem = new ArmSubsystemTeleOp();
+        armSubsystem.init(hardwareMap, false);
+
+        GamepadEx gam = new GamepadEx(gamepad1);
 
         waitForStart();
-        while(opModeIsActive()){
-            if (gamepad1.a){
-                armMotor.setPower(0.5);
-            } else if (gamepad1.b) {
-                armMotor.setPower(-0.5);
-            } else {
-                armMotor.setPower(0);
-            }
+        while(opModeIsActive()) {
+            armSubsystem.runV4BTesting(gam);
+
+            gam.readButtons();
+
+            telemetry.addData("Arm Telemetry", armSubsystem.armDisplayText);
+            telemetry.update();
         }
 
-        telemetry.addData("Blah blah", "Ja ja");
-        telemetry.update();
+
     }
 }

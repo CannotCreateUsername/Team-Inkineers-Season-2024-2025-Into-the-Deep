@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.Arrays;
@@ -31,7 +32,8 @@ public abstract class ArmSubsystem {
     public enum ArmState {
         REST,
         LEFT_FAR,
-        RIGHT_FAR;
+        RIGHT_FAR,
+        MEGA_REST;
 
         public ArmState getNextState() {
             return (this == ArmState.LEFT_FAR) ? ArmState.RIGHT_FAR : ArmState.LEFT_FAR;
@@ -54,7 +56,7 @@ public abstract class ArmSubsystem {
         NEUTRAL,
         UP,
         DOWN,
-        SCORE;
+        SCORE
     }
 
     public enum HangState {
@@ -81,7 +83,7 @@ public abstract class ArmSubsystem {
     public static int HANG_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
     final int MANUAL_INCREMENT = 40;
-    public static double DEFAULT_SLIDE_POWER = 0.5;
+    public static double DEFAULT_SLIDE_POWER = 1;
 
     // Default Rotation for Axon MAX+ Servo: 180 degrees
     // 90 degrees is position +- 90/180.9
@@ -93,20 +95,21 @@ public abstract class ArmSubsystem {
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.
     final double V4B_LOWER_CENTER = 0.5;
-    final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/180.9;
-    final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/180.9;
+    final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/180;
+    final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/180;
 
     // Upper servo. goBILDA, max rotation of 300 degrees.
     final double V4B_UPPER_CENTER = 0.5;
     final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 90.0/300;
-    final double V4B_UPPER_REST = V4B_UPPER_CENTER + 50.0/300;
+    final double V4B_UPPER_REST = V4B_UPPER_CENTER - 70.0/300;
     final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 90.0/300;
 
     // 0 is lower servo position. 1 is upper servo position.
     // TODO
     final double[] ARM_LEFT_POS = {V4B_LOWER_LEFT, V4B_UPPER_LEFT, WRIST_DOWN};
-    final double[] ARM_REST_POS = {V4B_LOWER_LEFT, V4B_UPPER_REST, WRIST_UP};
+    final double[] ARM_REST_POS = {V4B_LOWER_RIGHT, V4B_UPPER_REST, WRIST_UP};
     final double[] ARM_RIGHT_POS = {V4B_LOWER_RIGHT, V4B_UPPER_RIGHT, WRIST_DOWN};
+    final double[] MEGA_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};
 
 
     // Linear Actuator
@@ -128,7 +131,10 @@ public abstract class ArmSubsystem {
     public DcMotor wormMotor;
     public Servo latchServo;
 
+
+    // Sensors
     public ColorSensor racist;
+    public TouchSensor slideSwitch;
 
     boolean redSide = false;
     /** @noinspection ArraysAsListWithZeroOrOneArgument*/
@@ -155,6 +161,7 @@ public abstract class ArmSubsystem {
 
         // Map sensors
         racist = hardwareMap.get(ColorSensor.class, "racist");
+        slideSwitch = hardwareMap.get(TouchSensor.class, "slide_limit");
 
         // Set Motor Modes & Directions
         // Reverse slide motors. Depends on orientation of Bevel Gear
@@ -168,11 +175,7 @@ public abstract class ArmSubsystem {
         intakeServos.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
         // Reverse wrist servo
         wrist.setDirection(Servo.Direction.REVERSE);
-        // Reverse V4B servos, both upper and lower since they face the same direction.
-        upperBar.setDirection(Servo.Direction.REVERSE);
-        for (Servo s : lowerBar) {
-            s.setDirection(Servo.Direction.REVERSE);
-        }
+        // Reverse V4B servos, not needed atm.
 
         // Hanging Stuff
         hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -261,6 +264,20 @@ public abstract class ArmSubsystem {
      * 1: Upper Bar
      * 2: Wrist
      */
+    public void setV4BPosition(double[] position, WristState wState) {
+        if (position.length > 0) {
+            for (Servo s : lowerBar) {
+                s.setPosition(position[0]);
+            }
+        }
+        if (position.length > 1) {
+            upperBar.setPosition(position[1]);
+        }
+//        if (position.length > 2) {
+//            wrist.setPosition(position[2]);
+//        }
+        wristState = wState;
+    }
     public void setV4BPosition(double[] position) {
         if (position.length > 0) {
             for (Servo s : lowerBar) {
@@ -270,15 +287,12 @@ public abstract class ArmSubsystem {
         if (position.length > 1) {
             upperBar.setPosition(position[1]);
         }
-        if (position.length > 2) {
-            wrist.setPosition(position[2]);
-        }
     }
-    public void setV4BPosition(double upperPos, double lowerPos) {
-        upperBar.setPosition(upperPos);
+    public void setV4BPosition(double lowerPos, double upperPos) {
         for (Servo s : lowerBar) {
             s.setPosition(lowerPos);
         }
+        upperBar.setPosition(upperPos);
     }
 
     public boolean getInvalidColor() {
