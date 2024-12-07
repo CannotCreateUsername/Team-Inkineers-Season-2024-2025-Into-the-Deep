@@ -34,10 +34,6 @@ public abstract class ArmSubsystem {
         LEFT_FAR,
         RIGHT_FAR,
         MEGA_REST;
-
-        public ArmState getNextState() {
-            return (this == ArmState.LEFT_FAR) ? ArmState.RIGHT_FAR : ArmState.LEFT_FAR;
-        }
     }
 
     public enum AreaState {
@@ -78,7 +74,7 @@ public abstract class ArmSubsystem {
     // Constants, needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    public static int INTAKE_POSITION_SLIDES = 270;
+    public static int INTAKE_POSITION_SLIDES = 300;
     public static int OUTTAKE_POSITION_SLIDES = 2460;
     public static int HANG_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
@@ -171,8 +167,8 @@ public abstract class ArmSubsystem {
             m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
 
-        // Reverse right intake servo. Default rotation is clockwise (CW).
-        intakeServos.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
+        // Reverse right intake servo.
+        // intakeServos.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
         // Reverse wrist servo
         wrist.setDirection(Servo.Direction.REVERSE);
         // Reverse V4B servos, not needed atm.

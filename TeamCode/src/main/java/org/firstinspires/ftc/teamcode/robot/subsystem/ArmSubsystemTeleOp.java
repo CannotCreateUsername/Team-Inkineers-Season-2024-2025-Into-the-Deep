@@ -76,7 +76,52 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         drivePos = drive.pose;
     }
 
+    private boolean toggleSide = false;
     public void runArm(GamepadEx gamepad) {
+        switch (armState) {
+            //  Y < (driver front) intake
+            // X B < (driver left, right) wrist, rest
+            //  A < (driver right)
+            case REST:
+                armDisplayText = "Rest";
+                setV4BPosition(ARM_REST_POS);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+                    if (toggleSide) {
+                        armState = ArmState.RIGHT_FAR;
+                        toggleSide = false;
+                    } else {
+                        armState = ArmState.LEFT_FAR;
+                        toggleSide = true;
+                    }
+                    wristState = WristState.NEUTRAL;
+                } else if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
+                    armState = ArmState.MEGA_REST;
+                }
+                break;
+            case LEFT_FAR:
+                armDisplayText = "Left Extended";
+                setV4BPosition(ARM_LEFT_POS);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+                    armState = ArmState.REST;
+                    wristState = WristState.UP;
+                }
+                break;
+            case RIGHT_FAR:
+                armDisplayText = "Right Extended";
+                setV4BPosition(ARM_RIGHT_POS);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+                    armState = ArmState.REST;
+                    wristState = WristState.UP;
+                }
+                break;
+            case MEGA_REST:
+                armDisplayText = "Mega Rest";
+                setV4BPosition(MEGA_REST_POS);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
+                    armState = ArmState.REST;
+                }
+        }
+
         switch (areaState) {
             case CLOSE:
                 if (drivePos.position.y > 50) {
@@ -91,52 +136,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 break;
         }
-
-        switch (armState) {
-            //  Y < (driver front) intake
-            // X B < (driver left, right) wrist, rest
-            //  A < (driver right)
-            case REST:
-                armDisplayText = "Rest";
-                setV4BPosition(ARM_REST_POS);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
-                    armState = ArmState.LEFT_FAR;
-                    wristState = WristState.NEUTRAL;
-                } else if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    armState = ArmState.RIGHT_FAR;
-                    wristState = WristState.NEUTRAL;
-                } else if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
-                    armState = ArmState.MEGA_REST;
-                }
-                break;
-            case LEFT_FAR:
-                armDisplayText = "Left Extended";
-                setV4BPosition(ARM_LEFT_POS, WristState.DOWN);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
-                    armState = ArmState.REST;
-                    wristState = WristState.UP;
-                } else if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    armState = ArmState.RIGHT_FAR;
-                }
-                break;
-            case RIGHT_FAR:
-                armDisplayText = "Right Extended";
-                setV4BPosition(ARM_RIGHT_POS, WristState.DOWN);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
-                    armState = ArmState.REST;
-                    wristState = WristState.UP;
-                } if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
-                    armState = ArmState.LEFT_FAR;
-                }
-                break;
-            case MEGA_REST:
-                armDisplayText = "Mega Rest";
-                setV4BPosition(MEGA_REST_POS);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
-                    armState = ArmState.REST;
-                }
-        }
-
 
         switch (wristState) {
             case NEUTRAL:
@@ -243,14 +242,14 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 hangDisplayText = "X to cancel";
                 hangMotor.setTargetPosition(HANG_LINEAR_UP);
                 latchServo.setPosition(.5); // Unlatch worm gear
-                slideState = SlideState.INTAKE;
+//                slideState = SlideState.INTAKE; would break this due to encoder constant resetting
                 wristState = WristState.UP;
 
                 // DPAD Down to Ascend Level 2
                 if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_DOWN)) {
                     slideState = SlideState.HANG; // Prevent any outside control from slide loop
                     slidePower = 1; // More power to hang.
-                    targetSlidePosition = HANG_POSITION_SLIDES;
+//                    targetSlidePosition = HANG_POSITION_SLIDES; Disabled for meet 2
                     hangState = HangState.LEVEL2;
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     // Back to default loops
@@ -265,6 +264,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 wristState = WristState.UP;
                 hangMotor.setTargetPosition(HANG_LINEAR_DOWN);
 
+                /* Disabled for Meet 2
                 // Manual adjust worm gear
                 if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                     wormMotor.setPower(0.8);
@@ -273,13 +273,17 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 } else {
                     wormMotor.setPower(0);
                 }
+                 */
 
+                /* Disabled for meet 2
                 // DPAD Up to start Ascend Level 3
                 if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
                     targetSlidePosition = HANG_POSITION_SLIDES - 1500;
                     hangMotor.setTargetPosition(HANG_LINEAR_REST);
                     hangState = HangState.LEVEL3;
-                } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                } else
+                 */
+                if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     hangState = HangState.READY;
                     slidePower = 0.5;
                 }
