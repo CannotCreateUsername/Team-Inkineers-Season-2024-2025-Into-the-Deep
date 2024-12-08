@@ -33,7 +33,7 @@ public abstract class ArmSubsystem {
         REST,
         LEFT_FAR,
         RIGHT_FAR,
-        MEGA_REST;
+        MEGA_REST
     }
 
     public enum AreaState {
@@ -74,7 +74,7 @@ public abstract class ArmSubsystem {
     // Constants, needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    public static int INTAKE_POSITION_SLIDES = 300;
+    public static int INTAKE_POSITION_SLIDES = 350;
     public static int OUTTAKE_POSITION_SLIDES = 2460;
     public static int HANG_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
@@ -85,8 +85,9 @@ public abstract class ArmSubsystem {
     // 90 degrees is position +- 90/180.9
     final double WRIST_NEUTRAL = 0.5;
     final double WRIST_UP = WRIST_NEUTRAL + 90.0/180.9;
-    final double WRIST_DOWN = WRIST_NEUTRAL - 100.0/180.9;
+    final double WRIST_DOWN = WRIST_NEUTRAL - 90.0/180.9;
     final double WRIST_SCORE = WRIST_NEUTRAL - 25.0/180.9;
+    final double WRIST_PICKUP = WRIST_NEUTRAL - 10.0/180.9; // The new neutral. 12/7/24
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.
@@ -94,11 +95,11 @@ public abstract class ArmSubsystem {
     final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/180;
     final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/180;
 
-    // Upper servo. goBILDA, max rotation of 300 degrees.
+    // Upper servo. Axon, max rotation of 180.9 degrees.
     final double V4B_UPPER_CENTER = 0.5;
-    final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 90.0/300;
-    final double V4B_UPPER_REST = V4B_UPPER_CENTER - 70.0/300;
-    final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 90.0/300;
+    final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 90.0/180.9;
+    final double V4B_UPPER_REST = V4B_UPPER_CENTER - 70.0/180.9;
+    final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 90.0/180.9;
 
     // 0 is lower servo position. 1 is upper servo position.
     // TODO
@@ -171,7 +172,8 @@ public abstract class ArmSubsystem {
         // intakeServos.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
         // Reverse wrist servo
         wrist.setDirection(Servo.Direction.REVERSE);
-        // Reverse V4B servos, not needed atm.
+        // Reverse V4B servos, upper bar.
+        upperBar.setDirection(Servo.Direction.REVERSE);
 
         // Hanging Stuff
         hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -188,11 +190,12 @@ public abstract class ArmSubsystem {
         armState = ArmState.REST;
         areaState = AreaState.CLOSE;
         intakeState = IntakeState.IDLE;
-        wristState = WristState.NEUTRAL;
+        wristState = WristState.UP;
         hangState = HangState.REST;
 
         targetSlidePosition = INTAKE_POSITION_SLIDES;
         wrist.setPosition(WRIST_UP);
+        setV4BPosition(ARM_REST_POS);
     }
 
     // For manual adjustment in a separate OpMode
@@ -260,7 +263,7 @@ public abstract class ArmSubsystem {
      * 1: Upper Bar
      * 2: Wrist
      */
-    public void setV4BPosition(double[] position, WristState wState) {
+    public void setV4BPosition(double[] position) {
         if (position.length > 0) {
             for (Servo s : lowerBar) {
                 s.setPosition(position[0]);
@@ -272,23 +275,20 @@ public abstract class ArmSubsystem {
 //        if (position.length > 2) {
 //            wrist.setPosition(position[2]);
 //        }
-        wristState = wState;
-    }
-    public void setV4BPosition(double[] position) {
-        if (position.length > 0) {
-            for (Servo s : lowerBar) {
-                s.setPosition(position[0]);
-            }
-        }
-        if (position.length > 1) {
-            upperBar.setPosition(position[1]);
-        }
     }
     public void setV4BPosition(double lowerPos, double upperPos) {
         for (Servo s : lowerBar) {
             s.setPosition(lowerPos);
         }
         upperBar.setPosition(upperPos);
+    }
+
+    public ElapsedTime wristTimer = new ElapsedTime();
+    public void setWristState(WristState wState, boolean delayed) {
+        if (delayed) {
+            wristTimer.reset();
+        }
+        wristState = wState;
     }
 
     public boolean getInvalidColor() {

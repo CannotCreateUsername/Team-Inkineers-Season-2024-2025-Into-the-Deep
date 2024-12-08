@@ -93,7 +93,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                         armState = ArmState.LEFT_FAR;
                         toggleSide = true;
                     }
-                    wristState = WristState.NEUTRAL;
+                    setWristState(WristState.NEUTRAL, true);
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
                     armState = ArmState.MEGA_REST;
                 }
@@ -103,7 +103,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setV4BPosition(ARM_LEFT_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     armState = ArmState.REST;
-                    wristState = WristState.UP;
+                    setWristState(WristState.UP, false);
                 }
                 break;
             case RIGHT_FAR:
@@ -111,7 +111,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setV4BPosition(ARM_RIGHT_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     armState = ArmState.REST;
-                    wristState = WristState.UP;
+                    setWristState(WristState.UP, false);
                 }
                 break;
             case MEGA_REST:
@@ -138,30 +138,35 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         }
 
         switch (wristState) {
+            // Wrist timer controlled by setWristState. For delays when needed.
             case NEUTRAL:
                 wristDisplayText = "Neutral";
-                wrist.setPosition(WRIST_NEUTRAL);
+                if (wristTimer.seconds() > 0.5)
+                    wrist.setPosition(WRIST_PICKUP);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.DOWN;
                 }
                 break;
             case UP:
                 wristDisplayText = "Up";
-                wrist.setPosition(WRIST_UP);
+                if (wristTimer.seconds() > 0.5)
+                    wrist.setPosition(WRIST_UP);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.NEUTRAL;
                 }
                 break;
             case DOWN:
                 wristDisplayText = "Down";
-                wrist.setPosition(WRIST_DOWN);
+                if (wristTimer.seconds() > 0.5)
+                    wrist.setPosition(WRIST_DOWN);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.NEUTRAL;
                 }
                 break;
             case SCORE:
                 wristDisplayText = "Scoring";
-                wrist.setPosition(WRIST_SCORE);
+                if (wristTimer.seconds() > 0.5)
+                    wrist.setPosition(WRIST_SCORE);
                 break;
         }
 
