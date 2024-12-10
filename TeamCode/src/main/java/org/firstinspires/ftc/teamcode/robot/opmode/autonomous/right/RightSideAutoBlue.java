@@ -52,7 +52,7 @@ public class RightSideAutoBlue extends LinearOpMode {
                                 armSubsystem.score(),
                                 // Reset and start going
                                 new ParallelAction(
-                                        armSubsystem.slidesReset(false),
+                                        armSubsystem.resetSlides(false),
                                         runToSample
                                 ),
                                 armSubsystem.terminate()
@@ -96,7 +96,7 @@ public class RightSideAutoBlue extends LinearOpMode {
                                         runToChamber,
                                         armSubsystem.score(),
                                         new ParallelAction(
-                                                armSubsystem.slidesReset(false),
+                                                armSubsystem.resetSlides(false),
                                                 backToScore
                                         ),
                                         armSubsystem.terminate()
@@ -112,7 +112,7 @@ public class RightSideAutoBlue extends LinearOpMode {
                                         runToChamber,
                                         armSubsystem.score(),
                                         new ParallelAction(
-                                                armSubsystem.slidesReset(true),
+                                                armSubsystem.resetSlides(true),
                                                 park
                                         ),
                                         armSubsystem.terminate()

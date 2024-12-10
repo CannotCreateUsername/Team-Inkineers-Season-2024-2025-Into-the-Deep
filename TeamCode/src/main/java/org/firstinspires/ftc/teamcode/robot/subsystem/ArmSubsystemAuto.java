@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ArmSubsystemAuto extends ArmSubsystem {
@@ -20,15 +22,17 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     finished = false;
-                    targetSlidePosition = OUTTAKE_POSITION_SLIDES+100;
+                    targetSlidePosition = OUTTAKE_POSITION_SLIDES;
                     wristState = WristState.SCORE;
                     set = true;
                 }
 
+                // Control Slides
                 runSlideMotorsPID(autoSlidePow);
+                // Control Wrist
                 switch (wristState) {
                     case NEUTRAL:
-                        wrist.setPosition(WRIST_NEUTRAL);
+                        wrist.setPosition(WRIST_PICKUP);
                         break;
                     case UP:
                         wrist.setPosition(WRIST_UP);
@@ -40,15 +44,53 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                         wrist.setPosition(WRIST_SCORE);
                         break;
                 }
+                // V4B Controlled Independently
+
                 return !finished;
             }
+        };
+    }
+
+    public Action transitionToScore() {
+        return new SequentialAction(
+                pickUpSpecimen(1),
+                resetArm(),
+                new SleepAction(0.5), // Wait for reset to complete
+                readySpecimen(),
+                new SleepAction(0.5) // Wait for reset to complete
+        );
+    }
+    public Action scoreAndTransitionToPickup() {
+        return new SequentialAction(
+                score(),
+                resetArm(),
+                resetSlides(false)
+        );
+    }
+    public Action pickUpAndDropOff() {
+        return new SequentialAction(
+                pickUpSample(),
+                resetArm(),
+                new SleepAction(0.5), // Wait for reset to complete
+                dropOffSample(),
+                resetArm(),
+                new SleepAction(0.5) // Wait for reset to complete
+        );
+    }
+
+    public Action resetArm() {
+        return telemetryPacket -> {
+            targetSlidePosition = INTAKE_POSITION_SLIDES;
+            setArmPosition(ARM_REST_POS, WristState.UP);
+            setIntakePowers(0);
+            return false;
         };
     }
 
     public Action readySpecimen() {
         return telemetryPacket -> {
             targetSlidePosition = OUTTAKE_POSITION_SLIDES;
-            wristState = WristState.SCORE;
+            setArmPosition(ARM_LEFT_POS, WristState.SCORE);
             return false;
         };
     }
@@ -69,7 +111,8 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         };
     }
 
-    public Action slidesReset(boolean finished) {
+
+    public Action resetSlides(boolean done) {
         return new Action() {
             private boolean set = false;
             @Override
@@ -81,33 +124,77 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     set = true;
                 }
 
-                if (autoTimer.seconds() > 0.8)
-                    targetSlidePosition = REST_POSITION_SLIDES;
-                if (autoTimer.seconds() > 1.8 && !finished) {
+                targetSlidePosition = REST_POSITION_SLIDES;
+                if (slideSwitch.isPressed()) {
                     resetSlideEncoders();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES-60;
+                    if (!done)
+                        // Return slides to driving height if the autonomous period is not done.
+                        // Otherwise, when autonomous period is finished, it will stay at rest.
+                        targetSlidePosition = INTAKE_POSITION_SLIDES;
+                    // Break out if the magnetic limit switch is activated.
+                    return false;
                 }
 
-                return autoTimer.seconds() < 2;
+                // Break out if it does not reset within 1.2 seconds.
+                return autoTimer.seconds() < 1.2;
             }
         };
     }
 
-    public Action pickUpSpecimen(double time) {
+    public Action pickUpSample() {
+        return new Action() {
+            boolean set = false;
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!set) {
+                    autoTimer.reset();
+                    setArmPosition(ARM_LEFT_POS, WristState.DOWN);
+                    set = true;
+                }
+
+                if (autoTimer.seconds() > 0.5) {
+                    targetSlidePosition = INTAKE_POSITION_SLIDES;
+                    setIntakePowers(1);
+                }
+                return autoTimer.seconds() < 1.5;
+            }
+        };
+    }
+
+    public Action dropOffSample() {
+        return new Action() {
+            boolean set = false;
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!set) {
+                    autoTimer.reset();
+                    setArmPosition(ARM_RIGHT_POS, WristState.DOWN);
+                    set = true;
+                }
+
+                if (autoTimer.seconds() > 0.5) {
+                    setIntakePowers(-0.5);
+                }
+                return autoTimer.seconds() < 1;
+            }
+        };
+    }
+
+    public Action pickUpSpecimen(double time) { // Runs in parallel with a trajectory action
         return new Action() {
             private boolean set = false;
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES-60;
-                    wristState = WristState.NEUTRAL;
+                    targetSlidePosition = INTAKE_POSITION_SLIDES;
+                    setArmPosition(ARM_RIGHT_POS, WristState.NEUTRAL);
                     set = true;
                 }
                 setIntakePowers(1);
-                if (autoTimer.seconds() > time-0.2) {
-                    setIntakePowers(0);
-                }
+
+                // turn off intake in a separate action...
+
                 return autoTimer.seconds() < time;
             }
         };
@@ -121,6 +208,15 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     }
 
     // UNUSED ACTIONS
+
+    @Deprecated
+    public Action moveArm(ArmState state) {
+        return telemetryPacket -> {
+            armState = state;
+            return false;
+        };
+    }
+
     @Deprecated
     public Action spinIn(double time) {
         return new Action() {

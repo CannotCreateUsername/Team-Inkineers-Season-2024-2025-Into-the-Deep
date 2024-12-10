@@ -102,7 +102,6 @@ public abstract class ArmSubsystem {
     final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 90.0/180.9;
 
     // 0 is lower servo position. 1 is upper servo position.
-    // TODO
     final double[] ARM_LEFT_POS = {V4B_LOWER_LEFT, V4B_UPPER_LEFT, WRIST_DOWN};
     final double[] ARM_REST_POS = {V4B_LOWER_RIGHT, V4B_UPPER_REST, WRIST_UP};
     final double[] ARM_RIGHT_POS = {V4B_LOWER_RIGHT, V4B_UPPER_RIGHT, WRIST_DOWN};
@@ -257,6 +256,8 @@ public abstract class ArmSubsystem {
         return slideMotors.get(0).getCurrentPosition();
     }
 
+
+
     // Method to move the arm.
     /* Order:
      * 0: Lower Bar
@@ -282,6 +283,19 @@ public abstract class ArmSubsystem {
         }
         upperBar.setPosition(upperPos);
     }
+    public void setArmPosition(double[] position, WristState wState) {
+        if (position.length > 0) {
+            for (Servo s : lowerBar) {
+                s.setPosition(position[0]);
+            }
+        }
+        if (position.length > 1) {
+            upperBar.setPosition(position[1]);
+        }
+        wristState = wState;
+    }
+
+
 
     public ElapsedTime wristTimer = new ElapsedTime();
     public void setWristState(WristState wState, boolean delayed) {

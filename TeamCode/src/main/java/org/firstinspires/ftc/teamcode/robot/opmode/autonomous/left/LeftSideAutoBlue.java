@@ -43,7 +43,7 @@ public class LeftSideAutoBlue extends LinearOpMode {
                                 armSubsystem.score(),
                                 // Reset and start going
                                 new ParallelAction(
-                                        armSubsystem.slidesReset(true)
+                                        armSubsystem.resetSlides(true)
                                 ),
                                 armSubsystem.terminate()
                         )
