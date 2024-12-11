@@ -257,7 +257,6 @@ public abstract class ArmSubsystem {
     }
 
 
-
     // Method to move the arm.
     /* Order:
      * 0: Lower Bar
