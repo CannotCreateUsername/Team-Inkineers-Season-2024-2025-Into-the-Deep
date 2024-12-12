@@ -60,11 +60,11 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 new SleepAction(0.5) // Wait for reset to complete
         );
     }
-    public Action scoreAndTransitionToPickup() {
+    public Action scoreAndTransitionToPickup(boolean done) {
         return new SequentialAction(
                 score(),
                 resetArm(),
-                resetSlides(false)
+                resetSlides(done)
         );
     }
     public Action pickUpAndDropOff() {

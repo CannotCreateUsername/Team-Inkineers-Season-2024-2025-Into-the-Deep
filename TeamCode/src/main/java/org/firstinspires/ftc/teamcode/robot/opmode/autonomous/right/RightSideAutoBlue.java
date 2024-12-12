@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -28,17 +29,6 @@ public class RightSideAutoBlue extends LinearOpMode {
         Action runToScore = drive.actionBuilder(startPos)
                 .strafeToLinearHeading(coords.scoreSpecimenPos, coords.STRAIGHT)
                 .build();
-        Action runToSample = drive.actionBuilder(new Pose2d(coords.scoreSpecimenPos, coords.STRAIGHT))
-                .strafeToLinearHeading(coords.backUpPos, coords.STRAIGHT)
-                .strafeToLinearHeading(coords.aroundSamplePos1, coords.STRAIGHT)
-                .strafeToLinearHeading(coords.observationPos, coords.STRAIGHT)
-                .strafeToLinearHeading(coords.aroundSamplePos1, coords.STRAIGHT)
-                .strafeToLinearHeading(coords.aroundSamplePos2, coords.STRAIGHT)
-                .strafeToLinearHeading(coords.observationPos, coords.STRAIGHT)
-                .strafeToLinearHeading(coords.waitForHumanPos, coords.ROTATED)
-                .waitSeconds(1)
-                .build();
-
 
         telemetry.addLine("Wait for wrist! ^-^");
         telemetry.update();
@@ -50,76 +40,61 @@ public class RightSideAutoBlue extends LinearOpMode {
                         new SequentialAction(
                                 runToScore,
                                 armSubsystem.score(),
-                                // Reset and start going
-                                new ParallelAction(
-                                        armSubsystem.resetSlides(false),
-                                        runToSample
-                                ),
+                                armSubsystem.scoreAndTransitionToPickup(false),
                                 armSubsystem.terminate()
                         )
                 )
         );
-        // Cycle Specimen
-        for (int i = 1; i <= 2; i++) {
-            Action runToPickup = drive.actionBuilder(new Pose2d(coords.waitForHumanPos, coords.ROTATED))
-                    .strafeToLinearHeading(coords.specimenPickupPos, coords.ROTATED)
+        for (int i = 0; i < 2; i++) {
+            Action runToPickup = drive.actionBuilder(new Pose2d(coords.samplePos1, coords.STRAIGHT))
+                    .strafeToLinearHeading(new Vector2d(coords.samplePos1.x-(16*i), coords.samplePos1.y), coords.STRAIGHT)
+                    .build();
+
+            Actions.runBlocking(
+                    new ParallelAction(
+                            armSubsystem.controlActuators(),
+                            new SequentialAction(
+                                    runToPickup,
+                                    armSubsystem.pickUpAndDropOff(),
+                                    armSubsystem.terminate()
+                            )
+                    )
+
+            );
+        }
+
+        Action runToObservation = drive.actionBuilder(drive.pose)
+                .strafeToLinearHeading(coords.observationPos, coords.STRAIGHT)
+                .strafeToLinearHeading(coords.specimenPickupPos, coords.STRAIGHT)
+                .build();
+        Actions.runBlocking(runToObservation);
+
+        for (int i = 1; i < 3; i++) {
+            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x, coords.scoreSpecimenPos.y+i*2);
+            Action runToScore2 = drive.actionBuilder(drive.pose)
+                    .strafeToLinearHeading(newScorePos, coords.STRAIGHT)
+                    .build();
+            Action runToPickup2 = drive.actionBuilder(new Pose2d(newScorePos, coords.STRAIGHT))
+                    .strafeToLinearHeading(coords.specimenPickupPos, coords.STRAIGHT)
                     .build();
             Actions.runBlocking(
                     new ParallelAction(
                             armSubsystem.controlActuators(),
-                            runToPickup,
                             new SequentialAction(
-                                    armSubsystem.pickUpSpecimen(1),
+                                    new ParallelAction(
+                                            armSubsystem.transitionToScore(),
+                                            new SequentialAction(
+                                                    new SleepAction(1),
+                                                    runToScore2
+                                            )
+                                    ),
+                                    i == 2 ? armSubsystem.scoreAndTransitionToPickup(true) : armSubsystem.scoreAndTransitionToPickup(false),
+                                    runToPickup2,
                                     armSubsystem.terminate()
                             )
                     )
             );
-            // Offset two inches to the left of previous scoring position
-            // to avoid placing on top of scored specimen. Also +.5 in for padding
-            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x+i*1.2, coords.scoreSpecimenPos.y + i*2);
-            Action runToChamber = drive.actionBuilder(new Pose2d(coords.specimenPickupPos, coords.ROTATED))
-                    .strafeToLinearHeading(newScorePos, coords.STRAIGHT)
-                    .build();
-            Action backToScore = drive.actionBuilder(new Pose2d(newScorePos, coords.STRAIGHT))
-                    .strafeToLinearHeading(coords.waitForHumanPos, coords.ROTATED)
-                    .waitSeconds(0.5)
-                    .build();
-            Action park = drive.actionBuilder(new Pose2d(newScorePos, coords.STRAIGHT))
-                    .strafeToLinearHeading(new Vector2d(coords.observationPos.x-4, coords.observationPos.y), coords.STRAIGHT)
-                    .build();
-            if (i < 2) {
-                Actions.runBlocking(
-                        new ParallelAction (
-                                armSubsystem.controlActuators(),
-                                new SequentialAction(
-                                        armSubsystem.readySpecimen(),
-                                        runToChamber,
-                                        armSubsystem.score(),
-                                        new ParallelAction(
-                                                armSubsystem.resetSlides(false),
-                                                backToScore
-                                        ),
-                                        armSubsystem.terminate()
-                                )
-                        )
-                );
-            } else {
-                Actions.runBlocking(
-                        new ParallelAction (
-                                armSubsystem.controlActuators(),
-                                new SequentialAction(
-                                        armSubsystem.readySpecimen(),
-                                        runToChamber,
-                                        armSubsystem.score(),
-                                        new ParallelAction(
-                                                armSubsystem.resetSlides(true),
-                                                park
-                                        ),
-                                        armSubsystem.terminate()
-                                )
-                        )
-                );
-            }
+
         }
     }
 }

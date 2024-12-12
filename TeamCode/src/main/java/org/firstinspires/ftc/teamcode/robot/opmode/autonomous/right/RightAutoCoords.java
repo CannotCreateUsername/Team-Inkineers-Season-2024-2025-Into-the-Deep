@@ -15,8 +15,8 @@ public class RightAutoCoords {
     public Vector2d scoreSpecimenPos = new Vector2d(20, 5);
 
     public Vector2d samplePos1 = new Vector2d(20, -34);
-    public Vector2d samplePos2 = new Vector2d(20, -46);
-    public Vector2d samplePos3 = new Vector2d(20, -56);
+    public Vector2d samplePos2 = new Vector2d(20, -44);
+    public Vector2d samplePos3 = new Vector2d(20, -54);
 
     public Vector2d observationPos = new Vector2d(20, -38);
     public Vector2d specimenPickupPos = new Vector2d(10, -38);
