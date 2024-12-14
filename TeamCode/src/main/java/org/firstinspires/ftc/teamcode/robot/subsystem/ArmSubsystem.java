@@ -52,7 +52,8 @@ public abstract class ArmSubsystem {
         NEUTRAL,
         UP,
         DOWN,
-        SCORE
+        SCORE,
+        AUTO
     }
 
     public enum HangState {
@@ -87,7 +88,8 @@ public abstract class ArmSubsystem {
     final double WRIST_UP = WRIST_NEUTRAL + 120.0/236.0;
     final double WRIST_DOWN = WRIST_NEUTRAL - 120.0/236.0;
     final double WRIST_SCORE = WRIST_NEUTRAL - 25.0/236.0;
-    final double WRIST_PICKUP = WRIST_NEUTRAL - 20.0/236.0; // The new neutral. 12/7/24
+    final double WRIST_DROPOFF = WRIST_NEUTRAL - 40.0/236.0;
+    final double WRIST_PICKUP = WRIST_NEUTRAL - 10.0/236.0; // The new neutral. 12/7/24
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.
@@ -100,7 +102,7 @@ public abstract class ArmSubsystem {
     final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 105.0/236.0;
     final double V4B_UPPER_REST = V4B_UPPER_CENTER - 64.0/236.0;
     final double V4B_UPPER_TRANSITION = V4B_UPPER_LEFT - 20.0/236.0;
-    final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 90.0/236.0;
+    final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/236.0;
 
     // 0 is lower servo position. 1 is upper servo position.
     final double[] ARM_LEFT_POS = {V4B_LOWER_LEFT, V4B_UPPER_LEFT, WRIST_DOWN};
@@ -112,7 +114,7 @@ public abstract class ArmSubsystem {
     // Linear Actuator
     final int HANG_LINEAR_REST = 0;
     final int HANG_LINEAR_UP = 2900;
-    final int HANG_LINEAR_DOWN = 1100;
+    final int HANG_LINEAR_DOWN = 1500;
     // Worm Gear
     // Manually Controlled
     // final int HANG_WORM_READY = 500;

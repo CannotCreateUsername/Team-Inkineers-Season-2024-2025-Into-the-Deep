@@ -95,7 +95,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                         armState = ArmState.LEFT_FAR;
                         toggleSide = true;
                     }
-                    setWristState(WristState.NEUTRAL, true);
+                    setWristState(armState == ArmState.LEFT_FAR ? WristState.DOWN : WristState.NEUTRAL, true);
                     armTimer.reset();
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
                     armState = ArmState.MEGA_REST;

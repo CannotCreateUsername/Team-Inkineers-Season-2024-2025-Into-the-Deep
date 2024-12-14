@@ -51,7 +51,7 @@ public class SquidDriveBlue extends LinearOpMode {
         while (opModeIsActive()) {
             leftYInput = leftYHelper.getRampingValue(gamepad1.left_stick_y) * armSubsystem.driveMultiplier;
             leftXInput = leftXHelper.getRampingValue(gamepad1.left_stick_x) * armSubsystem.driveMultiplier;
-            rightXInput = rightXHelper.getRampingValue(gamepad1.right_stick_x) * armSubsystem.driveMultiplier;
+            rightXInput = rightXHelper.getRampingValue(gamepad1.right_stick_x) * armSubsystem.driveMultiplier * armSubsystem.driveMultiplier;
 
             Vector2d driveVector = new Vector2d(-leftYInput, -leftXInput);
             Rotation2d rotationAmount = drive.pose.heading.inverse().plus(Math.toRadians(90)); // Offset 90 Degrees due to new drive orientation

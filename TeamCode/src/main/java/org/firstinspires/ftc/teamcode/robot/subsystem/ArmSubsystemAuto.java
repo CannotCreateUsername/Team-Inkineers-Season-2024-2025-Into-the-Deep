@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -22,7 +23,6 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     finished = false;
-                    targetSlidePosition = OUTTAKE_POSITION_SLIDES;
                     wristState = WristState.SCORE;
                     set = true;
                 }
@@ -45,6 +45,9 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     case SCORE:
                         wrist.setPosition(WRIST_SCORE);
                         break;
+                    case AUTO:
+                        wrist.setPosition(WRIST_DROPOFF);
+                        break;
                 }
                 // V4B Controlled Independently
 
@@ -53,18 +56,23 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         };
     }
 
-    public Action transitionToScore() {
+    public Action transitionToScore(Action driveAction) {
         return new SequentialAction(
-                pickUpSpecimen(1),
+                new ParallelAction(
+                        pickUpSpecimen(1),
+                        driveAction
+                ),
                 resetArm(),
-                readySpecimen()
+                readySpecimen2()
         );
     }
     public Action scoreAndTransitionToPickup(boolean done) {
         return new SequentialAction(
                 score(),
-                resetArm(),
-                resetSlides(done)
+                new ParallelAction(
+                        resetArm(),
+                        resetSlides(done)
+                )
         );
     }
     public Action pickUpAndDropOff() {
@@ -86,7 +94,6 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     resetV4B();
                     set = true;
                 }
-                targetSlidePosition = INTAKE_POSITION_SLIDES;
                 setIntakePowers(0);
                 if (autoTimer.seconds() > 0.5) {
                     setV4BPosition(ARM_REST_POS);
@@ -106,13 +113,36 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
                     armState = ArmState.LEFT_FAR;
                     setV4BPosition(V4B_LOWER_LEFT, V4B_UPPER_TRANSITION);
-                    setWristState(WristState.SCORE, false);
                     set = true;
                 }
                 if (autoTimer.seconds() > 0.3) {
                     setV4BPosition(ARM_LEFT_POS);
+                    setWristState(WristState.SCORE, false);
                 }
-                return autoTimer.seconds() < 0.5;
+                return autoTimer.seconds() < 1.5;
+            }
+        };
+    }
+
+    public Action readySpecimen2() {
+        return new Action() {
+            boolean set = false;
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!set) {
+                    autoTimer.reset();
+                    targetSlidePosition = OUTTAKE_POSITION_SLIDES-50;
+                    armState = ArmState.LEFT_FAR;
+                    set = true;
+                }
+                if (autoTimer.seconds() > 0.6) {
+                    setV4BPosition(V4B_LOWER_LEFT, V4B_UPPER_TRANSITION);
+                }
+                if (autoTimer.seconds() > 1) {
+                    setV4BPosition(ARM_LEFT_POS);
+                    setWristState(WristState.SCORE, false);
+                }
+                return autoTimer.seconds() < 1.6;
             }
         };
     }
@@ -128,6 +158,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     targetSlidePosition = INTAKE_POSITION_SLIDES+SLIDES_OFFSET;
                     set = true;
                 }
+                setIntakePowers(0.2);
                 return autoTimer.seconds() < 0.6;
             }
         };
@@ -170,19 +201,20 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
+                    targetSlidePosition = INTAKE_POSITION_SLIDES;
                     setV4BPosition(V4B_LOWER_LEFT, V4B_UPPER_TRANSITION);
                     setWristState(WristState.DOWN, true);
                     set = true;
                 }
-                if (autoTimer.seconds() > 0.3) {
+                if (autoTimer.seconds() > 0.4) {
                     setV4BPosition(ARM_LEFT_POS);
                 }
 
-                if (autoTimer.seconds() > 0.5) {
-                    targetSlidePosition = INTAKE_POSITION_SLIDES;
+                if (autoTimer.seconds() > 0.8) {
+                    targetSlidePosition = REST_POSITION_SLIDES;
                     setIntakePowers(1);
                 }
-                return autoTimer.seconds() < 1.5;
+                return autoTimer.seconds() < 1.2;
             }
         };
     }
@@ -195,15 +227,15 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 if (!set) {
                     autoTimer.reset();
                     setV4BPosition(ARM_RIGHT_POS);
-                    setWristState(WristState.DOWN, false);
+                    setWristState(WristState.AUTO, false);
                     armState = ArmState.RIGHT_FAR;
                     set = true;
                 }
 
-                if (autoTimer.seconds() > 0.5) {
-                    setIntakePowers(-0.5);
+                if (autoTimer.seconds() > 0.6) {
+                    setIntakePowers(-0.2);
                 }
-                return autoTimer.seconds() < 1;
+                return autoTimer.seconds() < 0.9;
             }
         };
     }
