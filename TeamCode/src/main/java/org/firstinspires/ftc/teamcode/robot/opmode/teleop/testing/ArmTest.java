@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTeleOp;
 
 //@Disabled
-@TeleOp(name = "Arm Testing", group = "Testing")
+@TeleOp(name = "V4B Arm Testing", group = "Testing")
 public class ArmTest extends LinearOpMode {
     DcMotor armMotor = null;
 

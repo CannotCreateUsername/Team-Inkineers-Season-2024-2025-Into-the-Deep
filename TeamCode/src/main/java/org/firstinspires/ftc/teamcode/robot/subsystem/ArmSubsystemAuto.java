@@ -32,13 +32,15 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 // Control Wrist
                 switch (wristState) {
                     case NEUTRAL:
-                        wrist.setPosition(WRIST_PICKUP);
+                        if (wristTimer.seconds() > 0.5)
+                            wrist.setPosition(WRIST_PICKUP);
                         break;
                     case UP:
                         wrist.setPosition(WRIST_UP);
                         break;
                     case DOWN:
-                        wrist.setPosition(WRIST_DOWN);
+                        if (wristTimer.seconds() > 0.5)
+                            wrist.setPosition(WRIST_DOWN);
                         break;
                     case SCORE:
                         wrist.setPosition(WRIST_SCORE);
@@ -55,9 +57,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         return new SequentialAction(
                 pickUpSpecimen(1),
                 resetArm(),
-                new SleepAction(0.5), // Wait for reset to complete
-                readySpecimen(),
-                new SleepAction(0.5) // Wait for reset to complete
+                readySpecimen()
         );
     }
     public Action scoreAndTransitionToPickup(boolean done) {
@@ -71,27 +71,49 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         return new SequentialAction(
                 pickUpSample(),
                 resetArm(),
-                new SleepAction(0.5), // Wait for reset to complete
                 dropOffSample(),
-                resetArm(),
-                new SleepAction(0.5) // Wait for reset to complete
+                resetArm()
         );
     }
 
     public Action resetArm() {
-        return telemetryPacket -> {
-            targetSlidePosition = INTAKE_POSITION_SLIDES;
-            setArmPosition(ARM_REST_POS, WristState.UP);
-            setIntakePowers(0);
-            return false;
+        return new Action() {
+            boolean set = false;
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!set) {
+                    autoTimer.reset();
+                    resetV4B();
+                    set = true;
+                }
+                targetSlidePosition = INTAKE_POSITION_SLIDES;
+                setIntakePowers(0);
+                if (autoTimer.seconds() > 0.5) {
+                    setV4BPosition(ARM_REST_POS);
+                }
+                return autoTimer.seconds() < 1;
+            }
         };
     }
 
     public Action readySpecimen() {
-        return telemetryPacket -> {
-            targetSlidePosition = OUTTAKE_POSITION_SLIDES;
-            setArmPosition(ARM_LEFT_POS, WristState.SCORE);
-            return false;
+        return new Action() {
+            boolean set = false;
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!set) {
+                    autoTimer.reset();
+                    targetSlidePosition = OUTTAKE_POSITION_SLIDES;
+                    armState = ArmState.LEFT_FAR;
+                    setV4BPosition(V4B_LOWER_LEFT, V4B_UPPER_TRANSITION);
+                    setWristState(WristState.SCORE, false);
+                    set = true;
+                }
+                if (autoTimer.seconds() > 0.3) {
+                    setV4BPosition(ARM_LEFT_POS);
+                }
+                return autoTimer.seconds() < 0.5;
+            }
         };
     }
 
@@ -148,8 +170,12 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
-                    setArmPosition(ARM_LEFT_POS, WristState.DOWN);
+                    setV4BPosition(V4B_LOWER_LEFT, V4B_UPPER_TRANSITION);
+                    setWristState(WristState.DOWN, true);
                     set = true;
+                }
+                if (autoTimer.seconds() > 0.3) {
+                    setV4BPosition(ARM_LEFT_POS);
                 }
 
                 if (autoTimer.seconds() > 0.5) {
@@ -168,7 +194,9 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
-                    setArmPosition(ARM_RIGHT_POS, WristState.DOWN);
+                    setV4BPosition(ARM_RIGHT_POS);
+                    setWristState(WristState.DOWN, false);
+                    armState = ArmState.RIGHT_FAR;
                     set = true;
                 }
 
@@ -188,7 +216,8 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 if (!set) {
                     autoTimer.reset();
                     targetSlidePosition = INTAKE_POSITION_SLIDES;
-                    setArmPosition(ARM_RIGHT_POS, WristState.NEUTRAL);
+                    setV4BPosition(ARM_RIGHT_POS);
+                    setWristState(WristState.NEUTRAL, false);
                     set = true;
                 }
                 setIntakePowers(1);

@@ -36,7 +36,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case REST:
                 driveMultiplier = 1;
                 slideDisplayText = "REST";
-                targetSlidePosition = INTAKE_POSITION_SLIDES;
+                targetSlidePosition = (wristState == WristState.DOWN) ? INTAKE_POSITION_SLIDES - 80 : INTAKE_POSITION_SLIDES;
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     slideState = SlideState.OUTTAKE;
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
@@ -84,7 +84,9 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             //  A < (driver right)
             case REST:
                 armDisplayText = "Rest";
-                setV4BPosition(ARM_REST_POS);
+                if (armTimer.seconds() > 0.5) {
+                    setV4BPosition(ARM_REST_POS);
+                }
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     if (toggleSide) {
                         armState = ArmState.RIGHT_FAR;
@@ -94,24 +96,27 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                         toggleSide = true;
                     }
                     setWristState(WristState.NEUTRAL, true);
+                    armTimer.reset();
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
                     armState = ArmState.MEGA_REST;
                 }
                 break;
             case LEFT_FAR:
                 armDisplayText = "Left Extended";
-                setV4BPosition(ARM_LEFT_POS);
+                if (armTimer.seconds() < 0.3) {
+                    setV4BPosition(V4B_LOWER_LEFT, V4B_UPPER_TRANSITION);
+                } else {
+                    setV4BPosition(ARM_LEFT_POS);
+                }
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    armState = ArmState.REST;
-                    setWristState(WristState.UP, false);
+                    resetV4B();
                 }
                 break;
             case RIGHT_FAR:
                 armDisplayText = "Right Extended";
                 setV4BPosition(ARM_RIGHT_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    armState = ArmState.REST;
-                    setWristState(WristState.UP, false);
+                    resetV4B();
                 }
                 break;
             case MEGA_REST:

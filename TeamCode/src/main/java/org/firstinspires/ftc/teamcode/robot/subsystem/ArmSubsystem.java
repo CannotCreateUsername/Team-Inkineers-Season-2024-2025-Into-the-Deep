@@ -74,7 +74,7 @@ public abstract class ArmSubsystem {
     // Constants, needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    public static int INTAKE_POSITION_SLIDES = 350;
+    public static int INTAKE_POSITION_SLIDES = 450;
     public static int OUTTAKE_POSITION_SLIDES = 2460;
     public static int HANG_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
@@ -84,10 +84,10 @@ public abstract class ArmSubsystem {
     // Default Rotation for Axon MAX+ Servo: 180 degrees
     // 90 degrees is position +- 90/180.9
     final double WRIST_NEUTRAL = 0.5;
-    final double WRIST_UP = WRIST_NEUTRAL + 90.0/180.9;
-    final double WRIST_DOWN = WRIST_NEUTRAL - 90.0/180.9;
-    final double WRIST_SCORE = WRIST_NEUTRAL - 25.0/180.9;
-    final double WRIST_PICKUP = WRIST_NEUTRAL - 10.0/180.9; // The new neutral. 12/7/24
+    final double WRIST_UP = WRIST_NEUTRAL + 120.0/236.0;
+    final double WRIST_DOWN = WRIST_NEUTRAL - 120.0/236.0;
+    final double WRIST_SCORE = WRIST_NEUTRAL - 25.0/236.0;
+    final double WRIST_PICKUP = WRIST_NEUTRAL - 20.0/236.0; // The new neutral. 12/7/24
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.
@@ -97,9 +97,10 @@ public abstract class ArmSubsystem {
 
     // Upper servo. Axon, max rotation of 180.9 degrees.
     final double V4B_UPPER_CENTER = 0.5;
-    final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 90.0/180.9;
-    final double V4B_UPPER_REST = V4B_UPPER_CENTER - 70.0/180.9;
-    final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 90.0/180.9;
+    final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 105.0/236.0;
+    final double V4B_UPPER_REST = V4B_UPPER_CENTER - 64.0/236.0;
+    final double V4B_UPPER_TRANSITION = V4B_UPPER_LEFT - 20.0/236.0;
+    final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 90.0/236.0;
 
     // 0 is lower servo position. 1 is upper servo position.
     final double[] ARM_LEFT_POS = {V4B_LOWER_LEFT, V4B_UPPER_LEFT, WRIST_DOWN};
@@ -194,7 +195,7 @@ public abstract class ArmSubsystem {
 
         targetSlidePosition = INTAKE_POSITION_SLIDES;
         wrist.setPosition(WRIST_UP);
-        setV4BPosition(ARM_REST_POS);
+        setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
     }
 
     // For manual adjustment in a separate OpMode
@@ -272,28 +273,24 @@ public abstract class ArmSubsystem {
         if (position.length > 1) {
             upperBar.setPosition(position[1]);
         }
-//        if (position.length > 2) {
-//            wrist.setPosition(position[2]);
-//        }
     }
+
+    ElapsedTime armTimer = new ElapsedTime();
+    public void resetV4B() {
+        armTimer.reset();
+        wristState = WristState.UP;
+        if (armState == ArmState.LEFT_FAR) {
+            setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_TRANSITION);
+        }
+        armState = ArmState.REST;
+    }
+    // Used in manual TeleOp testing
     public void setV4BPosition(double lowerPos, double upperPos) {
         for (Servo s : lowerBar) {
             s.setPosition(lowerPos);
         }
         upperBar.setPosition(upperPos);
     }
-    public void setArmPosition(double[] position, WristState wState) {
-        if (position.length > 0) {
-            for (Servo s : lowerBar) {
-                s.setPosition(position[0]);
-            }
-        }
-        if (position.length > 1) {
-            upperBar.setPosition(position[1]);
-        }
-        wristState = wState;
-    }
-
 
 
     public ElapsedTime wristTimer = new ElapsedTime();

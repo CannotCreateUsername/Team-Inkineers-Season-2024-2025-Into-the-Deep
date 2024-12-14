@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robot.opmode.teleop.testing;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.Arrays;
 import java.util.List;
 
+@Disabled
 @TeleOp(name = "V4B Servo Position Tester", group = "Testing")
 public class V4BServoPositionTester extends LinearOpMode {
 
