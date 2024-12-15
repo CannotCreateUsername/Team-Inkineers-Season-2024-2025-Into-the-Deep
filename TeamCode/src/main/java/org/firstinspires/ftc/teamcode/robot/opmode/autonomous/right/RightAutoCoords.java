@@ -21,4 +21,5 @@ public class RightAutoCoords {
 
     public Vector2d observationPos = new Vector2d(23, -38);
     public Vector2d specimenPickupPos = new Vector2d(10, -38);
+    public Vector2d leftParkPos = new Vector2d(10, 24);
 }

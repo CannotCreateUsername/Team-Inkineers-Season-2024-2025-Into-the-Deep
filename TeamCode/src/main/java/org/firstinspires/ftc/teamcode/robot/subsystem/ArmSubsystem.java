@@ -75,7 +75,7 @@ public abstract class ArmSubsystem {
     // Constants, needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    public static int INTAKE_POSITION_SLIDES = 450;
+    public static int INTAKE_POSITION_SLIDES = 750;
     public static int OUTTAKE_POSITION_SLIDES = 2460;
     public static int HANG_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
@@ -89,7 +89,7 @@ public abstract class ArmSubsystem {
     final double WRIST_DOWN = WRIST_NEUTRAL - 120.0/236.0;
     final double WRIST_SCORE = WRIST_NEUTRAL - 25.0/236.0;
     final double WRIST_DROPOFF = WRIST_NEUTRAL - 40.0/236.0;
-    final double WRIST_PICKUP = WRIST_NEUTRAL - 10.0/236.0; // The new neutral. 12/7/24
+    final double WRIST_PICKUP = WRIST_NEUTRAL - 20.0/236.0; // The new neutral. 12/7/24
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.

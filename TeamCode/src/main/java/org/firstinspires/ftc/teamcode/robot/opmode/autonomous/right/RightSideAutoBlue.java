@@ -75,7 +75,7 @@ public class RightSideAutoBlue extends LinearOpMode {
                     .waitSeconds(0.5)
                     .strafeToLinearHeading(coords.specimenPickupPos, coords.ROTATED)
                     .build();
-            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x-3.5, coords.scoreSpecimenPos.y+i*2);
+            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x-3.5, coords.scoreSpecimenPos.y+i*4);
             Action runToScore2 = drive.actionBuilder(drive.pose)
                     .strafeToLinearHeading(newScorePos, coords.ROTATED)
                     .build();

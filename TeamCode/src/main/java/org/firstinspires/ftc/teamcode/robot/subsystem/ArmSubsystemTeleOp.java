@@ -36,7 +36,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case REST:
                 driveMultiplier = 1;
                 slideDisplayText = "REST";
-                targetSlidePosition = (wristState == WristState.DOWN) ? INTAKE_POSITION_SLIDES - 80 : INTAKE_POSITION_SLIDES;
+                targetSlidePosition = (wristState == WristState.DOWN) ? 400 : INTAKE_POSITION_SLIDES;
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     slideState = SlideState.OUTTAKE;
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
