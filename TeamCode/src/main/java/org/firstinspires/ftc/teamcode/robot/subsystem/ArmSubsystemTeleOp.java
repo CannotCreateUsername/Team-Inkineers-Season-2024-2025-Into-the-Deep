@@ -30,13 +30,16 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (stallTimer.seconds() > 0.5 || slideSwitch.isPressed()) {
                     resetSlideEncoders();
                 }
+                // Let intake move first.
+                if (stallTimer.seconds() > 0.15) {
+                    targetSlidePosition = REST_POSITION_SLIDES;
+                }
                 slideDisplayText = "INTAKE";
-                targetSlidePosition = REST_POSITION_SLIDES;
                 break;
             case REST:
                 driveMultiplier = 1;
                 slideDisplayText = "REST";
-                targetSlidePosition = (wristState == WristState.DOWN) ? 400 : INTAKE_POSITION_SLIDES;
+                targetSlidePosition = (wristState == WristState.DOWN) ? 400 : (intaked ? INTAKE_POSITION_SLIDES + 100: INTAKE_POSITION_SLIDES);
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     slideState = SlideState.OUTTAKE;
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
@@ -202,6 +205,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
                 if (gamepad.right_trigger == 0 ) {
                     intakeState = IntakeState.IDLE;
+                    intaked = true;
                     if (wristState == WristState.DOWN)
                         slideState = SlideState.REST;
                 }

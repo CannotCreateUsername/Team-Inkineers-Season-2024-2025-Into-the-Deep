@@ -114,7 +114,7 @@ public abstract class ArmSubsystem {
     // Linear Actuator
     final int HANG_LINEAR_REST = 0;
     final int HANG_LINEAR_UP = 2900;
-    final int HANG_LINEAR_DOWN = 1500;
+    final int HANG_LINEAR_DOWN = 1100;
     // Worm Gear
     // Manually Controlled
     // final int HANG_WORM_READY = 500;
@@ -227,6 +227,8 @@ public abstract class ArmSubsystem {
         wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
+    // Boolean to move slides up after picking up from wall.
+    public boolean intaked = false;
     // Method to run intake servos
     public void setIntakePowers(double power) {
         for (CRServo s : intakeServos) {
