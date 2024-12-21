@@ -6,7 +6,6 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ArmSubsystemAuto extends ArmSubsystem {
@@ -45,7 +44,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     case SCORE:
                         wrist.setPosition(WRIST_SCORE);
                         break;
-                    case AUTO:
+                    case LOW:
                         wrist.setPosition(WRIST_DROPOFF);
                         break;
                 }
@@ -155,7 +154,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 // Initialize
                 if (!set) {
                     autoTimer.reset();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES+SLIDES_OFFSET;
+                    targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES +SLIDES_OFFSET;
                     set = true;
                 }
                 setIntakePowers(0.2);
@@ -183,7 +182,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     if (!done)
                         // Return slides to driving height if the autonomous period is not done.
                         // Otherwise, when autonomous period is finished, it will stay at rest.
-                        targetSlidePosition = INTAKE_POSITION_SLIDES;
+                        targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
                     // Break out if the magnetic limit switch is activated.
                     return false;
                 }
@@ -201,7 +200,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES;
+                    targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
                     setV4BPosition(V4B_LOWER_LEFT, V4B_UPPER_TRANSITION);
                     setWristState(WristState.DOWN, true);
                     set = true;
@@ -227,7 +226,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 if (!set) {
                     autoTimer.reset();
                     setV4BPosition(ARM_RIGHT_POS);
-                    setWristState(WristState.AUTO, false);
+                    setWristState(WristState.LOW, false);
                     armState = ArmState.RIGHT_FAR;
                     set = true;
                 }
@@ -247,7 +246,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
-                    targetSlidePosition = INTAKE_POSITION_SLIDES;
+                    targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
                     setV4BPosition(ARM_RIGHT_POS);
                     setWristState(WristState.NEUTRAL, false);
                     set = true;

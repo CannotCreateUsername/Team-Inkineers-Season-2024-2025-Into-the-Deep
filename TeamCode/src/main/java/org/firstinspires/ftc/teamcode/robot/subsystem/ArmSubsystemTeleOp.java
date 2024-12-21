@@ -39,7 +39,17 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case REST:
                 driveMultiplier = 1;
                 slideDisplayText = "REST";
-                targetSlidePosition = (wristState == WristState.DOWN) ? 400 : (intaked ? INTAKE_POSITION_SLIDES + 100: INTAKE_POSITION_SLIDES);
+                if (wristState == WristState.DOWN) {
+                    targetSlidePosition = INTAKE_SAMPLE_POSITION_SLIDES;
+                } else if (wristState == WristState.LOW) {
+                    targetSlidePosition = INTAKE_SAMPLE_POSITION_SLIDES - 100;
+                } else {
+                    if (intaked) {
+                        targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES + 100;
+                    } else {
+                        targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
+                    }
+                }
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     slideState = SlideState.OUTTAKE;
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
@@ -98,7 +108,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                         armState = ArmState.LEFT_FAR;
                         toggleSide = true;
                     }
-                    setWristState(armState == ArmState.LEFT_FAR ? WristState.DOWN : WristState.NEUTRAL, true);
+                    setWristState(WristState.NEUTRAL, true);
                     armTimer.reset();
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
                     armState = ArmState.MEGA_REST;
@@ -130,29 +140,36 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
         }
 
-        switch (areaState) {
-            case CLOSE:
-                if (drivePos.position.y > 50) {
-                    wristState = WristState.DOWN;
-                    areaState = AreaState.FAR;
-                }
-                break;
-            case FAR:
-                if (drivePos.position.y < 50) {
-                    wristState = WristState.NEUTRAL;
-                    areaState = AreaState.CLOSE;
-                }
-                break;
-        }
+//        switch (areaState) {
+//            case CLOSE:
+//                if (drivePos.position.y > 50) {
+//                    wristState = WristState.DOWN;
+//                    areaState = AreaState.FAR;
+//                }
+//                break;
+//            case FAR:
+//                if (drivePos.position.y < 50) {
+//                    wristState = WristState.NEUTRAL;
+//                    areaState = AreaState.CLOSE;
+//                }
+//                break;
+//        }
 
         switch (wristState) {
-            // Wrist timer controlled by setWristState. For delays when needed.
+            /*
+            Going down...
+                Up          |
+                Neutral <-  |
+                Low      |  |
+                Down ----^  v
+             Wrist timer controlled by setWristState. For delays when needed.
+             */
             case NEUTRAL:
                 wristDisplayText = "Neutral";
                 if (wristTimer.seconds() > 0.5)
                     wrist.setPosition(WRIST_PICKUP);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
-                    wristState = WristState.DOWN;
+                    wristState = WristState.LOW;
                 }
                 break;
             case UP:
@@ -161,6 +178,14 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     wrist.setPosition(WRIST_UP);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.NEUTRAL;
+                }
+                break;
+            case LOW:
+                wristDisplayText = "Low";
+                if (wristTimer.seconds() > 0.5)
+                    wrist.setPosition(WRIST_DOWN);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                    wristState = WristState.DOWN;
                 }
                 break;
             case DOWN:
@@ -188,9 +213,10 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setIntakePowers(0);
 
                 if (gamepad.left_trigger > 0) {
+                    intaked = false;
                     intakeState = IntakeState.OUT;
                 } else if (gamepad.right_trigger > 0) {
-                    if (wristState == WristState.DOWN) {
+                    if (wristState == WristState.DOWN || wristState == WristState.LOW) {
                         stallTimer.reset();
                         intakeState = IntakeState.IN;
                         slideState = SlideState.INTAKE;

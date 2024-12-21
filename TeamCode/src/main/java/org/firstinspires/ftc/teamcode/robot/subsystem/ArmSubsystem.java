@@ -53,7 +53,7 @@ public abstract class ArmSubsystem {
         UP,
         DOWN,
         SCORE,
-        AUTO
+        LOW
     }
 
     public enum HangState {
@@ -75,7 +75,8 @@ public abstract class ArmSubsystem {
     // Constants, needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    public static int INTAKE_POSITION_SLIDES = 750;
+    public static int INTAKE_SPECIMEN_POSITION_SLIDES = 750;
+    public static int INTAKE_SAMPLE_POSITION_SLIDES = 400;
     public static int OUTTAKE_POSITION_SLIDES = 2460;
     public static int HANG_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
@@ -195,7 +196,7 @@ public abstract class ArmSubsystem {
         wristState = WristState.UP;
         hangState = HangState.REST;
 
-        targetSlidePosition = INTAKE_POSITION_SLIDES;
+        targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
         wrist.setPosition(WRIST_UP);
         setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
     }
