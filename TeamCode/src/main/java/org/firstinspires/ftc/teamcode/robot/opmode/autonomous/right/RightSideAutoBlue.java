@@ -11,9 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemAuto;
-
-import javax.net.ssl.SSLParameters;
 
 @Autonomous(name = "Right Auto", group = "Autonomous")
 public class RightSideAutoBlue extends LinearOpMode {
@@ -94,7 +93,10 @@ public class RightSideAutoBlue extends LinearOpMode {
                                             )
                                     ),
                                     i == 1 ? armSubsystem.scoreAndTransitionToPickup(true) : armSubsystem.scoreAndTransitionToPickup(false),
-                                    runToPickup2,
+                                    new ParallelAction(
+                                            runToPickup2,
+                                            armSubsystem.moveArm(ArmSubsystem.ArmState.RIGHT_FAR)
+                                    ),
                                     armSubsystem.terminate()
                             )
                     )

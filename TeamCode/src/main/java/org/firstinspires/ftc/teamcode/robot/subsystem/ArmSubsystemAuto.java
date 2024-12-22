@@ -259,6 +259,12 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             }
         };
     }
+    public Action moveArm(ArmState state) {
+        return telemetryPacket -> {
+            armState = state;
+            return false;
+        };
+    }
 
     public Action terminate() {
         return telemetryPacket -> {
@@ -268,14 +274,6 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     }
 
     // UNUSED ACTIONS
-
-    @Deprecated
-    public Action moveArm(ArmState state) {
-        return telemetryPacket -> {
-            armState = state;
-            return false;
-        };
-    }
 
     @Deprecated
     public Action spinIn(double time) {

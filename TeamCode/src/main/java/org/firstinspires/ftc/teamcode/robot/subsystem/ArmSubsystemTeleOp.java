@@ -240,14 +240,8 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 intakeDisplayText = "OuT";
                 setIntakePowers(-0.4);
 
-                if (gamepad.left_trigger == 0 && !eject) {
+                if (gamepad.left_trigger == 0) {
                     intakeState = IntakeState.IDLE;
-                    wristState = WristState.NEUTRAL;
-                } else {
-                    if (eject && ejectTimer.seconds() > 0.8) {
-                        intakeState = IntakeState.IDLE;
-                        eject = false;
-                    }
                 }
                 break;
             case HANG:

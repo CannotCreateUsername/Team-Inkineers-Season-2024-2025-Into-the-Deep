@@ -306,23 +306,7 @@ public abstract class ArmSubsystem {
         wristState = wState;
     }
 
-    public boolean getInvalidColor() {
-        // Yellow samples are more red, make sure difference is great to pick up yellow
-        if (redSide) {
-            return racist.blue() > 200 && racist.blue() > 3.5*racist.red();
-        } else {
-            return racist.red() > 200 && racist.red() > 3.5*racist.blue();
-        }
-    }
-
-    boolean eject = false;
-    ElapsedTime ejectTimer = new ElapsedTime();
-    public void eject() {
-        eject = true;
-        ejectTimer.reset();
-        intakeState = IntakeState.OUT;
-        wristState = WristState.NEUTRAL;
-    }
+    // RGB for yellow is (255, 255, 0)
 
     public String slideDisplayText = "WEEWOOWEEWOOWEEWOOWEEWOOWEEEEEEEEEEEEEEEEEEEEEEE";
     public String armDisplayText = "HEEEEEEEEEEEEEEEEEEEEYAWxd";
