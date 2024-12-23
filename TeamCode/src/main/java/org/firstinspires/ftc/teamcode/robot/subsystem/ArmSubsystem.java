@@ -170,6 +170,7 @@ public abstract class ArmSubsystem {
             m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
+        slideMotors.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Reverse right intake servo.
         // intakeServos.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
@@ -216,6 +217,7 @@ public abstract class ArmSubsystem {
             m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
+        slideMotors.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Hanging Stuff
         hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
