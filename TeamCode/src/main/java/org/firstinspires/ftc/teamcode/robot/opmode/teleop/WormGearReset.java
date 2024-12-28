@@ -19,16 +19,14 @@ public class WormGearReset extends LinearOpMode {
             arm.runManualTesting(gamepad);
 
             gamepad.readButtons();
-            telemetry.addData("Move Arm", "Right/Left Bumpers");
-            telemetry.addData("Arm Telemetry", arm.slideDisplayText);
+            telemetry.addData("Arm Telemetry", arm.armDisplayText);
             telemetry.addData("Slides Telemetry", arm.slideDisplayText);
             telemetry.addLine();
-            telemetry.addData("Hang Position", arm.hangMotor.getCurrentPosition());
-            telemetry.addData("Hang Target", arm.hangMotor.getTargetPosition());
-            telemetry.addLine();
+            telemetry.addData("Move Worm Gear", "Y/X");
             telemetry.addData("Worm Gear Position", arm.wormMotor.getCurrentPosition());
             telemetry.addData("Worm Gear Target", arm.wormMotor.getTargetPosition());
             telemetry.addLine();
+            telemetry.addData("Move Slides", "Right/Left Bumpers");
             telemetry.addData("Slides Position", arm.getSlidesPosition());
             telemetry.addData("Slides Target", arm.targetSlidePosition);
             telemetry.update();

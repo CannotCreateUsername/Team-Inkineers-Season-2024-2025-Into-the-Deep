@@ -91,6 +91,7 @@ public abstract class ArmSubsystem {
     final double WRIST_SCORE = WRIST_NEUTRAL - 25.0/236.0;
     final double WRIST_DROPOFF = WRIST_NEUTRAL - 40.0/236.0;
     final double WRIST_PICKUP = WRIST_NEUTRAL - 20.0/236.0; // The new neutral. 12/7/24
+    final double WRIST_PICKUP_LOW = WRIST_NEUTRAL - 70.0/236.0;
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.
@@ -111,11 +112,6 @@ public abstract class ArmSubsystem {
     final double[] ARM_RIGHT_POS = {V4B_LOWER_RIGHT, V4B_UPPER_RIGHT, WRIST_DOWN};
     final double[] MEGA_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};
 
-
-    // Linear Actuator
-    final int HANG_LINEAR_REST = 0;
-    final int HANG_LINEAR_UP = 2900;
-    final int HANG_LINEAR_DOWN = 1100;
     // Worm Gear
     // Manually Controlled
     // final int HANG_WORM_READY = 500;
@@ -127,7 +123,6 @@ public abstract class ArmSubsystem {
     public Servo upperBar;
     public Servo wrist;
 
-    public DcMotor hangMotor;
     public DcMotor wormMotor;
     public Servo latchServo;
 
@@ -155,7 +150,6 @@ public abstract class ArmSubsystem {
         upperBar = hardwareMap.get(Servo.class, "upper_bar");
         wrist = hardwareMap.get(Servo.class, "wrist");
 
-        hangMotor = hardwareMap.get(DcMotor.class, "hang_motor");
         wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
         latchServo = hardwareMap.get(Servo.class, "latch");
 
@@ -178,11 +172,6 @@ public abstract class ArmSubsystem {
         wrist.setDirection(Servo.Direction.REVERSE);
         // Reverse V4B servos, upper bar.
         upperBar.setDirection(Servo.Direction.REVERSE);
-
-        // Hanging Stuff
-        hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        hangMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -208,7 +197,6 @@ public abstract class ArmSubsystem {
                 hardwareMap.get(DcMotorEx.class, "left_slide"),
                 hardwareMap.get(DcMotorEx.class, "right_slide")
         );
-        hangMotor = hardwareMap.get(DcMotor.class, "hang_motor");
         wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
 
         // Set Motor Modes & Directions
@@ -218,11 +206,6 @@ public abstract class ArmSubsystem {
             m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
         slideMotors.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
-
-        // Hanging Stuff
-        hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        hangMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

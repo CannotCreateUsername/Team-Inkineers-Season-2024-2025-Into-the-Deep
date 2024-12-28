@@ -1,16 +1,14 @@
 package org.firstinspires.ftc.teamcode.robot.opmode.teleop.testing;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTeleOp;
 
 //@Disabled
 @TeleOp(name = "V4B Arm Testing", group = "Testing")
-public class ArmTest extends LinearOpMode {
+public class V4BTest extends LinearOpMode {
     DcMotor armMotor = null;
 
     public void runOpMode(){

@@ -1,9 +1,5 @@
 package org.firstinspires.ftc.teamcode.robot.subsystem;
 
-import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.kDhang;
-import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.kPhang;
-import static org.firstinspires.ftc.teamcode.robot.constants.PIDConstants.threshold_hang;
-
 import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -183,7 +179,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case LOW:
                 wristDisplayText = "Low";
                 if (wristTimer.seconds() > 0.5)
-                    wrist.setPosition(WRIST_DOWN);
+                    wrist.setPosition(WRIST_PICKUP_LOW);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.DOWN;
                 }
@@ -232,7 +228,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (gamepad.right_trigger == 0 ) {
                     intakeState = IntakeState.IDLE;
                     intaked = true;
-                    if (wristState == WristState.DOWN)
+                    if (wristState == WristState.DOWN || wristState == WristState.LOW)
                         slideState = SlideState.REST;
                 }
                 break;
@@ -248,22 +244,12 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         }
     }
 
-    public void hangPID(double power) {
-        double error = hangMotor.getTargetPosition() - hangMotor.getCurrentPosition();
-        if (Math.abs(error) > threshold_hang) {
-            hangMotor.setPower((error * kPhang + kDhang)*power);
-        } else {
-            hangMotor.setPower(0.0);
-        }
-    }
-
     // Additional Hanging Code
     public void runHang(GamepadEx gamepad) {
         switch (hangState) {
             case REST:
                 // Arm subsystem normal functionality, linear actuator down.
                 hangDisplayText = "REST";
-                hangMotor.setTargetPosition(HANG_LINEAR_REST);
                 latchServo.setPosition(0);
 
                 if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_UP)) {
@@ -274,7 +260,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case READY:
                 hangDisplayText = "X to cancel";
-                hangMotor.setTargetPosition(HANG_LINEAR_UP);
                 latchServo.setPosition(.5); // Unlatch worm gear
 //                slideState = SlideState.INTAKE; would break this due to encoder constant resetting
                 wristState = WristState.UP;
@@ -296,7 +281,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case LEVEL2:
                 hangDisplayText = "DPAD UP to Ascend";
                 wristState = WristState.UP;
-                hangMotor.setTargetPosition(HANG_LINEAR_DOWN);
 
                 /* Disabled for Meet 2
                 // Manual adjust worm gear
@@ -325,13 +309,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case LEVEL3:
                 hangDisplayText = "Ascended!!!";
 
-                // Move the linear actuator up or down
-                if (gamepad.isDown(GamepadKeys.Button.DPAD_UP)) {
-                    hangMotor.setTargetPosition(hangMotor.getCurrentPosition() + MANUAL_INCREMENT);
-                } else if (gamepad.isDown(GamepadKeys.Button.DPAD_DOWN)) {
-                    hangMotor.setTargetPosition(hangMotor.getCurrentPosition() - MANUAL_INCREMENT);
-                }
-
                 // Move the slides up or down
                 if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                     targetSlidePosition -= (MANUAL_INCREMENT+20);
@@ -339,7 +316,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     targetSlidePosition += (MANUAL_INCREMENT+20);
                 }
         }
-        hangPID(1);
     }
 
     private void setSlidePowers(double power) {
@@ -373,15 +349,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             wormMotor.setPower(-0.8);
         } else {
             wormMotor.setPower(0);
-        }
-
-        // Hang Motor Motion
-        if (gamepad.isDown(GamepadKeys.Button.DPAD_UP)) {
-            hangMotor.setPower(1);
-        } else if (gamepad.isDown(GamepadKeys.Button.DPAD_DOWN)) {
-            hangMotor.setPower(-1);
-        } else {
-            hangMotor.setPower(0);
         }
     }
 
