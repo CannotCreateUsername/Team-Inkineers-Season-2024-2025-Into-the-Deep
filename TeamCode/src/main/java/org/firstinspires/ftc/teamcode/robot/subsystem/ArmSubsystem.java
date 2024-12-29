@@ -152,53 +152,16 @@ public abstract class ArmSubsystem {
     public TouchSensor slideSwitch;
 
     boolean redSide = false;
-    /** @noinspection ArraysAsListWithZeroOrOneArgument*/
+    // Overarching Initialization Method
     public void init(HardwareMap hardwareMap, boolean isRedAlliance, boolean manualTesting) {
-        // Map the actuators
-        slideMotors = Arrays.asList(
-                hardwareMap.get(DcMotorEx.class, "left_slide"),
-                hardwareMap.get(DcMotorEx.class, "right_slide")
-        );
-        wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
+        initSlideSystem(hardwareMap);
 
-        // Set behavior & reverse slide motors. Depends on orientation.
-        for (DcMotorEx m : slideMotors) {
-            m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        }
-        slideMotors.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
-
-        wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        // Activate all other subsystems if not manual testing
         if (!manualTesting) {
-            intakeServos = Arrays.asList(
-                    hardwareMap.get(CRServo.class, "intake_left"),
-                    hardwareMap.get(CRServo.class, "intake_right")
-            );
-            lowerBar = Arrays.asList(
-                    hardwareMap.get(Servo.class, "lower_bar")
-            );
-            upperBar = hardwareMap.get(Servo.class, "upper_bar");
-            intakeWrist = hardwareMap.get(Servo.class, "intake_wrist");
-
-            specimenBar = hardwareMap.get(Servo.class, "specimen_bar");
-            specimenWrist = hardwareMap.get(Servo.class, "specimen_wrist");
-
-            // Map sensors
-            racist = hardwareMap.get(ColorSensor.class, "racist");
-            redSide = isRedAlliance;
-            slideSwitch = hardwareMap.get(TouchSensor.class, "slide_limit");
-
-            // Reverse the right intake servo
-            intakeServos.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
-            // Reverse wrist servo
-            intakeWrist.setDirection(Servo.Direction.REVERSE);
-            // Reverse V4B servos, upper bar
-            upperBar.setDirection(Servo.Direction.REVERSE);
+            initIntake(hardwareMap);
+            initV4B(hardwareMap);
+            initSpecimen(hardwareMap);
+            initSensors(hardwareMap, isRedAlliance);
 
             // Initialize Positions; Start at REST
             slideState = SlideState.REST;
@@ -213,14 +176,71 @@ public abstract class ArmSubsystem {
             setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
         }
     }
-
     public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
         init(hardwareMap, isRedAlliance, false);
     }
-
     // For manual adjustment in a separate OpMode
     public void initManualTesting(HardwareMap hardwareMap) {
         init(hardwareMap, false, true);
+    }
+
+    // Initializing Individually
+
+    public void initSlideSystem(HardwareMap hardwareMap) {
+        slideMotors = Arrays.asList(
+                hardwareMap.get(DcMotorEx.class, "left_slide"),
+                hardwareMap.get(DcMotorEx.class, "right_slide")
+        );
+        // Set behavior for each motor
+        for (DcMotorEx m : slideMotors) {
+            m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        }
+        // Reverse a slide motor. Depends on orientation.
+        slideMotors.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Worm Gear
+        wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
+        // Worm Motor Behavior
+        wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
+
+    public void initIntake(HardwareMap hardwareMap) {
+        intakeServos = Arrays.asList(
+                hardwareMap.get(CRServo.class, "intake_left"),
+                hardwareMap.get(CRServo.class, "intake_right")
+        );
+        // Reverse the right intake servo
+        intakeServos.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
+
+        intakeWrist = hardwareMap.get(Servo.class, "intake_wrist");
+        // Reverse wrist servo
+        intakeWrist.setDirection(Servo.Direction.REVERSE);
+    }
+
+    /** @noinspection ArraysAsListWithZeroOrOneArgument*/
+    public void initV4B(HardwareMap hardwareMap) {
+        lowerBar = Arrays.asList(
+                hardwareMap.get(Servo.class, "lower_bar")
+        );
+        upperBar = hardwareMap.get(Servo.class, "upper_bar");
+        // Reverse V4B servos, upper bar
+        upperBar.setDirection(Servo.Direction.REVERSE);
+    }
+
+    public void initSpecimen(HardwareMap hardwareMap) {
+        specimenBar = hardwareMap.get(Servo.class, "specimen_bar");
+        specimenWrist = hardwareMap.get(Servo.class, "specimen_wrist");
+    }
+
+    public void initSensors(HardwareMap hardwareMap, boolean isRedAlliance) {
+        racist = hardwareMap.get(ColorSensor.class, "racist");
+        redSide = isRedAlliance;
+        slideSwitch = hardwareMap.get(TouchSensor.class, "slide_limit");
     }
 
     // Boolean to move slides up after picking up from wall.
