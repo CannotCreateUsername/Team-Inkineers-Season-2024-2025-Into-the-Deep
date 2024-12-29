@@ -163,7 +163,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case NEUTRAL:
                 wristDisplayText = "Neutral";
                 if (wristTimer.seconds() > 0.5)
-                    wrist.setPosition(WRIST_PICKUP);
+                    intakeWrist.setPosition(WRIST_PICKUP);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.LOW;
                 }
@@ -171,7 +171,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case UP:
                 wristDisplayText = "Up";
                 if (wristTimer.seconds() > 0.5)
-                    wrist.setPosition(WRIST_UP);
+                    intakeWrist.setPosition(WRIST_UP);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.NEUTRAL;
                 }
@@ -179,7 +179,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case LOW:
                 wristDisplayText = "Low";
                 if (wristTimer.seconds() > 0.5)
-                    wrist.setPosition(WRIST_PICKUP_LOW);
+                    intakeWrist.setPosition(WRIST_PICKUP_LOW);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.DOWN;
                 }
@@ -187,7 +187,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case DOWN:
                 wristDisplayText = "Down";
                 if (wristTimer.seconds() > 0.5)
-                    wrist.setPosition(WRIST_DOWN);
+                    intakeWrist.setPosition(WRIST_DOWN);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.NEUTRAL;
                 }
@@ -195,7 +195,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case SCORE:
                 wristDisplayText = "Scoring";
                 if (wristTimer.seconds() > 0.5)
-                    wrist.setPosition(WRIST_SCORE);
+                    intakeWrist.setPosition(WRIST_SCORE);
                 break;
         }
 
@@ -250,7 +250,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case REST:
                 // Arm subsystem normal functionality, linear actuator down.
                 hangDisplayText = "REST";
-                latchServo.setPosition(0);
 
                 if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_UP)) {
                     hangState = HangState.READY;
@@ -260,7 +259,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case READY:
                 hangDisplayText = "X to cancel";
-                latchServo.setPosition(.5); // Unlatch worm gear
 //                slideState = SlideState.INTAKE; would break this due to encoder constant resetting
                 wristState = WristState.UP;
 

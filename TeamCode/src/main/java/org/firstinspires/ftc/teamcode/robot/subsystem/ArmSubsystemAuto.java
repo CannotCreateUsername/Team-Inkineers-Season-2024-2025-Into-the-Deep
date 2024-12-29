@@ -32,20 +32,20 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 switch (wristState) {
                     case NEUTRAL:
                         if (wristTimer.seconds() > 0.5)
-                            wrist.setPosition(WRIST_PICKUP);
+                            intakeWrist.setPosition(WRIST_PICKUP);
                         break;
                     case UP:
-                        wrist.setPosition(WRIST_UP);
+                        intakeWrist.setPosition(WRIST_UP);
                         break;
                     case DOWN:
                         if (wristTimer.seconds() > 0.5)
-                            wrist.setPosition(WRIST_DOWN);
+                            intakeWrist.setPosition(WRIST_DOWN);
                         break;
                     case SCORE:
-                        wrist.setPosition(WRIST_SCORE);
+                        intakeWrist.setPosition(WRIST_SCORE);
                         break;
                     case LOW:
-                        wrist.setPosition(WRIST_DROPOFF);
+                        intakeWrist.setPosition(WRIST_DROPOFF);
                         break;
                 }
                 // V4B Controlled Independently

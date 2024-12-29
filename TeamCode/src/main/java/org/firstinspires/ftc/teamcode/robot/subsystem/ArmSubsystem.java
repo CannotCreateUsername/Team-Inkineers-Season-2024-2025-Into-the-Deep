@@ -22,6 +22,11 @@ import java.util.List;
 /** @noinspection FieldCanBeLocal*/
 @Config
 public abstract class ArmSubsystem {
+
+    // Standard Rotations for Servos...
+    private final double MAX_AXON_ROTATION = 180.98;
+    private final double MAX_GOBILDA_ROTATION = 300;
+
     public enum SlideState {
         REST,
         INTAKE,
@@ -83,34 +88,49 @@ public abstract class ArmSubsystem {
     final int MANUAL_INCREMENT = 40;
     public static double DEFAULT_SLIDE_POWER = 1;
 
-    // Default Rotation for Axon MAX+ Servo: 180 degrees
-    // 90 degrees is position +- 90/180.9
+    private final double MAX_INTAKE_WRIST_ROTATION = 236.0; // The new neutral. 12/7/24
+
     final double WRIST_NEUTRAL = 0.5;
-    final double WRIST_UP = WRIST_NEUTRAL + 120.0/236.0;
-    final double WRIST_DOWN = WRIST_NEUTRAL - 120.0/236.0;
-    final double WRIST_SCORE = WRIST_NEUTRAL - 25.0/236.0;
-    final double WRIST_DROPOFF = WRIST_NEUTRAL - 40.0/236.0;
-    final double WRIST_PICKUP = WRIST_NEUTRAL - 20.0/236.0; // The new neutral. 12/7/24
-    final double WRIST_PICKUP_LOW = WRIST_NEUTRAL - 70.0/236.0;
+    final double WRIST_UP = WRIST_NEUTRAL + 120.0/MAX_INTAKE_WRIST_ROTATION;
+    final double WRIST_DOWN = WRIST_NEUTRAL - 120.0/MAX_INTAKE_WRIST_ROTATION;
+    final double WRIST_SCORE = WRIST_NEUTRAL - 25.0/MAX_INTAKE_WRIST_ROTATION;
+    final double WRIST_DROPOFF = WRIST_NEUTRAL - 40.0/MAX_INTAKE_WRIST_ROTATION;
+    final double WRIST_PICKUP = WRIST_NEUTRAL - 20.0/MAX_INTAKE_WRIST_ROTATION;
+    final double WRIST_PICKUP_LOW = WRIST_NEUTRAL - 70.0/MAX_INTAKE_WRIST_ROTATION;
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.
-    final double V4B_LOWER_CENTER = 0.5;
-    final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/180;
-    final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/180;
+    private final double MAX_LOWER_BAR_ROTATION = MAX_AXON_ROTATION;
 
-    // Upper servo. Axon, max rotation of 180.9 degrees.
+    final double V4B_LOWER_CENTER = 0.5;
+    final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
+    final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
+
+    // Upper servo. Axon, standard rotation of 180.98 degrees.
+    private final double MAX_UPPER_BAR_ROTATION = 236.0;
+
     final double V4B_UPPER_CENTER = 0.5;
-    final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 105.0/236.0;
-    final double V4B_UPPER_REST = V4B_UPPER_CENTER - 64.0/236.0;
-    final double V4B_UPPER_TRANSITION = V4B_UPPER_LEFT - 20.0/236.0;
-    final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/236.0;
+    final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 105.0/MAX_UPPER_BAR_ROTATION;
+    final double V4B_UPPER_REST = V4B_UPPER_CENTER - 64.0/MAX_UPPER_BAR_ROTATION;
+    final double V4B_UPPER_TRANSITION = V4B_UPPER_LEFT - 20.0/MAX_UPPER_BAR_ROTATION;
+    final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/MAX_UPPER_BAR_ROTATION;
 
     // 0 is lower servo position. 1 is upper servo position.
     final double[] ARM_LEFT_POS = {V4B_LOWER_LEFT, V4B_UPPER_LEFT, WRIST_DOWN};
     final double[] ARM_REST_POS = {V4B_LOWER_RIGHT, V4B_UPPER_REST, WRIST_UP};
     final double[] ARM_RIGHT_POS = {V4B_LOWER_RIGHT, V4B_UPPER_RIGHT, WRIST_DOWN};
     final double[] MEGA_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};
+
+    // Specimen Actuator Positions.
+    private final double MAX_SPECIMEN_BAR_ROTATION = 180.98; // TODO
+    private final double MAX_SPECIMEN_WRIST_ROTATION = MAX_GOBILDA_ROTATION;
+
+    final double SPECIMEN_BAR_INTAKE = 0.5 - (60.0+90.0)/MAX_SPECIMEN_BAR_ROTATION; // _/
+    final double SPECIMEN_BAR_OUTTAKE = 0.5 + 20.0/MAX_SPECIMEN_BAR_ROTATION;
+
+    final double SPECIMEN_WRIST_INTAKE = 0.5 + 60.0/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_OUTTAKE = 0.5 + 70.0/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_TRANSITION = 0.5 - 30.0/MAX_SPECIMEN_WRIST_ROTATION;
 
     // Worm Gear
     // Manually Controlled
@@ -121,11 +141,11 @@ public abstract class ArmSubsystem {
     public List<CRServo> intakeServos;
     public List<Servo> lowerBar;
     public Servo upperBar;
-    public Servo wrist;
+    public Servo intakeWrist;
+    public Servo specimenBar;
+    public Servo specimenWrist;
 
     public DcMotor wormMotor;
-    public Servo latchServo;
-
 
     // Sensors
     public ColorSensor racist;
@@ -133,32 +153,15 @@ public abstract class ArmSubsystem {
 
     boolean redSide = false;
     /** @noinspection ArraysAsListWithZeroOrOneArgument*/
-    public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
-        // For color sensor
-        redSide = isRedAlliance;
+    public void init(HardwareMap hardwareMap, boolean isRedAlliance, boolean manualTesting) {
         // Map the actuators
         slideMotors = Arrays.asList(
                 hardwareMap.get(DcMotorEx.class, "left_slide"),
                 hardwareMap.get(DcMotorEx.class, "right_slide")
         );
-        intakeServos = Arrays.asList(
-                hardwareMap.get(CRServo.class, "intake")
-        );
-        lowerBar = Arrays.asList(
-                hardwareMap.get(Servo.class, "lower_bar")
-        );
-        upperBar = hardwareMap.get(Servo.class, "upper_bar");
-        wrist = hardwareMap.get(Servo.class, "wrist");
-
         wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
-        latchServo = hardwareMap.get(Servo.class, "latch");
 
-        // Map sensors
-        racist = hardwareMap.get(ColorSensor.class, "racist");
-        slideSwitch = hardwareMap.get(TouchSensor.class, "slide_limit");
-
-        // Set Motor Modes & Directions
-        // Reverse slide motors. Depends on orientation of Bevel Gear
+        // Set behavior & reverse slide motors. Depends on orientation.
         for (DcMotorEx m : slideMotors) {
             m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
             m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -166,51 +169,58 @@ public abstract class ArmSubsystem {
         }
         slideMotors.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // Reverse right intake servo.
-        // intakeServos.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
-        // Reverse wrist servo
-        wrist.setDirection(Servo.Direction.REVERSE);
-        // Reverse V4B servos, upper bar.
-        upperBar.setDirection(Servo.Direction.REVERSE);
-
         wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // Initialize Positions; Start at REST
-        slideState = SlideState.REST;
-        armState = ArmState.REST;
-        areaState = AreaState.CLOSE;
-        intakeState = IntakeState.IDLE;
-        wristState = WristState.UP;
-        hangState = HangState.REST;
+        if (!manualTesting) {
+            intakeServos = Arrays.asList(
+                    hardwareMap.get(CRServo.class, "intake_left"),
+                    hardwareMap.get(CRServo.class, "intake_right")
+            );
+            lowerBar = Arrays.asList(
+                    hardwareMap.get(Servo.class, "lower_bar")
+            );
+            upperBar = hardwareMap.get(Servo.class, "upper_bar");
+            intakeWrist = hardwareMap.get(Servo.class, "intake_wrist");
 
-        targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
-        wrist.setPosition(WRIST_UP);
-        setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
+            specimenBar = hardwareMap.get(Servo.class, "specimen_bar");
+            specimenWrist = hardwareMap.get(Servo.class, "specimen_wrist");
+
+            // Map sensors
+            racist = hardwareMap.get(ColorSensor.class, "racist");
+            redSide = isRedAlliance;
+            slideSwitch = hardwareMap.get(TouchSensor.class, "slide_limit");
+
+            // Reverse the right intake servo
+            intakeServos.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
+            // Reverse wrist servo
+            intakeWrist.setDirection(Servo.Direction.REVERSE);
+            // Reverse V4B servos, upper bar
+            upperBar.setDirection(Servo.Direction.REVERSE);
+
+            // Initialize Positions; Start at REST
+            slideState = SlideState.REST;
+            armState = ArmState.REST;
+            areaState = AreaState.CLOSE;
+            intakeState = IntakeState.IDLE;
+            wristState = WristState.UP;
+            hangState = HangState.REST;
+
+            targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
+            intakeWrist.setPosition(WRIST_UP);
+            setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
+        }
+    }
+
+    public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
+        init(hardwareMap, isRedAlliance, false);
     }
 
     // For manual adjustment in a separate OpMode
     public void initManualTesting(HardwareMap hardwareMap) {
-        slideMotors = Arrays.asList(
-                hardwareMap.get(DcMotorEx.class, "left_slide"),
-                hardwareMap.get(DcMotorEx.class, "right_slide")
-        );
-        wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
-
-        // Set Motor Modes & Directions
-        for (DcMotorEx m : slideMotors) {
-            m.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        }
-        slideMotors.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
-
-        wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        init(hardwareMap, false, true);
     }
 
     // Boolean to move slides up after picking up from wall.
