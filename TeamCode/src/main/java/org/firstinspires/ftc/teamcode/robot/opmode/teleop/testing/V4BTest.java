@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTeleOp;
+import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTesting;
 
 //@Disabled
 @TeleOp(name = "V4B Arm Testing", group = "Testing")
@@ -12,7 +12,7 @@ public class V4BTest extends LinearOpMode {
     DcMotor armMotor = null;
 
     public void runOpMode(){
-        ArmSubsystemTeleOp armSubsystem = new ArmSubsystemTeleOp();
+        ArmSubsystemTesting armSubsystem = new ArmSubsystemTesting();
         armSubsystem.init(hardwareMap, false);
 
         GamepadEx gam = new GamepadEx(gamepad1);

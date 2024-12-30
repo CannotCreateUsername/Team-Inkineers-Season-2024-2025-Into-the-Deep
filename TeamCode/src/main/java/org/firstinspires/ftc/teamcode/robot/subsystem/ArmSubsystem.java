@@ -41,9 +41,9 @@ public abstract class ArmSubsystem {
         MEGA_REST
     }
 
-    public enum AreaState {
-        CLOSE,
-        FAR
+    public enum SpecimenState {
+        INTAKE,
+        OUTTAKE
     }
 
     public enum IntakeState {
@@ -68,12 +68,18 @@ public abstract class ArmSubsystem {
         LEVEL3
     }
 
+    public enum AreaState {
+        CLOSE,
+        FAR
+    }
+
     SlideState slideState;
     ArmState armState;
-    AreaState areaState;
+    SpecimenState specimenState;
     IntakeState intakeState;
     WristState wristState;
     HangState hangState;
+    AreaState areaState;
 
     public int targetSlidePosition;
 
@@ -166,10 +172,11 @@ public abstract class ArmSubsystem {
             // Initialize Positions; Start at REST
             slideState = SlideState.REST;
             armState = ArmState.REST;
-            areaState = AreaState.CLOSE;
+            specimenState = SpecimenState.INTAKE;
             intakeState = IntakeState.IDLE;
             wristState = WristState.UP;
             hangState = HangState.REST;
+            areaState = AreaState.CLOSE;
 
             targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
             intakeWrist.setPosition(WRIST_UP);
@@ -264,14 +271,19 @@ public abstract class ArmSubsystem {
             }
         }
     }
-
+    // Method to set power to slide motors manually
+    public void setSlidePowers(double power) {
+        for (DcMotorEx m : slideMotors) {
+            m.setPower(power);
+        }
+    }
+    // Method to reset slide encoders
     public void resetSlideEncoders() {
         for (DcMotorEx m : slideMotors) {
             m.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
             m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
     }
-
     // Method to simplify getting the current linear slides position
     public int getSlidesPosition() {
         return slideMotors.get(0).getCurrentPosition();

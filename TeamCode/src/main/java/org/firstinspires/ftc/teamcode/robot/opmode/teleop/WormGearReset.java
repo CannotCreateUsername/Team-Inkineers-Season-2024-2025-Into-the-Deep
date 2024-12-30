@@ -4,14 +4,14 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTeleOp;
+import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTesting;
 
 @TeleOp(name = "Arm/Hang Testing", group = "Testing")
 public class WormGearReset extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         GamepadEx gamepad = new GamepadEx(gamepad1);
-        ArmSubsystemTeleOp arm = new ArmSubsystemTeleOp();
+        ArmSubsystemTesting arm = new ArmSubsystemTesting();
         arm.initManualTesting(hardwareMap);
 
         waitForStart();
