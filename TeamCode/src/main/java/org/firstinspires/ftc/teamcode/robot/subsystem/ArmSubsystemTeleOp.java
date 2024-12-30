@@ -135,20 +135,21 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
         }
 
-//        switch (areaState) {
-//            case CLOSE:
-//                if (drivePos.position.y > 50) {
-//                    wristState = WristState.DOWN;
-//                    areaState = AreaState.FAR;
-//                }
-//                break;
-//            case FAR:
-//                if (drivePos.position.y < 50) {
-//                    wristState = WristState.NEUTRAL;
-//                    areaState = AreaState.CLOSE;
-//                }
-//                break;
-//        }
+        // The Specimen Arm should interact closely with the Virtual Four Bar.
+        switch (specimenState) {
+            case INTAKE:
+                if (specimenTimer.seconds() > 0.2) {
+                    specimenWrist.setPosition(armState == ArmState.LEFT_FAR ? 0.5 + SPECIMEN_WRIST_INTAKE_ANGLE : 0.5 - SPECIMEN_WRIST_INTAKE_ANGLE);
+                } else {
+                    specimenWrist.setPosition(armState == ArmState.LEFT_FAR ? 0.5 + SPECIMEN_WRIST_TRANSITION_ANGLE : 0.5 - SPECIMEN_WRIST_TRANSITION_ANGLE);
+                }
+                specimenBar.setPosition(armState == ArmState.LEFT_FAR ? 0.5 + SPECIMEN_BAR_INTAKE_ANGLE : 0.5 - SPECIMEN_BAR_INTAKE_ANGLE);
+                break;
+            case OUTTAKE:
+                specimenWrist.setPosition(armState == ArmState.LEFT_FAR ? 0.5 - SPECIMEN_WRIST_OUTTAKE_ANGLE : 0.5 + SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                specimenBar.setPosition(armState == ArmState.LEFT_FAR ? 0.5 - SPECIMEN_BAR_OUTTAKE_ANGLE : 0.5 + SPECIMEN_BAR_OUTTAKE_ANGLE);
+                break;
+        }
 
         switch (wristState) {
             /*
@@ -201,7 +202,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
     }
 
-    public void runIntake(Gamepad gamepad, GamepadEx gamepadEx) {
+    public void runIntake(Gamepad gamepad) {
         switch (intakeState) {
             case IDLE:
                 intakeDisplayText = "IDLE";
@@ -318,7 +319,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
     public void runSubsystem(GamepadEx gamepadEx, Gamepad gamepad) {
         runSlides(gamepadEx);
         runArm(gamepadEx);
-        runIntake(gamepad, gamepadEx);
+        runIntake(gamepad);
         runHang(gamepadEx);
     }
 }

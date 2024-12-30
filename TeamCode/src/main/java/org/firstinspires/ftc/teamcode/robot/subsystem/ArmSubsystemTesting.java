@@ -68,12 +68,12 @@ public class ArmSubsystemTesting extends ArmSubsystem {
     public void runSpecimenTesting(GamepadEx gamepad, LinearOpMode opMode) {
         if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
             if (yeah) {
-                specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE);
-                specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE);
+                specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
                 yeah = false;
             } else {
-                specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE);
-                specimenBar.setPosition(SPECIMEN_BAR_INTAKE);
+                specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
+                specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
                 yeah = true;
             }
         }

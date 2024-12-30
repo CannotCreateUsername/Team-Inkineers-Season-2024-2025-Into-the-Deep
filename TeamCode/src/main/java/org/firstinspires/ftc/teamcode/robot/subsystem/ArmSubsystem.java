@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.Arrays;
 import java.util.List;
 
-/** @noinspection FieldCanBeLocal*/
+/** @noinspection FieldCanBeLocal, UnaryPlus */
 @Config
 public abstract class ArmSubsystem {
 
@@ -131,12 +131,12 @@ public abstract class ArmSubsystem {
     private final double MAX_SPECIMEN_BAR_ROTATION = 180.98; // TODO
     private final double MAX_SPECIMEN_WRIST_ROTATION = MAX_GOBILDA_ROTATION;
 
-    final double SPECIMEN_BAR_INTAKE = 0.5 - (60.0+90.0)/MAX_SPECIMEN_BAR_ROTATION; // _/
-    final double SPECIMEN_BAR_OUTTAKE = 0.5 + 20.0/MAX_SPECIMEN_BAR_ROTATION;
+    final double SPECIMEN_BAR_INTAKE_ANGLE = -(60.0+90.0)/MAX_SPECIMEN_BAR_ROTATION; // _/
+    final double SPECIMEN_BAR_OUTTAKE_ANGLE = +20.0/MAX_SPECIMEN_BAR_ROTATION;
 
-    final double SPECIMEN_WRIST_INTAKE = 0.5 + 60.0/MAX_SPECIMEN_WRIST_ROTATION;
-    final double SPECIMEN_WRIST_OUTTAKE = 0.5 + 70.0/MAX_SPECIMEN_WRIST_ROTATION;
-    final double SPECIMEN_WRIST_TRANSITION = 0.5 - 30.0/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_INTAKE_ANGLE = +60.0/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_OUTTAKE_ANGLE = +70.0/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_TRANSITION_ANGLE = -30.0/MAX_SPECIMEN_WRIST_ROTATION;
 
     // Worm Gear
     // Manually Controlled
@@ -178,6 +178,7 @@ public abstract class ArmSubsystem {
             hangState = HangState.REST;
             areaState = AreaState.CLOSE;
 
+            // TODO: initialize specimen arm positions
             targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
             intakeWrist.setPosition(WRIST_UP);
             setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
@@ -333,8 +334,17 @@ public abstract class ArmSubsystem {
         wristState = wState;
     }
 
-    // RGB for yellow is (255, 255, 0)
+    public ElapsedTime specimenTimer = new ElapsedTime();
+    public void setSpecimenState(SpecimenState state) {
+        if (state == SpecimenState.INTAKE) {
+            specimenTimer.reset();
+            specimenState = SpecimenState.INTAKE;
+        } else if (state == SpecimenState.OUTTAKE) {
+            specimenState = SpecimenState.OUTTAKE;
+        }
+    }
 
+    // RGB for yellow is (255, 255, 0)
     public String slideDisplayText = "WEEWOOWEEWOOWEEWOOWEEWOOWEEEEEEEEEEEEEEEEEEEEEEE";
     public String armDisplayText = "HEEEEEEEEEEEEEEEEEEEEYAWxd";
     public String intakeDisplayText = "NOMMMMMMMMMMMMMMMMM";
