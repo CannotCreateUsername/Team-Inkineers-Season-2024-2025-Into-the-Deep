@@ -11,7 +11,7 @@ public class WormGearReset extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         GamepadEx gamepad = new GamepadEx(gamepad1);
-        ArmSubsystemTesting arm = new ArmSubsystemTesting();
+        ArmSubsystemTesting arm = new ArmSubsystemTesting(this);
         arm.initManualTesting(hardwareMap);
 
         waitForStart();

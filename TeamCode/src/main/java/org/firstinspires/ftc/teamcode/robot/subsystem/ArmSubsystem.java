@@ -172,16 +172,17 @@ public abstract class ArmSubsystem {
             // Initialize Positions; Start at REST
             slideState = SlideState.REST;
             armState = ArmState.REST;
-            specimenState = SpecimenState.INTAKE;
+            specimenState = SpecimenState.OUTTAKE;
             intakeState = IntakeState.IDLE;
             wristState = WristState.UP;
             hangState = HangState.REST;
             areaState = AreaState.CLOSE;
 
-            // TODO: initialize specimen arm positions
             targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
             intakeWrist.setPosition(WRIST_UP);
             setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
+            specimenBar.setPosition(0.5 + SPECIMEN_BAR_OUTTAKE_ANGLE);
+            specimenWrist.setPosition(0.5 + SPECIMEN_WRIST_OUTTAKE_ANGLE);
         }
     }
     public void init(HardwareMap hardwareMap, boolean isRedAlliance) {

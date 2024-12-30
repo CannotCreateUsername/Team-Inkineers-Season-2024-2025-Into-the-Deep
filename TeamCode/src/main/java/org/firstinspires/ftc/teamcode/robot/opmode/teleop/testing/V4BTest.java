@@ -12,7 +12,7 @@ public class V4BTest extends LinearOpMode {
     DcMotor armMotor = null;
 
     public void runOpMode(){
-        ArmSubsystemTesting armSubsystem = new ArmSubsystemTesting();
+        ArmSubsystemTesting armSubsystem = new ArmSubsystemTesting(this);
         armSubsystem.init(hardwareMap, false);
 
         GamepadEx gam = new GamepadEx(gamepad1);

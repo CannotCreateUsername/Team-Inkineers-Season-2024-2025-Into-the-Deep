@@ -3,8 +3,14 @@ package org.firstinspires.ftc.teamcode.robot.subsystem;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Gamepad;
 
 public class ArmSubsystemTesting extends ArmSubsystem {
+    LinearOpMode opMode;
+
+    public ArmSubsystemTesting (LinearOpMode opMode) {
+        this.opMode = opMode;
+    }
 
     public void runManualTesting(GamepadEx gamepad) {
         // Viper Slide Motion
@@ -65,19 +71,36 @@ public class ArmSubsystemTesting extends ArmSubsystem {
     }
 
     private boolean yeah2 = false;
-    public void runSpecimenTesting(GamepadEx gamepad, LinearOpMode opMode) {
+    public void runSpecimenTesting(GamepadEx gamepad) {
         if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-            if (yeah) {
+            if (yeah2) {
                 specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
                 specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
-                yeah = false;
+                yeah2 = false;
             } else {
                 specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
                 specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
-                yeah = true;
+                yeah2 = true;
             }
         }
 
         opMode.telemetry.addData("Wrist Position", "um.");
+    }
+
+    public void runIntakeTesting(Gamepad gamepad) {
+        if (gamepad.left_trigger > 0) {
+            setIntakePowers(-1);
+        } else if (gamepad.right_trigger > 0) {
+            setIntakePowers(1);
+        } else if (gamepad.left_bumper) {
+            intakeServos.get(0).setPower(1);
+        } else if (gamepad.right_bumper) {
+            intakeServos.get(1).setPower(1);
+        } else {
+            setIntakePowers(0);
+        }
+
+        opMode.telemetry.addData("Test Intake", "Left/Right Trigger");
+        opMode.telemetry.addData("Individual Servos", "Left Bumper for Left. Should Intake");
     }
 }

@@ -98,9 +98,11 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     if (toggleSide) {
                         armState = ArmState.RIGHT_FAR;
+                        setSpecimenState(SpecimenState.OUTTAKE);
                         toggleSide = false;
                     } else {
                         armState = ArmState.LEFT_FAR;
+                        setSpecimenState(SpecimenState.INTAKE);
                         toggleSide = true;
                     }
                     setWristState(WristState.NEUTRAL, true);
@@ -118,6 +120,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     resetV4B();
+                    setSpecimenState(SpecimenState.OUTTAKE);
                 }
                 break;
             case RIGHT_FAR:
@@ -139,15 +142,15 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         switch (specimenState) {
             case INTAKE:
                 if (specimenTimer.seconds() > 0.2) {
-                    specimenWrist.setPosition(armState == ArmState.LEFT_FAR ? 0.5 + SPECIMEN_WRIST_INTAKE_ANGLE : 0.5 - SPECIMEN_WRIST_INTAKE_ANGLE);
+                    specimenWrist.setPosition(0.5 + SPECIMEN_WRIST_INTAKE_ANGLE);
                 } else {
-                    specimenWrist.setPosition(armState == ArmState.LEFT_FAR ? 0.5 + SPECIMEN_WRIST_TRANSITION_ANGLE : 0.5 - SPECIMEN_WRIST_TRANSITION_ANGLE);
+                    specimenWrist.setPosition(0.5 + SPECIMEN_WRIST_TRANSITION_ANGLE);
                 }
-                specimenBar.setPosition(armState == ArmState.LEFT_FAR ? 0.5 + SPECIMEN_BAR_INTAKE_ANGLE : 0.5 - SPECIMEN_BAR_INTAKE_ANGLE);
+                specimenBar.setPosition(0.5 + SPECIMEN_BAR_INTAKE_ANGLE);
                 break;
             case OUTTAKE:
-                specimenWrist.setPosition(armState == ArmState.LEFT_FAR ? 0.5 - SPECIMEN_WRIST_OUTTAKE_ANGLE : 0.5 + SPECIMEN_WRIST_OUTTAKE_ANGLE);
-                specimenBar.setPosition(armState == ArmState.LEFT_FAR ? 0.5 - SPECIMEN_BAR_OUTTAKE_ANGLE : 0.5 + SPECIMEN_BAR_OUTTAKE_ANGLE);
+                specimenWrist.setPosition(0.5 + SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                specimenBar.setPosition(0.5 + SPECIMEN_BAR_OUTTAKE_ANGLE);
                 break;
         }
 
@@ -198,8 +201,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     intakeWrist.setPosition(WRIST_SCORE);
                 break;
         }
-
-
     }
 
     public void runIntake(Gamepad gamepad) {
