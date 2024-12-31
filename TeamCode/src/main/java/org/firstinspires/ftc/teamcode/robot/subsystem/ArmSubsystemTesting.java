@@ -42,7 +42,7 @@ public class ArmSubsystemTesting extends ArmSubsystem {
             setV4BPosition(ARM_LEFT_POS);
         } else if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
             armDisplayText = "RIGHT Position";
-            setV4BPosition(ARM_RIGHT_POS);
+            setV4BPosition(ARM_INTAKE_POS);
         }
 
         if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {

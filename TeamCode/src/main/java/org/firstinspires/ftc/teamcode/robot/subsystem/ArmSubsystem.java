@@ -29,7 +29,6 @@ public abstract class ArmSubsystem {
 
     public enum SlideState {
         REST,
-        INTAKE,
         OUTTAKE,
         HANG
     }
@@ -37,7 +36,7 @@ public abstract class ArmSubsystem {
     public enum ArmState {
         REST,
         LEFT_FAR,
-        RIGHT_FAR,
+        OUTTAKE,
         MEGA_REST
     }
 
@@ -86,8 +85,6 @@ public abstract class ArmSubsystem {
     // Constants, needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    public static int INTAKE_SPECIMEN_POSITION_SLIDES = 750;
-    public static int INTAKE_SAMPLE_POSITION_SLIDES = 400;
     public static int OUTTAKE_POSITION_SLIDES = 2460;
     public static int HANG_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
@@ -122,9 +119,9 @@ public abstract class ArmSubsystem {
     final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/MAX_UPPER_BAR_ROTATION;
 
     // 0 is lower servo position. 1 is upper servo position.
-    final double[] ARM_LEFT_POS = {V4B_LOWER_LEFT, V4B_UPPER_LEFT, WRIST_DOWN};
+    final double[] ARM_LEFT_POS = {V4B_LOWER_CENTER, V4B_UPPER_LEFT, WRIST_NEUTRAL};
     final double[] ARM_REST_POS = {V4B_LOWER_RIGHT, V4B_UPPER_REST, WRIST_UP};
-    final double[] ARM_RIGHT_POS = {V4B_LOWER_RIGHT, V4B_UPPER_RIGHT, WRIST_DOWN};
+    final double[] ARM_INTAKE_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_DOWN};
     final double[] MEGA_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};
 
     // Specimen Actuator Positions.
@@ -133,10 +130,12 @@ public abstract class ArmSubsystem {
 
     final double SPECIMEN_BAR_INTAKE_ANGLE = -(60.0+90.0)/MAX_SPECIMEN_BAR_ROTATION; // _/
     final double SPECIMEN_BAR_OUTTAKE_ANGLE = +20.0/MAX_SPECIMEN_BAR_ROTATION;
+    final double SPECIMEN_BAR_STRAIGHT_ANGLE = +90.0/MAX_SPECIMEN_BAR_ROTATION;
 
     final double SPECIMEN_WRIST_INTAKE_ANGLE = +60.0/MAX_SPECIMEN_WRIST_ROTATION;
     final double SPECIMEN_WRIST_OUTTAKE_ANGLE = +70.0/MAX_SPECIMEN_WRIST_ROTATION;
     final double SPECIMEN_WRIST_TRANSITION_ANGLE = -30.0/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_STRAIGHT_ANGLE = +0.0/MAX_SPECIMEN_WRIST_ROTATION;
 
     // Worm Gear
     // Manually Controlled
@@ -178,7 +177,7 @@ public abstract class ArmSubsystem {
             hangState = HangState.REST;
             areaState = AreaState.CLOSE;
 
-            targetSlidePosition = INTAKE_SPECIMEN_POSITION_SLIDES;
+            targetSlidePosition = REST_POSITION_SLIDES;
             intakeWrist.setPosition(WRIST_UP);
             setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
             specimenBar.setPosition(0.5 + SPECIMEN_BAR_OUTTAKE_ANGLE);
@@ -252,8 +251,6 @@ public abstract class ArmSubsystem {
         slideSwitch = hardwareMap.get(TouchSensor.class, "slide_limit");
     }
 
-    // Boolean to move slides up after picking up from wall.
-    public boolean intaked = false;
     // Method to run intake servos
     public void setIntakePowers(double power) {
         for (CRServo s : intakeServos) {

@@ -36,24 +36,5 @@ public class LeftSideAutoBlue extends LinearOpMode {
         telemetry.update();
         waitForStart();
         if (isStopRequested()) return;
-        Actions.runBlocking(
-                new ParallelAction(
-                        armSubsystem.controlActuators(),
-                        new SequentialAction(
-                                new SleepAction(4),
-                                new ParallelAction(
-                                        runToScore,
-                                        armSubsystem.readySpecimen()
-                                ),
-                                armSubsystem.scoreAndTransitionToPickup(true),
-                                armSubsystem.terminate()
-                        )
-                )
-        );
-        drive.updatePoseEstimate();
-        Action runToPark = drive.actionBuilder(drive.pose)
-                .strafeToLinearHeading(coords.leftParkPos, coords.ROTATED)
-                .build();
-        Actions.runBlocking(runToPark);
     }
 }

@@ -32,7 +32,7 @@ public class SquidDriveBlue extends LinearOpMode {
 
         // More Gamepad functionality
         GamepadEx gamepadEx1 = new GamepadEx(gamepad1);
-//        GamepadEx gamepadEx2 = new GamepadEx(gamepad2);
+        GamepadEx gamepadEx2 = new GamepadEx(gamepad2);
 
         GamepadHelper leftYHelper = new GamepadHelper();
         GamepadHelper leftXHelper = new GamepadHelper();
@@ -72,7 +72,7 @@ public class SquidDriveBlue extends LinearOpMode {
 
             // Run the ARM
             armSubsystem.getDrivePos(drive);
-            armSubsystem.runSubsystem(gamepadEx1, gamepad1);
+            armSubsystem.runSubsystem(gamepadEx1, gamepadEx2, gamepad1);
             // Troll
             windmill.setPower(rotatedInput.x+rightXInput);
 
