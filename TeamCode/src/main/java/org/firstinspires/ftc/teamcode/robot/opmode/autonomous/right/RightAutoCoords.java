@@ -9,13 +9,13 @@ public class RightAutoCoords {
     // VECTOR2D (FORWARD, SIDEWAYS)
     // NEGATIVE SIDEWAYS FOR RIGHT, POSITIVE FOR LEFT
 
-    public double TURNED = Math.toRadians(180);
     public double ROTATED = Math.toRadians(-90);
     public double STRAIGHT = Math.toRadians(0);
 
-    public Vector2d scoreSpecimenPos = new Vector2d(23, 4);
+    public Vector2d scoreSpecimenPos = new Vector2d(24, 0);
+    public Vector2d backScorePos = new Vector2d(16, 0);
 
-    public Vector2d samplePos1 = new Vector2d(25.5, -38);
+    public Vector2d samplePos1 = new Vector2d(25, -38);
     public Vector2d samplePos2 = new Vector2d(25, -48);
     public Vector2d samplePos3 = new Vector2d(25, -58);
 

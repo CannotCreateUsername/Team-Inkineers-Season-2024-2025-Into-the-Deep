@@ -147,13 +147,13 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (specimenTimer.seconds() > 0.2) {
                     specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
                 } else {
-                    specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ANGLE);
+                    specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
                 }
                 specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
                 break;
             case OUTTAKE:
-                specimenWrist.setPosition(SPECIMEN_WRIST_STRAIGHT_ANGLE);
-                specimenBar.setPosition(SPECIMEN_BAR_STRAIGHT_ANGLE);
+                specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
                 break;
             case HANG:
                 specimenBar.setPosition(SPECIMEN_BAR_NEUTRAL);

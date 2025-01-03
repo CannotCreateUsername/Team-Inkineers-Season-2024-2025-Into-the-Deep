@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ArmSubsystemAuto extends ArmSubsystem {
@@ -34,23 +35,36 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                         setV4BPosition(ARM_LEFT_POS);
                         break;
                     case RIGHT:
-                        setV4BPosition(ARM_RIGHT_POS);
-                        break;
+                        if (specimenState != SpecimenState.INTAKE) {
+                            setV4BPosition(ARM_RIGHT_POS);
+                            break;
+                        }
                 }
 
                 // Control specimen arm
                 switch(specimenState) {
                     case INTAKE:
-                        specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
-                        if (specimenTimer.seconds() > 0.5) {
-                            specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ANGLE);
-                        } else {
-                            specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
+                        if (armState != ArmState.RIGHT) {
+                            specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
+                            if (specimenTimer.seconds() > 0.5) {
+                                specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
+                            } else {
+                                specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
+                            }
                         }
                         break;
                     case OUTTAKE:
+                        specimenBar.setPosition(SPECIMEN_BAR_STRAIGHT_ANGLE);
+                        specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ON);
+                        break;
+                    case AUTO:
                         specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
-                        specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                        specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ON);
+                        break;
+                    case HANG:
+                        specimenBar.setPosition(SPECIMEN_BAR_NEUTRAL);
+                        specimenWrist.setPosition(SPECIMEN_WRIST_NEUTRAL);
+                        break;
                 }
 
                 // Control Wrist
@@ -97,12 +111,18 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         );
     }
 
+    public Action hangSpecimen() {
+        return moveSpecimen(SpecimenState.AUTO);
+    }
+
     public Action pickUpSample() {
         return new SequentialAction(
                 new ParallelAction(
                         moveV4B(ArmState.LEFT),
-                        moveWrist(WristState.LOW)
+                        moveWrist(WristState.LOW),
+                        moveSpecimen(SpecimenState.HANG)
                 ),
+                new SleepAction(0.5),
                 moveIntake(IntakeState.IN, 0.4),
                 moveWrist(WristState.NEUTRAL)
         );
@@ -110,7 +130,11 @@ public class ArmSubsystemAuto extends ArmSubsystem {
 
     public Action dropOffSample() {
         return new SequentialAction(
-                moveV4B(ArmState.RIGHT),
+                new ParallelAction(
+                        moveV4B(ArmState.RIGHT),
+                        moveSpecimen(SpecimenState.HANG)
+                ),
+                new SleepAction(0.5),
                 new ParallelAction(
                         moveWrist(WristState.DROPOFF),
                         moveIntake(IntakeState.OUT, 0.2)
@@ -121,7 +145,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     public Action readyIntake() {
         return new ParallelAction(
                 moveV4B(ArmState.REST),
-                moveWrist(WristState.NEUTRAL),
+                moveWrist(WristState.UP),
                 moveSpecimen(SpecimenState.INTAKE)
         );
     }
