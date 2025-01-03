@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.Arrays;
 import java.util.List;
 
-/** @noinspection FieldCanBeLocal, UnaryPlus */
+/** @noinspection FieldCanBeLocal */
 @Config
 public abstract class ArmSubsystem {
 
@@ -35,14 +35,17 @@ public abstract class ArmSubsystem {
 
     public enum ArmState {
         REST,
-        LEFT_FAR,
-        OUTTAKE,
-        MEGA_REST
+        MEGA_REST,
+        LEFT,
+        RIGHT,
+        INTAKE,
+        HANG
     }
 
     public enum SpecimenState {
         INTAKE,
-        OUTTAKE
+        OUTTAKE,
+        HANG
     }
 
     public enum IntakeState {
@@ -55,7 +58,7 @@ public abstract class ArmSubsystem {
     public enum WristState {
         NEUTRAL,
         UP,
-        DOWN,
+        DROPOFF,
         SCORE,
         LOW
     }
@@ -108,34 +111,40 @@ public abstract class ArmSubsystem {
     final double V4B_LOWER_CENTER = 0.5;
     final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
     final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
+    final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 64.0/MAX_LOWER_BAR_ROTATION;
 
     // Upper servo. Axon, standard rotation of 180.98 degrees.
     private final double MAX_UPPER_BAR_ROTATION = 236.0;
 
     final double V4B_UPPER_CENTER = 0.5;
-    final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 105.0/MAX_UPPER_BAR_ROTATION;
+    final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 100.0/MAX_UPPER_BAR_ROTATION;
     final double V4B_UPPER_REST = V4B_UPPER_CENTER - 64.0/MAX_UPPER_BAR_ROTATION;
-    final double V4B_UPPER_TRANSITION = V4B_UPPER_LEFT - 20.0/MAX_UPPER_BAR_ROTATION;
+//    final double V4B_UPPER_TRANSITION = V4B_UPPER_LEFT - 20.0/MAX_UPPER_BAR_ROTATION;
     final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/MAX_UPPER_BAR_ROTATION;
 
     // 0 is lower servo position. 1 is upper servo position.
     final double[] ARM_LEFT_POS = {V4B_LOWER_CENTER, V4B_UPPER_LEFT, WRIST_NEUTRAL};
-    final double[] ARM_REST_POS = {V4B_LOWER_RIGHT, V4B_UPPER_REST, WRIST_UP};
+    final double[] ARM_RIGHT_POS = {V4B_LOWER_CENTER, V4B_UPPER_RIGHT, WRIST_NEUTRAL};
+    final double[] ARM_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_LEFT, WRIST_NEUTRAL};
     final double[] ARM_INTAKE_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_DOWN};
     final double[] MEGA_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};
 
     // Specimen Actuator Positions.
-    private final double MAX_SPECIMEN_BAR_ROTATION = 180.98; // TODO
+    private final double MAX_SPECIMEN_BAR_ROTATION = 355;
     private final double MAX_SPECIMEN_WRIST_ROTATION = MAX_GOBILDA_ROTATION;
 
-    final double SPECIMEN_BAR_INTAKE_ANGLE = -(60.0+90.0)/MAX_SPECIMEN_BAR_ROTATION; // _/
-    final double SPECIMEN_BAR_OUTTAKE_ANGLE = +20.0/MAX_SPECIMEN_BAR_ROTATION;
-    final double SPECIMEN_BAR_STRAIGHT_ANGLE = +90.0/MAX_SPECIMEN_BAR_ROTATION;
+    final double SPECIMEN_BAR_NEUTRAL = 0.5;
+    final double SPECIMEN_BAR_INITIAL_ANGLE = SPECIMEN_BAR_NEUTRAL +(60.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
+    final double SPECIMEN_BAR_INTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL +(60.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
+    final double SPECIMEN_BAR_OUTTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL -20.0/MAX_SPECIMEN_BAR_ROTATION;
+    final double SPECIMEN_BAR_STRAIGHT_ANGLE = SPECIMEN_BAR_NEUTRAL +90.0/MAX_SPECIMEN_BAR_ROTATION;
 
-    final double SPECIMEN_WRIST_INTAKE_ANGLE = +60.0/MAX_SPECIMEN_WRIST_ROTATION;
-    final double SPECIMEN_WRIST_OUTTAKE_ANGLE = +70.0/MAX_SPECIMEN_WRIST_ROTATION;
-    final double SPECIMEN_WRIST_TRANSITION_ANGLE = -30.0/MAX_SPECIMEN_WRIST_ROTATION;
-    final double SPECIMEN_WRIST_STRAIGHT_ANGLE = +0.0/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_NEUTRAL = 0.5;
+    final double SPECIMEN_WRIST_INITIAL_ANGLE = SPECIMEN_WRIST_NEUTRAL +(90.0+10.0)/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_INTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL +60.0/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_OUTTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL +70.0/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_TRANSITION_ANGLE = SPECIMEN_WRIST_NEUTRAL -30.0/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_STRAIGHT_ANGLE = SPECIMEN_WRIST_NEUTRAL +0.0/MAX_SPECIMEN_WRIST_ROTATION;
 
     // Worm Gear
     // Manually Controlled
@@ -179,9 +188,9 @@ public abstract class ArmSubsystem {
 
             targetSlidePosition = REST_POSITION_SLIDES;
             intakeWrist.setPosition(WRIST_UP);
-            setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
-            specimenBar.setPosition(0.5 + SPECIMEN_BAR_OUTTAKE_ANGLE);
-            specimenWrist.setPosition(0.5 + SPECIMEN_WRIST_OUTTAKE_ANGLE);
+            setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_REST);
+            specimenBar.setPosition(SPECIMEN_BAR_INITIAL_ANGLE);
+            specimenWrist.setPosition(SPECIMEN_WRIST_INITIAL_ANGLE);
         }
     }
     public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
@@ -307,13 +316,11 @@ public abstract class ArmSubsystem {
     }
 
     ElapsedTime armTimer = new ElapsedTime();
-    public void resetV4B() {
-        armTimer.reset();
-        wristState = WristState.UP;
-        if (armState == ArmState.LEFT_FAR) {
-            setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_TRANSITION);
+    public void setArmState(ArmState state) {
+        if (state == ArmState.REST) {
+            armTimer.reset();
         }
-        armState = ArmState.REST;
+        armState = state;
     }
     // Used in manual TeleOp testing
     public void setV4BPosition(double lowerPos, double upperPos) {
@@ -336,10 +343,8 @@ public abstract class ArmSubsystem {
     public void setSpecimenState(SpecimenState state) {
         if (state == SpecimenState.INTAKE) {
             specimenTimer.reset();
-            specimenState = SpecimenState.INTAKE;
-        } else if (state == SpecimenState.OUTTAKE) {
-            specimenState = SpecimenState.OUTTAKE;
         }
+        specimenState = state;
     }
 
     // RGB for yellow is (255, 255, 0)

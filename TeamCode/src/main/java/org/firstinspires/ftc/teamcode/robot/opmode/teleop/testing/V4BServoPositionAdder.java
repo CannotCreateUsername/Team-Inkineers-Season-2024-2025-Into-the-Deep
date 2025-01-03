@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 @Disabled
-@TeleOp(name = "V4B Servo Position Tester", group = "Testing")
-public class V4BServoPositionTester extends LinearOpMode {
+@TeleOp(name = "V4B Servo Position Adder", group = "Testing")
+public class V4BServoPositionAdder extends LinearOpMode {
 
     List<Servo> lowerBar;
     Servo upperBar;
@@ -21,6 +21,7 @@ public class V4BServoPositionTester extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // Same initialization as in ArmSubsystem.java
+        //noinspection ArraysAsListWithZeroOrOneArgument
         lowerBar = Arrays.asList(
                 hardwareMap.get(Servo.class, "lower_bar")
         );

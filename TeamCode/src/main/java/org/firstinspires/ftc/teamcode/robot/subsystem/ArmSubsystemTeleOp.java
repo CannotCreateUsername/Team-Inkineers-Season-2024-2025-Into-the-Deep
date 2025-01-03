@@ -99,45 +99,45 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     if (toggleSide) {
-                        armState = ArmState.OUTTAKE;
+                        setArmState(ArmState.INTAKE);
                         setSpecimenState(SpecimenState.OUTTAKE);
                         toggleSide = false;
                     } else {
-                        armState = ArmState.LEFT_FAR;
+                        setArmState(ArmState.LEFT);
                         setSpecimenState(SpecimenState.INTAKE);
                         toggleSide = true;
                     }
                     setWristState(WristState.NEUTRAL, true);
                     armTimer.reset();
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
-                    armState = ArmState.MEGA_REST;
+                    setArmState(ArmState.MEGA_REST);
                 }
                 break;
-            case LEFT_FAR:
+            case LEFT:
                 armDisplayText = "Left Extended";
-                if (armTimer.seconds() < 0.3) {
-                    setV4BPosition(V4B_LOWER_CENTER, V4B_UPPER_TRANSITION);
-                } else {
-                    setV4BPosition(ARM_LEFT_POS);
-                }
+                setV4BPosition(ARM_LEFT_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    resetV4B();
+                    setArmState(ArmState.REST);
                     setSpecimenState(SpecimenState.OUTTAKE);
                 }
                 break;
-            case OUTTAKE:
+            case INTAKE:
                 armDisplayText = "Right Extended";
                 setV4BPosition(ARM_INTAKE_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    resetV4B();
+                    setArmState(ArmState.REST);
                 }
                 break;
             case MEGA_REST:
                 armDisplayText = "Mega Rest";
                 setV4BPosition(MEGA_REST_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
-                    armState = ArmState.REST;
+                    setArmState(ArmState.REST);
                 }
+                break;
+            case HANG:
+                armDisplayText = "Hanging";
+                setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
                 break;
         }
 
@@ -145,15 +145,19 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         switch (specimenState) {
             case INTAKE:
                 if (specimenTimer.seconds() > 0.2) {
-                    specimenWrist.setPosition(0.5 + SPECIMEN_WRIST_INTAKE_ANGLE);
+                    specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
                 } else {
-                    specimenWrist.setPosition(0.5 + SPECIMEN_WRIST_TRANSITION_ANGLE);
+                    specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ANGLE);
                 }
-                specimenBar.setPosition(0.5 + SPECIMEN_BAR_INTAKE_ANGLE);
+                specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
                 break;
             case OUTTAKE:
-                specimenWrist.setPosition(0.5 + SPECIMEN_WRIST_STRAIGHT_ANGLE);
-                specimenBar.setPosition(0.5 + SPECIMEN_BAR_STRAIGHT_ANGLE);
+                specimenWrist.setPosition(SPECIMEN_WRIST_STRAIGHT_ANGLE);
+                specimenBar.setPosition(SPECIMEN_BAR_STRAIGHT_ANGLE);
+                break;
+            case HANG:
+                specimenBar.setPosition(SPECIMEN_BAR_NEUTRAL);
+                specimenWrist.setPosition(SPECIMEN_WRIST_NEUTRAL);
                 break;
         }
 
@@ -166,26 +170,15 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     wristState = WristState.LOW;
                 }
                 break;
-            case UP: // Unused
+            case UP: // Used in Hang
                 wristDisplayText = "Up";
                 if (wristTimer.seconds() > 0.5)
                     intakeWrist.setPosition(WRIST_UP);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
-                    wristState = WristState.NEUTRAL;
-                }
                 break;
             case LOW:
                 wristDisplayText = "Low";
                 if (wristTimer.seconds() > 0.5)
                     intakeWrist.setPosition(WRIST_PICKUP_LOW);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
-                    wristState = WristState.NEUTRAL;
-                }
-                break;
-            case DOWN: // Unused
-                wristDisplayText = "Down";
-                if (wristTimer.seconds() > 0.5)
-                    intakeWrist.setPosition(WRIST_DOWN);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     wristState = WristState.NEUTRAL;
                 }

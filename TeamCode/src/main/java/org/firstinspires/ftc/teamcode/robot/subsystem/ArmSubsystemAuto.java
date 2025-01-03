@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ArmSubsystemAuto extends ArmSubsystem {
@@ -19,81 +21,167 @@ public class ArmSubsystemAuto extends ArmSubsystem {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     finished = false;
-                    wristState = WristState.SCORE;
                     set = true;
                 }
 
                 // Control Slides
                 runSlideMotorsPID(autoSlidePow);
+
+                // Control V4B
+                switch (armState) {
+                    case REST:
+                    case LEFT:
+                        setV4BPosition(ARM_LEFT_POS);
+                        break;
+                    case RIGHT:
+                        setV4BPosition(ARM_RIGHT_POS);
+                        break;
+                }
+
+                // Control specimen arm
+                switch(specimenState) {
+                    case INTAKE:
+                        specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
+                        if (specimenTimer.seconds() > 0.5) {
+                            specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ANGLE);
+                        } else {
+                            specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
+                        }
+                        break;
+                    case OUTTAKE:
+                        specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
+                        specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                }
+
                 // Control Wrist
                 switch (wristState) {
                     case NEUTRAL:
-                        if (wristTimer.seconds() > 0.5)
-                            intakeWrist.setPosition(WRIST_PICKUP);
+                        intakeWrist.setPosition(WRIST_NEUTRAL);
                         break;
                     case UP:
                         intakeWrist.setPosition(WRIST_UP);
                         break;
-                    case DOWN:
-                        if (wristTimer.seconds() > 0.5)
-                            intakeWrist.setPosition(WRIST_DOWN);
+                    case DROPOFF:
+                        intakeWrist.setPosition(WRIST_DROPOFF);
                         break;
                     case SCORE:
                         intakeWrist.setPosition(WRIST_SCORE);
                         break;
                     case LOW:
-                        intakeWrist.setPosition(WRIST_DROPOFF);
+                        intakeWrist.setPosition(WRIST_PICKUP_LOW);
                         break;
                 }
-                // V4B Controlled Independently
+
+                switch (intakeState) {
+                    case IDLE:
+                        setIntakePowers(0);
+                        break;
+                    case IN:
+                        setIntakePowers(1);
+                        break;
+                    case OUT:
+                        setIntakePowers(-1);
+                        break;
+                }
 
                 return !finished;
             }
         };
     }
 
-    public Action resetArm() {
+    public Action readySpecimen() {
+        return new ParallelAction(
+                moveV4B(ArmState.REST),
+                moveWrist(WristState.NEUTRAL),
+                moveSpecimen(SpecimenState.OUTTAKE)
+        );
+    }
+
+    public Action pickUpSample() {
+        return new SequentialAction(
+                new ParallelAction(
+                        moveV4B(ArmState.LEFT),
+                        moveWrist(WristState.LOW)
+                ),
+                moveIntake(IntakeState.IN, 0.4),
+                moveWrist(WristState.NEUTRAL)
+        );
+    }
+
+    public Action dropOffSample() {
+        return new SequentialAction(
+                moveV4B(ArmState.RIGHT),
+                new ParallelAction(
+                        moveWrist(WristState.DROPOFF),
+                        moveIntake(IntakeState.OUT, 0.2)
+                )
+        );
+    }
+
+    public Action readyIntake() {
+        return new ParallelAction(
+                moveV4B(ArmState.REST),
+                moveWrist(WristState.NEUTRAL),
+                moveSpecimen(SpecimenState.INTAKE)
+        );
+    }
+
+
+
+    // PRIMITIVE ACTIONS
+    @Deprecated
+    public Action setTargetSlidePosition(int position) {
+        return telemetryPacket -> {
+            targetSlidePosition = position;
+            return false;
+        };
+    }
+
+    public Action moveSpecimen(SpecimenState state) {
+        return telemetryPacket -> {
+            setSpecimenState(state);
+            return false;
+        };
+    }
+
+    @Deprecated
+    public Action resetSlidesPosition() {
+        return telemetryPacket -> {
+            resetSlideEncoders();
+            return false;
+        };
+    }
+
+    public Action moveV4B(ArmState state) {
+        return telemetryPacket -> {
+            setArmState(state);
+            return false;
+        };
+    }
+
+    public Action moveWrist(WristState state) {
+        return telemetryPacket -> {
+            wristState = state;
+            return false;
+        };
+    }
+
+    public Action moveIntake(IntakeState state, double seconds) {
         return new Action() {
-            boolean set = false;
+            private boolean set = false;
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 if (!set) {
                     autoTimer.reset();
-                    resetV4B();
+                    intakeState = state;
                     set = true;
                 }
-                setIntakePowers(0);
-                if (autoTimer.seconds() > 0.5) {
-                    setV4BPosition(ARM_REST_POS);
-                }
-                return autoTimer.seconds() < 1;
-            }
-        };
-    }
 
-    public Action readySpecimen() {
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                return false;
-            }
-        };
-    }
+                if (autoTimer.seconds() > seconds-0.1)
+                    intakeState = IntakeState.IDLE;
 
-    public Action resetSlides(boolean done) {
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                resetSlideEncoders();
-                return false;
+                return autoTimer.seconds() < seconds;
             }
-        };
-    }
-
-    public Action moveArm(ArmState state) {
-        return telemetryPacket -> {
-            armState = state;
-            return false;
         };
     }
 
@@ -104,43 +192,4 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         };
     }
 
-
-    // UNUSED ACTIONS
-
-    @Deprecated
-    public Action spinIn(double time) {
-        return new Action() {
-            private boolean set = false;
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (!set) {
-                    autoTimer.reset();
-                    targetSlidePosition = REST_POSITION_SLIDES;
-                    wristState = WristState.DOWN;
-                    set = true;
-                }
-
-                setIntakePowers(1);
-                return autoTimer.seconds() < time;
-            }
-        };
-    }
-
-    @Deprecated
-    public Action spinOut(double time) {
-        return new Action() {
-            private boolean set = false;
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (!set) {
-                    autoTimer.reset();
-                    wristState = WristState.NEUTRAL;
-                    set = true;
-                }
-
-                setIntakePowers(-1);
-                return autoTimer.seconds() < time;
-            }
-        };
-    }
 }

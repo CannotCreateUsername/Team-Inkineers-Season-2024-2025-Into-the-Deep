@@ -67,12 +67,17 @@ public class ArmSubsystemTesting extends ArmSubsystem {
         if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
             armDisplayText = "Mega Rest";
             setV4BPosition(MEGA_REST_POS);
+            specimenBar.setPosition(0.5);
+            specimenWrist.setPosition(0.5);
         }
     }
 
     private boolean yeah2 = false;
     public void runSpecimenTesting(GamepadEx gamepad) {
-        if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+        if (gamepad.wasJustPressed(GamepadKeys.Button.BACK)) {
+            specimenBar.setPosition(SPECIMEN_BAR_NEUTRAL);
+            specimenWrist.setPosition(SPECIMEN_WRIST_NEUTRAL);
+        } else if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
             if (yeah2) {
                 specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
                 specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
@@ -84,7 +89,8 @@ public class ArmSubsystemTesting extends ArmSubsystem {
             }
         }
 
-        opMode.telemetry.addData("Wrist Position", "um.");
+        opMode.telemetry.addData("BACK", "Neutral");
+        opMode.telemetry.addData("A", "Toggle Intake/Outtake");
     }
 
     public void runIntakeTesting(Gamepad gamepad) {
