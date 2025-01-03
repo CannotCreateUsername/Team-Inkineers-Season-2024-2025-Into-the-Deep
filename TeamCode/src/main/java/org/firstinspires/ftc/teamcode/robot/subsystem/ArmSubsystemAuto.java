@@ -53,11 +53,11 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                             }
                         }
                         break;
-                    case OUTTAKE:
+                    case AUTO:
                         specimenBar.setPosition(SPECIMEN_BAR_STRAIGHT_ANGLE);
                         specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ON);
                         break;
-                    case AUTO:
+                    case OUTTAKE:
                         specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
                         specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ON);
                         break;
@@ -107,12 +107,19 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         return new ParallelAction(
                 moveV4B(ArmState.REST),
                 moveWrist(WristState.NEUTRAL),
-                moveSpecimen(SpecimenState.OUTTAKE)
+                moveSpecimen(SpecimenState.AUTO)
         );
     }
 
-    public Action hangSpecimen() {
-        return moveSpecimen(SpecimenState.AUTO);
+    public Action hangSpecimenTransition(Action driveAction) {
+        return new SequentialAction(
+                moveSpecimen(SpecimenState.OUTTAKE),
+                new SleepAction(0.3),
+                new ParallelAction(
+                        driveAction,
+                        readyIntake()
+                )
+        );
     }
 
     public Action pickUpSample() {
@@ -145,7 +152,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     public Action readyIntake() {
         return new ParallelAction(
                 moveV4B(ArmState.REST),
-                moveWrist(WristState.UP),
+                moveWrist(WristState.NEUTRAL),
                 moveSpecimen(SpecimenState.INTAKE)
         );
     }

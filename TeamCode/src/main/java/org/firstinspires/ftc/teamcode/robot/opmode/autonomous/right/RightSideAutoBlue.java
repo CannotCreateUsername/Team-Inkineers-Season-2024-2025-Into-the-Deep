@@ -4,7 +4,6 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -54,8 +53,7 @@ public class RightSideAutoBlue extends LinearOpMode {
                         new SequentialAction(
                                 armSubsystem.readySpecimen(),
                                 runToScore,
-                                armSubsystem.hangSpecimen(),
-                                runToSample1,
+                                armSubsystem.hangSpecimenTransition(runToSample1),
                                 armSubsystem.pickUpSample(),
                                 armSubsystem.dropOffSample(),
                                 runToSample2,
@@ -87,14 +85,7 @@ public class RightSideAutoBlue extends LinearOpMode {
                             new SequentialAction(
                                     armSubsystem.readySpecimen(),
                                     runToNewScore,
-                                    armSubsystem.hangSpecimen(),
-                                    new ParallelAction(
-                                            runToPickUp,
-                                            new SequentialAction(
-                                                    new SleepAction(0.4),
-                                                    armSubsystem.readyIntake()
-                                            )
-                                    ),
+                                    armSubsystem.hangSpecimenTransition(runToPickUp),
                                     armSubsystem.terminate()
                             )
                     )

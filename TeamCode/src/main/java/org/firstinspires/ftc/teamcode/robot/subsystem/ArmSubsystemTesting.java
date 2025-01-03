@@ -79,18 +79,25 @@ public class ArmSubsystemTesting extends ArmSubsystem {
             specimenWrist.setPosition(SPECIMEN_WRIST_NEUTRAL);
         } else if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
             if (yeah2) {
-                specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
-                specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
+                specimenBar.setPosition(SPECIMEN_BAR_STRAIGHT_ANGLE);
+                specimenWrist.setPosition(SPECIMEN_WRIST_NEUTRAL);
                 yeah2 = false;
             } else {
-                specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
                 specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
+                specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
                 yeah2 = true;
             }
+        } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+            specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
+            specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ON);
+        } else if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
+            specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
         }
 
         opMode.telemetry.addData("BACK", "Neutral");
         opMode.telemetry.addData("A", "Toggle Intake/Outtake");
+        opMode.telemetry.addData("X", "Auto Ready");
+        opMode.telemetry.addData("B", "Wrist Transition Off");
     }
 
     public void runIntakeTesting(Gamepad gamepad) {

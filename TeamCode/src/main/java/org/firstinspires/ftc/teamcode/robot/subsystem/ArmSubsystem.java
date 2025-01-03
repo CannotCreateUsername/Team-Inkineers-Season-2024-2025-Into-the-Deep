@@ -44,7 +44,7 @@ public abstract class ArmSubsystem {
 
     public enum SpecimenState {
         INTAKE,
-        OUTTAKE,
+        OUTTAKE, // The state right before scoring
         AUTO,
         HANG
     }
@@ -89,7 +89,7 @@ public abstract class ArmSubsystem {
     // Constants, needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    public static int OUTTAKE_POSITION_SLIDES = 2460;
+    public static int OUTTAKE_POSITION_SLIDES = 2500;
     public static int HANG_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
     final int MANUAL_INCREMENT = 40;
@@ -143,7 +143,7 @@ public abstract class ArmSubsystem {
     final double SPECIMEN_WRIST_NEUTRAL = 0.5;
     final double SPECIMEN_WRIST_INITIAL_ANGLE = SPECIMEN_WRIST_NEUTRAL +(90.0+10.0)/MAX_SPECIMEN_WRIST_ROTATION;
     final double SPECIMEN_WRIST_INTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL +60.0/MAX_SPECIMEN_WRIST_ROTATION;
-    final double SPECIMEN_WRIST_OUTTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL +70.0/MAX_SPECIMEN_WRIST_ROTATION;
+//    final double SPECIMEN_WRIST_OUTTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL +70.0/MAX_SPECIMEN_WRIST_ROTATION;
     final double SPECIMEN_WRIST_TRANSITION_OFF = SPECIMEN_WRIST_NEUTRAL -30.0/MAX_SPECIMEN_WRIST_ROTATION;
     final double SPECIMEN_WRIST_TRANSITION_ON = SPECIMEN_WRIST_NEUTRAL +60.0/MAX_SPECIMEN_WRIST_ROTATION;
 
@@ -342,8 +342,8 @@ public abstract class ArmSubsystem {
 
     public ElapsedTime specimenTimer = new ElapsedTime();
     public void setSpecimenState(SpecimenState state) {
-        if (state == SpecimenState.INTAKE) {
-            specimenTimer.reset();
+        if (specimenState == SpecimenState.OUTTAKE && state != SpecimenState.OUTTAKE) {
+            specimenTimer.reset(); // Allow to go to transition state to score
         }
         specimenState = state;
     }
