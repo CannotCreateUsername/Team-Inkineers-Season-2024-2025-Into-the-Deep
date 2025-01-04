@@ -107,26 +107,25 @@ public abstract class ArmSubsystem {
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.
-    private final double MAX_LOWER_BAR_ROTATION = MAX_AXON_ROTATION;
-
+    private final double MAX_LOWER_BAR_ROTATION = 200.5; // 144/255
     final double V4B_LOWER_CENTER = 0.5;
+    final double V4B_LOWER_REST = V4B_LOWER_CENTER + 80.0/MAX_LOWER_BAR_ROTATION;
     final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
     final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
-    final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 64.0/MAX_LOWER_BAR_ROTATION;
+    final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 70.0/MAX_LOWER_BAR_ROTATION;
 
     // Upper servo. Axon, standard rotation of 180.98 degrees.
-    private final double MAX_UPPER_BAR_ROTATION = 236.0;
-
+    private final double MAX_UPPER_BAR_ROTATION = 236.7; // 170/255
     final double V4B_UPPER_CENTER = 0.5;
     final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 100.0/MAX_UPPER_BAR_ROTATION;
-    final double V4B_UPPER_REST = V4B_UPPER_CENTER - 64.0/MAX_UPPER_BAR_ROTATION;
+    final double V4B_UPPER_REST = V4B_UPPER_CENTER - 80.0/MAX_UPPER_BAR_ROTATION;
 //    final double V4B_UPPER_TRANSITION = V4B_UPPER_LEFT - 20.0/MAX_UPPER_BAR_ROTATION;
     final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/MAX_UPPER_BAR_ROTATION;
 
     // 0 is lower servo position. 1 is upper servo position.
     final double[] ARM_LEFT_POS = {V4B_LOWER_CENTER, V4B_UPPER_LEFT, WRIST_NEUTRAL};
     final double[] ARM_RIGHT_POS = {V4B_LOWER_CENTER, V4B_UPPER_RIGHT, WRIST_NEUTRAL};
-    final double[] ARM_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_LEFT, WRIST_NEUTRAL};
+    final double[] ARM_REST_POS = {V4B_LOWER_REST, V4B_UPPER_LEFT, WRIST_NEUTRAL};
     final double[] ARM_INTAKE_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_DOWN};
     final double[] MEGA_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};
 
@@ -135,13 +134,13 @@ public abstract class ArmSubsystem {
     private final double MAX_SPECIMEN_WRIST_ROTATION = MAX_GOBILDA_ROTATION;
 
     final double SPECIMEN_BAR_NEUTRAL = 0.5;
-    final double SPECIMEN_BAR_INITIAL_ANGLE = SPECIMEN_BAR_NEUTRAL +(60.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
-    final double SPECIMEN_BAR_INTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL +(60.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
+    final double SPECIMEN_BAR_INITIAL_ANGLE = SPECIMEN_BAR_NEUTRAL +(70.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
+    final double SPECIMEN_BAR_INTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL +(70.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
     final double SPECIMEN_BAR_OUTTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL -45.0/MAX_SPECIMEN_BAR_ROTATION;
     final double SPECIMEN_BAR_STRAIGHT_ANGLE = SPECIMEN_BAR_NEUTRAL -90.0/MAX_SPECIMEN_BAR_ROTATION;
 
     final double SPECIMEN_WRIST_NEUTRAL = 0.5;
-    final double SPECIMEN_WRIST_INITIAL_ANGLE = SPECIMEN_WRIST_NEUTRAL +(90.0+10.0)/MAX_SPECIMEN_WRIST_ROTATION;
+    final double SPECIMEN_WRIST_INITIAL_ANGLE = SPECIMEN_WRIST_NEUTRAL +(90.0+30.0)/MAX_SPECIMEN_WRIST_ROTATION;
     final double SPECIMEN_WRIST_INTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL +60.0/MAX_SPECIMEN_WRIST_ROTATION;
 //    final double SPECIMEN_WRIST_OUTTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL +70.0/MAX_SPECIMEN_WRIST_ROTATION;
     final double SPECIMEN_WRIST_TRANSITION_OFF = SPECIMEN_WRIST_NEUTRAL -30.0/MAX_SPECIMEN_WRIST_ROTATION;
@@ -200,6 +199,10 @@ public abstract class ArmSubsystem {
     // For manual adjustment in a separate OpMode
     public void initManualTesting(HardwareMap hardwareMap) {
         init(hardwareMap, false, true);
+        initIntake(hardwareMap);
+        initV4B(hardwareMap);
+        intakeWrist.setPosition(WRIST_UP);
+        setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_REST);
     }
 
     // Initializing Individually
@@ -236,23 +239,24 @@ public abstract class ArmSubsystem {
         intakeServos.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
 
         intakeWrist = hardwareMap.get(Servo.class, "intake_wrist");
-        // Reverse wrist servo
-        intakeWrist.setDirection(Servo.Direction.REVERSE);
     }
 
-    /** @noinspection ArraysAsListWithZeroOrOneArgument*/
     public void initV4B(HardwareMap hardwareMap) {
         lowerBar = Arrays.asList(
                 hardwareMap.get(Servo.class, "lower_bar")
         );
         upperBar = hardwareMap.get(Servo.class, "upper_bar");
         // Reverse V4B servos, upper bar
+        for (Servo s : lowerBar) {
+            s.setDirection(Servo.Direction.FORWARD);
+        }
         upperBar.setDirection(Servo.Direction.REVERSE);
     }
 
     public void initSpecimen(HardwareMap hardwareMap) {
         specimenBar = hardwareMap.get(Servo.class, "specimen_bar");
         specimenWrist = hardwareMap.get(Servo.class, "specimen_wrist");
+        specimenWrist.setDirection(Servo.Direction.REVERSE);
     }
 
     public void initSensors(HardwareMap hardwareMap, boolean isRedAlliance) {

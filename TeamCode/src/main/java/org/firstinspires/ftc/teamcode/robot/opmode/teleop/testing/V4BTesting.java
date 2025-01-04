@@ -8,12 +8,11 @@ import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTesting;
 
 //@Disabled
 @TeleOp(name = "V4B Arm Testing", group = "Testing")
-public class V4BTest extends LinearOpMode {
-    DcMotor armMotor = null;
+public class V4BTesting extends LinearOpMode {
 
     public void runOpMode(){
         ArmSubsystemTesting armSubsystem = new ArmSubsystemTesting(this);
-        armSubsystem.init(hardwareMap, false);
+        armSubsystem.initV4B(hardwareMap);
 
         GamepadEx gam = new GamepadEx(gamepad1);
 

@@ -67,8 +67,6 @@ public class ArmSubsystemTesting extends ArmSubsystem {
         if (gamepad.wasJustPressed(GamepadKeys.Button.START)) {
             armDisplayText = "Mega Rest";
             setV4BPosition(MEGA_REST_POS);
-            specimenBar.setPosition(0.5);
-            specimenWrist.setPosition(0.5);
         }
     }
 
@@ -111,6 +109,14 @@ public class ArmSubsystemTesting extends ArmSubsystem {
             intakeServos.get(1).setPower(1);
         } else {
             setIntakePowers(0);
+        }
+
+        if (gamepad.a) {
+            intakeWrist.setPosition(WRIST_UP);
+        } else if (gamepad.b) {
+            intakeWrist.setPosition(WRIST_PICKUP_LOW);
+        } else if (gamepad.back) {
+            intakeWrist.setPosition(WRIST_NEUTRAL);
         }
 
         opMode.telemetry.addData("Test Intake", "Left/Right Trigger");

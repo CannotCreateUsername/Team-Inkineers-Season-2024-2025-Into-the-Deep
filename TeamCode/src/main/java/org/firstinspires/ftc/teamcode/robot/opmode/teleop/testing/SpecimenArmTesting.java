@@ -17,6 +17,9 @@ public class SpecimenArmTesting extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             armSubsystem.runSpecimenTesting(gamepadEx1);
+
+            gamepadEx1.readButtons();
+
             telemetry.update();
         }
     }
