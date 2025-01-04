@@ -69,7 +69,7 @@ public class SquidDriveBlue extends LinearOpMode {
 
             // Run the ARM
             armSubsystem.getDrivePos(drive);
-            armSubsystem.runSubsystem(gamepadEx1, gamepadEx2, gamepad2);
+            armSubsystem.runSubsystem(gamepadEx1, gamepadEx2, gamepad1);
 
             gamepadEx1.readButtons();
             gamepadEx2.readButtons();

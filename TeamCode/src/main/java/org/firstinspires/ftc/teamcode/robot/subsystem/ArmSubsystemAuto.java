@@ -31,6 +31,8 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 // Control V4B
                 switch (armState) {
                     case REST:
+                        setV4BPosition(ARM_REST_POS);
+                        break;
                     case LEFT:
                         setV4BPosition(ARM_LEFT_POS);
                         break;
@@ -53,13 +55,9 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                             }
                         }
                         break;
-                    case AUTO:
-                        specimenBar.setPosition(SPECIMEN_BAR_STRAIGHT_ANGLE);
-                        specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ON);
-                        break;
                     case OUTTAKE:
                         specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
-                        specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_ON);
+                        specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
                         break;
                     case HANG:
                         specimenBar.setPosition(SPECIMEN_BAR_NEUTRAL);
@@ -78,11 +76,8 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                     case DROPOFF:
                         intakeWrist.setPosition(WRIST_DROPOFF);
                         break;
-                    case SCORE:
-                        intakeWrist.setPosition(WRIST_SCORE);
-                        break;
-                    case LOW:
-                        intakeWrist.setPosition(WRIST_PICKUP_LOW);
+                    case PICKUP:
+                        intakeWrist.setPosition(WRIST_PICKUP);
                         break;
                 }
 
@@ -107,18 +102,15 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         return new ParallelAction(
                 moveV4B(ArmState.REST),
                 moveWrist(WristState.NEUTRAL),
-                moveSpecimen(SpecimenState.AUTO)
+                moveSpecimen(SpecimenState.OUTTAKE)
         );
     }
 
     public Action hangSpecimenTransition(Action driveAction) {
         return new SequentialAction(
-                moveSpecimen(SpecimenState.OUTTAKE),
+                readyIntake(),
                 new SleepAction(0.3),
-                new ParallelAction(
-                        driveAction,
-                        readyIntake()
-                )
+                driveAction
         );
     }
 
@@ -126,7 +118,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         return new SequentialAction(
                 new ParallelAction(
                         moveV4B(ArmState.LEFT),
-                        moveWrist(WristState.LOW),
+                        moveWrist(WristState.PICKUP),
                         moveSpecimen(SpecimenState.HANG)
                 ),
                 new SleepAction(0.5),
@@ -185,7 +177,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
 
     public Action moveV4B(ArmState state) {
         return telemetryPacket -> {
-            setArmState(state);
+            setArmState(state, false);
             return false;
         };
     }
