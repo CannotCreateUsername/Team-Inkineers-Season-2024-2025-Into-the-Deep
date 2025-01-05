@@ -121,7 +121,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setV4BPosition(ARM_INTAKE_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X) || gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     setArmState(ArmState.REST, false);
-                    setWristState(WristState.NEUTRAL, false);
+                    setWristState(WristState.UP, false);
                     setSpecimenState(SpecimenState.INTAKE);
                 }
                 break;
@@ -200,6 +200,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
                 if (gamepad.left_trigger > 0) {
                     intakeState = IntakeState.OUT;
+                    setWristState(WristState.NEUTRAL, false);
                 } else if (gamepad.right_trigger > 0) {
                     intakeState = IntakeState.IN;
                 }
