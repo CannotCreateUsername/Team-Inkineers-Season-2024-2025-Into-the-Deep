@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robot.subsystem;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -18,7 +19,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         runSlides(gamepadEx1);
         runArm(gamepadEx1);
         runIntake(gamepad);
-        runHang();
+        runHang(gamepadEx1);
     }
 
     private int buttonCount = 0;
@@ -127,7 +128,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case HANG:
                 armDisplayText = "Hanging";
-                setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_INITIAL);
+                setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_INITIAL);
                 break;
         }
 
@@ -224,7 +225,41 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         }
     }
 
-    public void runHang() {
+    ElapsedTime hangTimer = new ElapsedTime();
+    boolean hanging = false;
+    public void runHang(GamepadEx gamepad) {
+        if (gamepad.wasJustPressed(GamepadKeys.Button.BACK)) {
+            // tuck everything in
+            hangTimer.reset();
+            setWristState(WristState.UP, false);
+            setArmState(ArmState.HANG, false);
+            setSpecimenState(SpecimenState.HANG);
 
+            hanging = true;
+        }
+
+        if (hanging) {
+            if (hangTimer.seconds() > 4) {
+                targetSlidePosition = REST_POSITION_SLIDES;
+                if (slideSwitch.isPressed()) {
+                    resetSlideEncoders();
+                }
+                wormMotor.setPower(0);
+            } else if (hangTimer.seconds() > 3) {
+                wormMotor.setTargetPosition(HANG_WORM_LV2);
+                targetSlidePosition = ASCENT_LV2;
+                wormMotor.setPower(1);
+            } else if (hangTimer.seconds() > 2) {
+                targetSlidePosition = PRE_ASCENT_LV2;
+                wormMotor.setPower(0);
+            } else if (hangTimer.seconds() > 1) {
+                wormMotor.setTargetPosition(HANG_WORM_READY);
+                wormMotor.setPower(1);
+            } else {
+                targetSlidePosition = ASCENT_LV2_READY;
+                wormMotor.setPower(0);
+            }
+            wormMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
     }
 }

@@ -62,19 +62,11 @@ public abstract class ArmSubsystem {
 //        LOW
     }
 
-    public enum HangState {
-        REST,
-        READY,
-        LEVEL2,
-        LEVEL3
-    }
-
     SlideState slideState;
     ArmState armState;
     SpecimenState specimenState;
     IntakeState intakeState;
     WristState wristState;
-    HangState hangState;
 
     public int targetSlidePosition;
 
@@ -82,10 +74,14 @@ public abstract class ArmSubsystem {
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
     public static int OUTTAKE_POSITION_SLIDES = 2500;
-    public static int HANG_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
     final int MANUAL_INCREMENT = 40;
-    public static double DEFAULT_SLIDE_POWER = 1;
+    public final double DEFAULT_SLIDE_POWER = 1;
+    // Hanging
+    public final int ASCENT_LV2_READY = 1400;
+    public final int PRE_ASCENT_LV2 = 1100;
+    public final int ASCENT_LV2 = 575;
+
 
     private final double MAX_INTAKE_WRIST_ROTATION = 236.0; // The new neutral. 12/7/24
 
@@ -137,8 +133,8 @@ public abstract class ArmSubsystem {
     final double SPECIMEN_WRIST_TRANSITION_OFF = SPECIMEN_WRIST_NEUTRAL -120.0/MAX_SPECIMEN_WRIST_ROTATION;
 
     // Worm Gear
-    // Manually Controlled
-    // final int HANG_WORM_READY = 500;
+     final int HANG_WORM_READY = 500;
+     final int HANG_WORM_LV2 = -700;
 
     // Declare actuator variables
     public List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
@@ -173,7 +169,6 @@ public abstract class ArmSubsystem {
             specimenState = SpecimenState.INTAKE;
             intakeState = IntakeState.IDLE;
             wristState = WristState.NEUTRAL;
-            hangState = HangState.REST;
 
             targetSlidePosition = REST_POSITION_SLIDES;
             intakeWrist.setPosition(WRIST_UP);
@@ -215,7 +210,7 @@ public abstract class ArmSubsystem {
         // Worm Motor Behavior
         wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        wormMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
