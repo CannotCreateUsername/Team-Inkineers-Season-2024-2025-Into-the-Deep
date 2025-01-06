@@ -127,7 +127,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case HANG:
                 armDisplayText = "Hanging";
-                setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_REST);
+                setV4BPosition(V4B_LOWER_RIGHT, V4B_UPPER_INITIAL);
                 break;
         }
 

@@ -17,7 +17,7 @@ public class RightSideAutoBlue extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose2d startPos = new Pose2d(0, 0, Math.toRadians(-90));
+        Pose2d startPos = new Pose2d(0, 0, Math.toRadians(0));
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPos);
 
         ArmSubsystemAuto armSubsystem = new ArmSubsystemAuto();
@@ -38,7 +38,11 @@ public class RightSideAutoBlue extends LinearOpMode {
                 .strafeToLinearHeading(coords.samplePos2, coords.ROTATED)
                 .build();
 
-        Action runToIntake = drive.actionBuilder(new Pose2d(coords.samplePos2, coords.ROTATED))
+        Action runToDropOff = drive.actionBuilder(new Pose2d(coords.samplePos2, coords.ROTATED))
+                .strafeToLinearHeading(coords.observationPos, coords.ROTATED)
+                .build();
+
+        Action runToIntake = drive.actionBuilder(new Pose2d(coords.observationPos, coords.ROTATED))
                 .strafeToLinearHeading(coords.specimenPickupPos, coords.ROTATED)
                 .build();
 
@@ -51,13 +55,16 @@ public class RightSideAutoBlue extends LinearOpMode {
                 new ParallelAction(
                         armSubsystem.controlActuators(),
                         new SequentialAction(
-                                armSubsystem.readySpecimen(),
-                                runToScore,
+                                new ParallelAction(
+                                        runToScore,
+                                        armSubsystem.readySpecimen()
+                                ),
                                 armSubsystem.hangSpecimenTransition(runToSample1),
-                                armSubsystem.pickUpSample(),
+                                armSubsystem.pickUpSample(false),
                                 armSubsystem.dropOffSample(),
                                 runToSample2,
-                                armSubsystem.pickUpSample(),
+                                armSubsystem.pickUpSample(true),
+                                runToDropOff,
                                 armSubsystem.dropOffSample(),
                                 armSubsystem.readyIntake(),
                                 runToIntake,
@@ -67,30 +74,32 @@ public class RightSideAutoBlue extends LinearOpMode {
         );
 
         for (int i = 1; i <= 3; i++) {
-            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x + i * 4, coords.scoreSpecimenPos.y);
+            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x - i * 2, coords.scoreSpecimenPos.y);
 
             Action runToNewScore = drive.actionBuilder(new Pose2d(coords.specimenPickupPos, coords.ROTATED))
-                    .splineToLinearHeading(new Pose2d(newScorePos, coords.ROTATED), Math.PI/2)
+                    .setTangent(Math.PI/2)
+                    .splineToConstantHeading(newScorePos, Math.PI/2)
                     .build();
 
             Action runToPickUp = drive.actionBuilder(new Pose2d(newScorePos, coords.ROTATED))
 //                    .strafeToLinearHeading(new Vector2d(newScorePos.x-8, newScorePos.y), coords.ROTATED)
-                    .splineToLinearHeading(new Pose2d(coords.observationPos, coords.ROTATED), Math.PI/2)
-                    .strafeToLinearHeading(coords.specimenPickupPos, coords.ROTATED)
+                    .setTangent(-Math.PI/2)
+                    .splineToConstantHeading(coords.specimenPickupPos, -Math.PI/2)
                     .build();
 
             Actions.runBlocking(
                     new ParallelAction(
                             armSubsystem.controlActuators(),
                             new SequentialAction(
-                                    armSubsystem.readySpecimen(),
-                                    runToNewScore,
+                                    new ParallelAction(
+                                            runToNewScore,
+                                            armSubsystem.readySpecimen()
+                                    ),
                                     armSubsystem.hangSpecimenTransition(runToPickUp),
                                     armSubsystem.terminate()
                             )
                     )
             );
-
         }
     }
 }

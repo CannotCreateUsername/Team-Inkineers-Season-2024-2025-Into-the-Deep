@@ -109,7 +109,7 @@ public abstract class ArmSubsystem {
     private final double MAX_UPPER_BAR_ROTATION = 236.7; // 170/255
     final double V4B_UPPER_CENTER = 0.5;
     final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 100.0/MAX_UPPER_BAR_ROTATION;
-    final double V4B_UPPER_REST = V4B_UPPER_CENTER - 80.0/MAX_UPPER_BAR_ROTATION;
+    final double V4B_UPPER_INITIAL = V4B_UPPER_CENTER - 80.0/MAX_UPPER_BAR_ROTATION;
 //    final double V4B_UPPER_TRANSITION = V4B_UPPER_LEFT - 20.0/MAX_UPPER_BAR_ROTATION;
     final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/MAX_UPPER_BAR_ROTATION;
 
@@ -177,7 +177,7 @@ public abstract class ArmSubsystem {
 
             targetSlidePosition = REST_POSITION_SLIDES;
             intakeWrist.setPosition(WRIST_UP);
-            setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_REST);
+            setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_INITIAL);
             specimenBar.setPosition(SPECIMEN_BAR_INITIAL_ANGLE);
             specimenWrist.setPosition(SPECIMEN_WRIST_INITIAL_ANGLE);
         }
@@ -191,7 +191,7 @@ public abstract class ArmSubsystem {
         initIntake(hardwareMap);
         initV4B(hardwareMap);
         intakeWrist.setPosition(WRIST_UP);
-        setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_REST);
+        setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_INITIAL);
     }
 
     // Initializing Individually
