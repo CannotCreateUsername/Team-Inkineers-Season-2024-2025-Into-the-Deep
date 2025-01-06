@@ -122,10 +122,10 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         return new SequentialAction(
                 new ParallelAction(
                         moveV4B(ArmState.LEFT),
-                        moveWrist(WristState.NEUTRAL),
                         moveSpecimen(SpecimenState.HANG)
                 ),
                 new SleepAction(delay ? 1 : 0.5),
+                moveWrist(WristState.NEUTRAL),
                 new ParallelAction(
                         moveIntake(IntakeState.IN, 1),
                         new SequentialAction(

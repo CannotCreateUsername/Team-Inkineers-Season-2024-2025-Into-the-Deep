@@ -24,7 +24,7 @@ import java.util.List;
 public abstract class ArmSubsystem {
 
     // Standard Rotations for Servos...
-    private final double MAX_AXON_ROTATION = 180.98;
+    // private final double MAX_AXON_ROTATION = 180.98;
     private final double MAX_GOBILDA_ROTATION = 300;
 
     public enum SlideState {
@@ -59,7 +59,7 @@ public abstract class ArmSubsystem {
         UP,
         DROPOFF,
         PICKUP,
-        LOW
+//        LOW
     }
 
     public enum HangState {
@@ -91,7 +91,7 @@ public abstract class ArmSubsystem {
 
     final double WRIST_NEUTRAL = 0.5;
     final double WRIST_UP = WRIST_NEUTRAL + 120.0/MAX_INTAKE_WRIST_ROTATION;
-    final double WRIST_DOWN = WRIST_NEUTRAL - 120.0/MAX_INTAKE_WRIST_ROTATION;
+//    final double WRIST_DOWN = WRIST_NEUTRAL - 120.0/MAX_INTAKE_WRIST_ROTATION;
     final double WRIST_DROPOFF = WRIST_NEUTRAL - 40.0/MAX_INTAKE_WRIST_ROTATION;
     final double WRIST_PICKUP = WRIST_NEUTRAL - 60.0/MAX_INTAKE_WRIST_ROTATION;
 //    final double WRIST_PICKUP_LOW = WRIST_NEUTRAL - 70.0/MAX_INTAKE_WRIST_ROTATION;
@@ -170,7 +170,7 @@ public abstract class ArmSubsystem {
             // Initialize Positions; Start at REST
             slideState = SlideState.REST;
             armState = ArmState.REST;
-            specimenState = SpecimenState.OUTTAKE;
+            specimenState = SpecimenState.INTAKE;
             intakeState = IntakeState.IDLE;
             wristState = WristState.NEUTRAL;
             hangState = HangState.REST;

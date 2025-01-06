@@ -64,8 +64,10 @@ public class RightSideAutoBlue extends LinearOpMode {
                                 armSubsystem.dropOffSample(),
                                 runToSample2,
                                 armSubsystem.pickUpSample(true),
-                                runToDropOff,
-                                armSubsystem.dropOffSample(),
+                                new ParallelAction(
+                                        runToDropOff,
+                                        armSubsystem.dropOffSample()
+                                ),
                                 armSubsystem.readyIntake(),
                                 runToIntake,
                                 armSubsystem.terminate()
