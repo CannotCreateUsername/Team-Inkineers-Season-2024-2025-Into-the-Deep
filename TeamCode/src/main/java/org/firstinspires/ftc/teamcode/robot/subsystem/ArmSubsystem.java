@@ -29,6 +29,7 @@ public abstract class ArmSubsystem {
 
     public enum SlideState {
         REST,
+        INTAKE,
         OUTTAKE,
         HANG
     }
@@ -59,7 +60,8 @@ public abstract class ArmSubsystem {
         UP,
         DROPOFF,
         PICKUP,
-        LOW
+        LOW,
+        DOWN
     }
 
     SlideState slideState;
@@ -73,7 +75,8 @@ public abstract class ArmSubsystem {
     // Constants, needs to be adjusted based on testing
     // Linear Slides
     final int REST_POSITION_SLIDES = 0;
-    public static int OUTTAKE_POSITION_SLIDES = 2500;
+    final int  INTAKE_POSITION_SLIDES = 500;
+    public final int OUTTAKE_POSITION_SLIDES = 2500;
     final int MAX_EXTEND_POSITION = 3000;
     final int MANUAL_INCREMENT = 40;
     public final double DEFAULT_SLIDE_POWER = 1;
@@ -87,16 +90,16 @@ public abstract class ArmSubsystem {
 
     final double WRIST_NEUTRAL = 0.5;
     final double WRIST_UP = WRIST_NEUTRAL + 120.0/MAX_INTAKE_WRIST_ROTATION;
-    final double WRIST_LOW = WRIST_NEUTRAL - 60.0/MAX_INTAKE_WRIST_ROTATION;
     final double WRIST_DROPOFF = WRIST_NEUTRAL - 40.0/MAX_INTAKE_WRIST_ROTATION;
+    final double WRIST_LOW = WRIST_NEUTRAL - 50.0/MAX_INTAKE_WRIST_ROTATION;
     final double WRIST_PICKUP = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
-//    final double WRIST_PICKUP_LOW = WRIST_NEUTRAL - 70.0/MAX_INTAKE_WRIST_ROTATION;
+    final double WRIST_DOWN = WRIST_NEUTRAL - 90/MAX_INTAKE_WRIST_ROTATION;
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.
-    private final double MAX_LOWER_BAR_ROTATION = 200.5; // 144/255
+    final double MAX_LOWER_BAR_ROTATION = 200.5; // 144/255
     final double V4B_LOWER_CENTER = 0.5;
-    final double V4B_LOWER_REST = V4B_LOWER_CENTER + 80.0/MAX_LOWER_BAR_ROTATION;
+    final double V4B_LOWER_REST = V4B_LOWER_CENTER + 70.0/MAX_LOWER_BAR_ROTATION;
     final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
     final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
     final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 70.0/MAX_LOWER_BAR_ROTATION;
@@ -275,6 +278,8 @@ public abstract class ArmSubsystem {
         }
     }
     // Method to reset slide encoders
+    ElapsedTime stallTimer = new ElapsedTime();
+    boolean resetting = false;
     public void resetSlideEncoders() {
         for (DcMotorEx m : slideMotors) {
             m.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -284,6 +289,12 @@ public abstract class ArmSubsystem {
     // Method to simplify getting the current linear slides position
     public int getSlidesPosition() {
         return slideMotors.get(0).getCurrentPosition();
+    }
+
+    public void setSlideState(SlideState state, boolean reset) {
+        resetting = reset;
+        stallTimer.reset();
+        slideState = state;
     }
 
 

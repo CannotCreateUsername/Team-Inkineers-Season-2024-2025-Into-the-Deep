@@ -23,25 +23,51 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
     }
 
     private int buttonCount = 0;
-    ElapsedTime stallTimer = new ElapsedTime();
     ElapsedTime buttonTimer = new ElapsedTime();
+
     public void runSlides(GamepadEx gamepad) {
         // Arm control logic
         switch (slideState) {
             case REST:
                 driveMultiplier = 1;
                 // Prevent stalling
-                if (stallTimer.seconds() > 0.5 || slideSwitch.isPressed()) {
+                if (stallTimer.seconds() > 2 || (slideSwitch.isPressed() && resetting)) {
                     resetSlideEncoders();
+                    resetting = false;
                 }
 
                 slideDisplayText = "REST";
                 targetSlidePosition = REST_POSITION_SLIDES;
 
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
-                    slideState = SlideState.OUTTAKE;
+                    setSlideState(SlideState.INTAKE, false);
+
+                    setArmState(ArmState.LEFT, false);
+                    setWristState(WristState.DOWN, false);
+                    setSpecimenState(SpecimenState.INTAKE);
+                }
+                break;
+            case INTAKE:
+                if (intakeState == IntakeState.IN) {
+                    if (stallTimer.seconds() > 0.1)
+                        targetSlidePosition = REST_POSITION_SLIDES;
+                }
+                else {
+                    targetSlidePosition = INTAKE_POSITION_SLIDES;
+                }
+                if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
+                    targetSlidePosition = REST_POSITION_SLIDES;
+                    setSlideState(SlideState.REST, true);
+
+                    setArmState(ArmState.REST, false);
+                    setWristState(WristState.NEUTRAL, false);
+                }
+                if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
-                    wristState = WristState.UP;
+                    setSlideState(SlideState.OUTTAKE, false);
+
+                    setArmState(ArmState.HANG, false);
+                    setWristState(WristState.UP, false);
                 }
                 break;
             case OUTTAKE:
@@ -62,11 +88,12 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     buttonTimer.reset();
                 }
                 if (buttonCount > 1 && buttonTimer.seconds() < 0.5) {
-                    buttonCount = 0;
-
                     // Move back down to rest
-                    slideState = SlideState.REST;
-                    stallTimer.reset();
+                    setSlideState(SlideState.REST, true);
+                    setArmState(ArmState.REST, false);
+                    setWristState(WristState.NEUTRAL, true);
+
+                    buttonCount = 0;
                 }
 
                 break;
@@ -110,7 +137,11 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case LEFT:
                 armDisplayText = "Left Extended";
-                setV4BPosition(ARM_LEFT_POS);
+                if (slideState == SlideState.INTAKE) {
+                    setV4BPosition(V4B_LOWER_CENTER - 20.0/MAX_LOWER_BAR_ROTATION, V4B_UPPER_LEFT);
+                } else {
+                    setV4BPosition(ARM_LEFT_POS);
+                }
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.NEUTRAL, false);
@@ -197,6 +228,13 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
                     wristState = armState == ArmState.LEFT ? WristState.PICKUP : WristState.NEUTRAL;
                 }
+                break;
+            case DOWN:
+                wristDisplayText = "Down";
+                if (wristTimer.seconds() > 0.1) {
+                    intakeWrist.setPosition(WRIST_DOWN);
+                }
+                break;
         }
     }
 
@@ -211,7 +249,8 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     setWristState(WristState.PICKUP, false);
                 } else if (gamepad.right_trigger > 0) {
                     intakeState = IntakeState.IN;
-                    setWristState(WristState.LOW, true);
+                    setWristState(slideState == SlideState.INTAKE ? WristState.DOWN : WristState.LOW, true);
+                    stallTimer.reset();
                 }
                 break;
             case IN:
