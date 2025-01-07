@@ -59,7 +59,7 @@ public abstract class ArmSubsystem {
         UP,
         DROPOFF,
         PICKUP,
-//        LOW
+        LOW
     }
 
     SlideState slideState;
@@ -87,9 +87,9 @@ public abstract class ArmSubsystem {
 
     final double WRIST_NEUTRAL = 0.5;
     final double WRIST_UP = WRIST_NEUTRAL + 120.0/MAX_INTAKE_WRIST_ROTATION;
-//    final double WRIST_DOWN = WRIST_NEUTRAL - 120.0/MAX_INTAKE_WRIST_ROTATION;
+    final double WRIST_LOW = WRIST_NEUTRAL - 60.0/MAX_INTAKE_WRIST_ROTATION;
     final double WRIST_DROPOFF = WRIST_NEUTRAL - 40.0/MAX_INTAKE_WRIST_ROTATION;
-    final double WRIST_PICKUP = WRIST_NEUTRAL - 60.0/MAX_INTAKE_WRIST_ROTATION;
+    final double WRIST_PICKUP = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
 //    final double WRIST_PICKUP_LOW = WRIST_NEUTRAL - 70.0/MAX_INTAKE_WRIST_ROTATION;
 
     // Coaxial V4B positions
@@ -106,8 +106,8 @@ public abstract class ArmSubsystem {
     final double V4B_UPPER_CENTER = 0.5;
     final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 100.0/MAX_UPPER_BAR_ROTATION;
     final double V4B_UPPER_INITIAL = V4B_UPPER_CENTER - 80.0/MAX_UPPER_BAR_ROTATION;
-//    final double V4B_UPPER_TRANSITION = V4B_UPPER_LEFT - 20.0/MAX_UPPER_BAR_ROTATION;
     final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/MAX_UPPER_BAR_ROTATION;
+    final double UPPER_ALT_INTAKE_ANGLE = 30/MAX_UPPER_BAR_ROTATION;
 
     // 0 is lower servo position. 1 is upper servo position.
     final double[] ARM_LEFT_POS = {V4B_LOWER_CENTER, V4B_UPPER_LEFT, WRIST_NEUTRAL};

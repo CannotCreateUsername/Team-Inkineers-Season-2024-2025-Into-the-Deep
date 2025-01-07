@@ -63,7 +63,7 @@ public class SquidDriveBlue extends LinearOpMode {
             // Reset heading if started in wrong orientation
             telemetry.addData("Reset Heading", "Press Back");
             telemetry.addLine();
-            if (gamepadEx1.wasJustPressed(GamepadKeys.Button.BACK)) {
+            if (gamepadEx1.wasJustPressed(GamepadKeys.Button.START)) {
                 drive.pose = new Pose2d(0, 0, 0);
             }
 

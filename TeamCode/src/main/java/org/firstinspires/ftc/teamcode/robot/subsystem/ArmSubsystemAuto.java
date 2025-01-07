@@ -78,7 +78,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                         intakeWrist.setPosition(WRIST_DROPOFF);
                         break;
                     case PICKUP:
-                        intakeWrist.setPosition(WRIST_PICKUP);
+                        intakeWrist.setPosition(WRIST_LOW);
                         break;
                 }
 

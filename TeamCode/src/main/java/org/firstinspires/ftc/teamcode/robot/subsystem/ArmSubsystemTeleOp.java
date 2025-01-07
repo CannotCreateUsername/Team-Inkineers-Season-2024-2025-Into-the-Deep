@@ -112,7 +112,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 armDisplayText = "Left Extended";
                 setV4BPosition(ARM_LEFT_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    setArmState(ArmState.REST, true);
+                    setArmState(ArmState.REST, false);
                     setWristState(WristState.NEUTRAL, false);
                     setSpecimenState(SpecimenState.INTAKE);
                 }
@@ -122,7 +122,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setV4BPosition(ARM_INTAKE_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X) || gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     setArmState(ArmState.REST, false);
-                    setWristState(WristState.UP, false);
+                    setWristState(WristState.NEUTRAL, false);
                     setSpecimenState(SpecimenState.INTAKE);
                 }
                 break;
@@ -168,15 +168,15 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         switch (wristState) {
             case NEUTRAL:
                 wristDisplayText = "Neutral";
-                if (wristTimer.seconds() > 0.5)
+                if (wristTimer.seconds() > 0.2)
                     intakeWrist.setPosition(WRIST_NEUTRAL);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
                     wristState = WristState.PICKUP;
                 }
                 break;
-            case UP: // Used in Hang
+            case UP:
                 wristDisplayText = "Up";
-                if (wristTimer.seconds() > 0.5)
+                if (wristTimer.seconds() > 0.2)
                     intakeWrist.setPosition(WRIST_UP);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
                     wristState = WristState.NEUTRAL;
@@ -184,12 +184,19 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case PICKUP:
                 wristDisplayText = "Pickup";
-                if (wristTimer.seconds() > 0.5)
+                if (wristTimer.seconds() > 0.2)
                     intakeWrist.setPosition(WRIST_PICKUP);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
-                    wristState = WristState.NEUTRAL;
+                    wristState = WristState.LOW;
                 }
                 break;
+            case LOW:
+                wristDisplayText = "Low";
+                if (wristTimer.seconds() > 0.1)
+                    intakeWrist.setPosition(WRIST_LOW);
+                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
+                    wristState = armState == ArmState.LEFT ? WristState.PICKUP : WristState.NEUTRAL;
+                }
         }
     }
 
@@ -201,9 +208,10 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
                 if (gamepad.left_trigger > 0) {
                     intakeState = IntakeState.OUT;
-                    setWristState(WristState.NEUTRAL, false);
+                    setWristState(WristState.PICKUP, false);
                 } else if (gamepad.right_trigger > 0) {
                     intakeState = IntakeState.IN;
+                    setWristState(WristState.LOW, true);
                 }
                 break;
             case IN:
@@ -211,6 +219,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setIntakePowers(1);
                 if (gamepad.right_trigger == 0 ) {
                     intakeState = IntakeState.IDLE;
+                    setWristState(WristState.PICKUP, false);
                 }
                 break;
             case OUT:
@@ -231,14 +240,17 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         if (gamepad.wasJustPressed(GamepadKeys.Button.BACK)) {
             // tuck everything in
             hangTimer.reset();
-            setWristState(WristState.UP, false);
-            setArmState(ArmState.HANG, false);
-            setSpecimenState(SpecimenState.HANG);
+            wormMotor.setTargetPosition(0);
 
             hanging = true;
         }
 
         if (hanging) {
+            // Ensure arms are pulled backed
+            setWristState(WristState.UP, false);
+            setArmState(ArmState.HANG, false);
+            setSpecimenState(SpecimenState.HANG);
+
             if (hangTimer.seconds() > 4) {
                 targetSlidePosition = REST_POSITION_SLIDES;
                 if (slideSwitch.isPressed()) {
