@@ -37,10 +37,8 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                         setV4BPosition(ARM_LEFT_POS);
                         break;
                     case RIGHT:
-                        if (specimenState != SpecimenState.INTAKE) {
-                            setV4BPosition(ARM_RIGHT_POS);
-                            break;
-                        }
+                        setV4BPosition(V4B_LOWER_CENTER, UPPER_ALT_INTAKE_ANGLE + 0.5);
+                        break;
                 }
 
                 // Control specimen arm
@@ -49,7 +47,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                         if (armState != ArmState.RIGHT) {
                             if (specimenTimer.seconds() > 0.6) {
                                 specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
-                            } else if (specimenTimer.seconds() > 0.4) {
+                            } else if (specimenTimer.seconds() > 0.3) {
                                 specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
                             }
 
@@ -110,26 +108,40 @@ public class ArmSubsystemAuto extends ArmSubsystem {
         );
     }
 
-    public Action hangSpecimenTransition(Action driveAction) {
-        return new SequentialAction(
-                readyIntake(),
-                new SleepAction(0.3),
-                driveAction
-        );
+    public Action hangSpecimenTransition(Action driveAction, boolean pickUp) {
+        if (pickUp) {
+            return new SequentialAction(
+                    readyIntake(),
+                    new SleepAction(0.3),
+                    new ParallelAction(
+                            driveAction,
+                            new SequentialAction(
+                                    new SleepAction(0.5),
+                                    pickUpSample(true)
+                            )
+                    )
+            );
+        } else {
+            return new SequentialAction(
+                    readyIntake(),
+                    new SleepAction(0.3),
+                    driveAction
+            );
+        }
     }
 
     public Action pickUpSample(boolean delay) {
         return new SequentialAction(
                 new ParallelAction(
-                        moveV4B(ArmState.LEFT),
-                        moveSpecimen(SpecimenState.HANG)
+                        moveWrist(delay ? WristState.NEUTRAL : WristState.UP),
+                        moveV4B(ArmState.LEFT)
                 ),
-                new SleepAction(delay ? 1 : 0.5),
+                new SleepAction(delay ? 1.4 : 0.5),
                 moveWrist(WristState.NEUTRAL),
                 new ParallelAction(
-                        moveIntake(IntakeState.IN, 1),
+                        moveIntake(IntakeState.IN, 0.8),
                         new SequentialAction(
-                                new SleepAction(0.4), // In contact for 1 - 0.4 seconds
+                                new SleepAction(0.4), // In contact for 0.8 - 0.2 seconds
                                 moveWrist(WristState.PICKUP)
                         )
                 ),
@@ -140,8 +152,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     public Action dropOffSample() {
         return new SequentialAction(
                 new ParallelAction(
-                        moveV4B(ArmState.RIGHT),
-                        moveSpecimen(SpecimenState.HANG)
+                        moveV4B(ArmState.RIGHT)
                 ),
                 new SleepAction(1),
                 moveWrist(WristState.DROPOFF),

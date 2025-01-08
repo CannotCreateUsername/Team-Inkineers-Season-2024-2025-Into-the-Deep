@@ -15,10 +15,11 @@ public class RightAutoCoords {
     public Vector2d scoreSpecimenPos = new Vector2d(-6, 36);
     public Vector2d backScorePos = new Vector2d(-6, 27);
 
-    public Vector2d samplePos1 = new Vector2d(33, 27);
-    public Vector2d samplePos2 = new Vector2d(43, 27);
-    public Vector2d samplePos3 = new Vector2d(53, 27);
+    public Vector2d samplePos1 = new Vector2d(33, 26);
+    public Vector2d samplePos2 = new Vector2d(43, 27.5);
+    public Vector2d samplePos3 = new Vector2d(53, 26.5);
+    public Vector2d sampleTransition = new Vector2d(38, 15);
 
     public Vector2d observationPos = new Vector2d(25, 16);
-    public Vector2d specimenPickupPos = new Vector2d(25, -2);
+    public Vector2d specimenPickupPos = new Vector2d(25, -1);
 }

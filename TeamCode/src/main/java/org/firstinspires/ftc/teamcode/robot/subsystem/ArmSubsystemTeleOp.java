@@ -55,14 +55,15 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 else {
                     targetSlidePosition = INTAKE_POSITION_SLIDES;
                 }
+                setWristState(WristState.DOWN, false);
+
                 if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
                     targetSlidePosition = REST_POSITION_SLIDES;
                     setSlideState(SlideState.REST, true);
 
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.NEUTRAL, false);
-                }
-                if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
+                } else if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
                     setSlideState(SlideState.OUTTAKE, false);
 
@@ -138,13 +139,17 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case LEFT:
                 armDisplayText = "Left Extended";
                 if (slideState == SlideState.INTAKE) {
-                    setV4BPosition(V4B_LOWER_CENTER - 20.0/MAX_LOWER_BAR_ROTATION, V4B_UPPER_LEFT);
+                    setV4BPosition(V4B_LOWER_CENTER - 32.0/MAX_LOWER_BAR_ROTATION, V4B_UPPER_LEFT);
                 } else {
                     setV4BPosition(ARM_LEFT_POS);
                 }
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.NEUTRAL, false);
+                    setSpecimenState(SpecimenState.INTAKE);
+                } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                    setArmState(ArmState.INTAKE, false);
+                    setWristState(WristState.PICKUP, true);
                     setSpecimenState(SpecimenState.INTAKE);
                 }
                 break;
@@ -256,7 +261,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
             case IN:
                 intakeDisplayText = "IN";
                 setIntakePowers(1);
-                if (gamepad.right_trigger == 0 ) {
+                if (gamepad.right_trigger == 0) {
                     intakeState = IntakeState.IDLE;
                     setWristState(WristState.PICKUP, false);
                 }

@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -30,20 +31,20 @@ public class RightSideAutoBlue extends LinearOpMode {
                 .build();
 
         Action runToSample1 = drive.actionBuilder(new Pose2d(coords.scoreSpecimenPos, coords.ROTATED))
-                .strafeToLinearHeading(coords.backScorePos, coords.ROTATED)
-                .strafeToLinearHeading(coords.samplePos1, coords.ROTATED)
+                .setTangent(-Math.PI/2)
+                .splineToConstantHeading(coords.samplePos1, 0)
                 .build();
 
         Action runToSample2 = drive.actionBuilder(new Pose2d(coords.samplePos1, coords.ROTATED))
-                .strafeToLinearHeading(coords.samplePos2, coords.ROTATED)
+                .strafeToLinearHeading(coords.sampleTransition, coords.ROTATED)
+                .waitSeconds(0.5)
+                .setTangent(0)
+                .splineToConstantHeading(coords.samplePos2, Math.PI/2)
                 .build();
 
-        Action runToDropOff = drive.actionBuilder(new Pose2d(coords.samplePos2, coords.ROTATED))
-                .strafeToLinearHeading(coords.observationPos, coords.ROTATED)
-                .build();
-
-        Action runToIntake = drive.actionBuilder(new Pose2d(coords.observationPos, coords.ROTATED))
-                .strafeToLinearHeading(coords.specimenPickupPos, coords.ROTATED)
+        Action runToIntake = drive.actionBuilder(new Pose2d(coords.samplePos2, coords.ROTATED))
+                .setTangent(-Math.PI)
+                .splineToConstantHeading(new Vector2d(coords.specimenPickupPos.x, coords.specimenPickupPos.y - 1), -Math.PI/2)
                 .build();
 
         telemetry.addLine("Wait for wrist! ^-^");
@@ -59,24 +60,27 @@ public class RightSideAutoBlue extends LinearOpMode {
                                         runToScore,
                                         armSubsystem.readySpecimen()
                                 ),
-                                armSubsystem.hangSpecimenTransition(runToSample1),
-                                armSubsystem.pickUpSample(false),
-                                armSubsystem.dropOffSample(),
-                                runToSample2,
-                                armSubsystem.pickUpSample(true),
+                                armSubsystem.hangSpecimenTransition(runToSample1, true),
                                 new ParallelAction(
-                                        runToDropOff,
-                                        armSubsystem.dropOffSample()
+                                        armSubsystem.dropOffSample(),
+                                        runToSample2,
+                                        new SequentialAction(
+                                                new SleepAction(1.4),
+                                                armSubsystem.pickUpSample(false)
+                                        )
                                 ),
                                 armSubsystem.readyIntake(),
-                                runToIntake,
+                                new ParallelAction(
+                                        runToIntake,
+                                        armSubsystem.dropOffSample()
+                                ),
                                 armSubsystem.terminate()
                         )
                 )
         );
 
         for (int i = 1; i <= 3; i++) {
-            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x - i * 2, coords.scoreSpecimenPos.y);
+            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x - i * 1.5, coords.scoreSpecimenPos.y);
 
             Action runToNewScore = drive.actionBuilder(new Pose2d(coords.specimenPickupPos, coords.ROTATED))
                     .setTangent(Math.PI/2)
@@ -97,7 +101,7 @@ public class RightSideAutoBlue extends LinearOpMode {
                                             runToNewScore,
                                             armSubsystem.readySpecimen()
                                     ),
-                                    armSubsystem.hangSpecimenTransition(runToPickUp),
+                                    armSubsystem.hangSpecimenTransition(runToPickUp, false),
                                     armSubsystem.terminate()
                             )
                     )
