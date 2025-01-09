@@ -136,7 +136,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                         moveWrist(delay ? WristState.NEUTRAL : WristState.UP),
                         moveV4B(ArmState.LEFT)
                 ),
-                new SleepAction(delay ? 1.4 : 0.5),
+                new SleepAction(delay ? 1.4 : 0.6),
                 moveWrist(WristState.NEUTRAL),
                 new ParallelAction(
                         moveIntake(IntakeState.IN, 0.8),

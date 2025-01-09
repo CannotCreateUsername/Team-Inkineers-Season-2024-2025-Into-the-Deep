@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -153,6 +154,8 @@ public abstract class ArmSubsystem {
     // Sensors
     public ColorSensor racist;
     public TouchSensor slideSwitch;
+    public LED red;
+    public LED green;
 
     boolean redSide = false;
     // Overarching Initialization Method
@@ -250,6 +253,8 @@ public abstract class ArmSubsystem {
         racist = hardwareMap.get(ColorSensor.class, "racist");
         redSide = isRedAlliance;
         slideSwitch = hardwareMap.get(TouchSensor.class, "slide_limit");
+        red = hardwareMap.get(LED.class, "red");
+        green = hardwareMap.get(LED.class, "green");
     }
 
     // Method to run intake servos

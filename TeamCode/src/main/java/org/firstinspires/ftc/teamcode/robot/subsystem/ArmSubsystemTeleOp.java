@@ -154,12 +154,24 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 break;
             case INTAKE:
-                armDisplayText = "Right Extended";
+                armDisplayText = "Intake Extended";
                 setV4BPosition(ARM_INTAKE_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X) || gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.NEUTRAL, false);
                     setSpecimenState(SpecimenState.INTAKE);
+                } else if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    setArmState(ArmState.RIGHT, false);
+                }
+                break;
+            case RIGHT:
+                armDisplayText = "Intake Alternated";
+                if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_LEFT)) {
+                    setV4BPosition(V4B_LOWER_CENTER, 0.5 - UPPER_ALT_INTAKE_ANGLE);
+                } else if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_RIGHT)) {
+                    setV4BPosition(V4B_LOWER_CENTER, 0.5 + UPPER_ALT_INTAKE_ANGLE);
+                } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                    setArmState(ArmState.INTAKE, false);
                 }
                 break;
             case HANG:
