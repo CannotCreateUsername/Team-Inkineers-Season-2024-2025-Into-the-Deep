@@ -75,70 +75,70 @@ public abstract class ArmSubsystem {
 
     // Constants, needs to be adjusted based on testing
     // Linear Slides
-    final int REST_POSITION_SLIDES = 0;
-    final int  INTAKE_POSITION_SLIDES = 500;
-    public final int OUTTAKE_POSITION_SLIDES = 2500;
-    final int MAX_EXTEND_POSITION = 3000;
-    final int MANUAL_INCREMENT = 40;
-    public final double DEFAULT_SLIDE_POWER = 1;
+    protected final int REST_POSITION_SLIDES = 0;
+    protected final int  INTAKE_POSITION_SLIDES = 500;
+    protected final int OUTTAKE_POSITION_SLIDES = 2500;
+    protected final int MAX_EXTEND_POSITION = 3000;
+    protected final int MANUAL_INCREMENT = 40;
+    protected final double DEFAULT_SLIDE_POWER = 1;
     // Hanging
-    public final int ASCENT_LV2_READY = 1400;
-    public final int PRE_ASCENT_LV2 = 1100;
-    public final int ASCENT_LV2 = 575;
+    protected final int ASCENT_LV2_READY = 1400;
+    protected final int PRE_ASCENT_LV2 = 1100;
+    protected final int ASCENT_LV2 = 575;
 
 
     private final double MAX_INTAKE_WRIST_ROTATION = 236.0; // The new neutral. 12/7/24
 
-    final double WRIST_NEUTRAL = 0.5;
-    final double WRIST_UP = WRIST_NEUTRAL + 120.0/MAX_INTAKE_WRIST_ROTATION;
-    final double WRIST_DROPOFF = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
-    final double WRIST_LOW = WRIST_NEUTRAL - 54.0/MAX_INTAKE_WRIST_ROTATION;
-    final double WRIST_PICKUP = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
-    final double WRIST_DOWN = WRIST_NEUTRAL - 90.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_NEUTRAL = 0.5;
+    protected final double WRIST_UP = WRIST_NEUTRAL + 120.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_DROPOFF = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_LOW = WRIST_NEUTRAL - 54.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_PICKUP = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_DOWN = WRIST_NEUTRAL - 90.0/MAX_INTAKE_WRIST_ROTATION;
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.
-    final double MAX_LOWER_BAR_ROTATION = 200.5; // 144/255
-    final double V4B_LOWER_CENTER = 0.5;
-    final double V4B_LOWER_REST = V4B_LOWER_CENTER + 45.0/MAX_LOWER_BAR_ROTATION;
-    final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
-    final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
-    final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 70.0/MAX_LOWER_BAR_ROTATION;
+    protected final double MAX_LOWER_BAR_ROTATION = 200.5; // 144/255
+    protected final double V4B_LOWER_CENTER = 0.5;
+    protected final double V4B_LOWER_REST = V4B_LOWER_CENTER + 45.0/MAX_LOWER_BAR_ROTATION;
+    protected final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
+    protected final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
+    protected final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 70.0/MAX_LOWER_BAR_ROTATION;
 
     // Upper servo. Axon, standard rotation of 180.98 degrees.
     private final double MAX_UPPER_BAR_ROTATION = 236.7; // 170/255
-    final double V4B_UPPER_CENTER = 0.5;
-    final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 100.0/MAX_UPPER_BAR_ROTATION;
-    final double V4B_UPPER_INITIAL = V4B_UPPER_CENTER - 80.0/MAX_UPPER_BAR_ROTATION;
-    final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/MAX_UPPER_BAR_ROTATION;
-    final double UPPER_ALT_INTAKE_ANGLE = 45/MAX_UPPER_BAR_ROTATION;
+    protected final double V4B_UPPER_CENTER = 0.5;
+    protected final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 100.0/MAX_UPPER_BAR_ROTATION;
+    protected final double V4B_UPPER_INITIAL = V4B_UPPER_CENTER - 80.0/MAX_UPPER_BAR_ROTATION;
+    protected final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/MAX_UPPER_BAR_ROTATION;
+    protected final double UPPER_ALT_INTAKE_ANGLE = 45/MAX_UPPER_BAR_ROTATION;
 
     // 0 is lower servo position. 1 is upper servo position.
-    final double[] ARM_LEFT_POS = {V4B_LOWER_CENTER, V4B_UPPER_LEFT, WRIST_NEUTRAL};
-    final double[] ARM_RIGHT_POS = {V4B_LOWER_CENTER, V4B_UPPER_RIGHT, WRIST_NEUTRAL};
-    final double[] ARM_REST_POS = {V4B_LOWER_REST, V4B_UPPER_LEFT, WRIST_NEUTRAL};
-    final double[] ARM_INTAKE_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_PICKUP};
-    final double[] MEGA_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};
+    protected final double[] ARM_LEFT_POS = {V4B_LOWER_CENTER, V4B_UPPER_LEFT, WRIST_NEUTRAL};
+//    protected final double[] ARM_RIGHT_POS = {V4B_LOWER_CENTER, V4B_UPPER_RIGHT, WRIST_NEUTRAL};
+    protected final double[] ARM_REST_POS = {V4B_LOWER_REST, V4B_UPPER_LEFT, WRIST_NEUTRAL};
+    protected final double[] ARM_INTAKE_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_PICKUP};
+    protected final double[] MEGA_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};
 
     // Specimen Actuator Positions.
     private final double MAX_SPECIMEN_BAR_ROTATION = 355;
     private final double MAX_SPECIMEN_WRIST_ROTATION = MAX_GOBILDA_ROTATION;
 
-    final double SPECIMEN_BAR_NEUTRAL = 0.5;
-    final double SPECIMEN_BAR_INITIAL_ANGLE = SPECIMEN_BAR_NEUTRAL +(69.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
-    final double SPECIMEN_BAR_INTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL +(69.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
-    final double SPECIMEN_BAR_OUTTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL -55.0/MAX_SPECIMEN_BAR_ROTATION;
-    final double SPECIMEN_BAR_STOP_ANGLE = SPECIMEN_BAR_NEUTRAL +10.0/MAX_SPECIMEN_BAR_ROTATION;
+    protected final double SPECIMEN_BAR_NEUTRAL = 0.5;
+    protected final double SPECIMEN_BAR_INITIAL_ANGLE = SPECIMEN_BAR_NEUTRAL +(69.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
+    protected final double SPECIMEN_BAR_INTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL +(69.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
+    protected final double SPECIMEN_BAR_OUTTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL -55.0/MAX_SPECIMEN_BAR_ROTATION;
+    protected final double SPECIMEN_BAR_STOP_ANGLE = SPECIMEN_BAR_NEUTRAL +10.0/MAX_SPECIMEN_BAR_ROTATION;
 
-    final double SPECIMEN_WRIST_NEUTRAL = 0.5;
-    final double SPECIMEN_WRIST_INITIAL_ANGLE = SPECIMEN_WRIST_NEUTRAL -(90.0+30.0)/MAX_SPECIMEN_WRIST_ROTATION;
-    final double SPECIMEN_WRIST_INTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL -60.0/MAX_SPECIMEN_WRIST_ROTATION;
-    final double SPECIMEN_WRIST_OUTTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL +1.0/MAX_SPECIMEN_WRIST_ROTATION;
-    final double SPECIMEN_WRIST_TRANSITION_OFF = SPECIMEN_WRIST_NEUTRAL -120.0/MAX_SPECIMEN_WRIST_ROTATION;
+    protected final double SPECIMEN_WRIST_NEUTRAL = 0.5;
+    protected final double SPECIMEN_WRIST_INITIAL_ANGLE = SPECIMEN_WRIST_NEUTRAL -(90.0+30.0)/MAX_SPECIMEN_WRIST_ROTATION;
+    protected final double SPECIMEN_WRIST_INTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL -60.0/MAX_SPECIMEN_WRIST_ROTATION;
+    protected final double SPECIMEN_WRIST_OUTTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL +1.0/MAX_SPECIMEN_WRIST_ROTATION;
+    protected final double SPECIMEN_WRIST_TRANSITION_OFF = SPECIMEN_WRIST_NEUTRAL -120.0/MAX_SPECIMEN_WRIST_ROTATION;
 
     // Worm Gear
-     final int HANG_WORM_READY = 500;
-     final int HANG_WORM_LV2 = -700;
+    protected final int HANG_WORM_READY = 500;
+    protected final int HANG_WORM_LV2 = -700;
 
     // Declare actuator variables
     public List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
@@ -157,7 +157,7 @@ public abstract class ArmSubsystem {
     public LED red;
     public LED green;
 
-    boolean redSide = false;
+    private boolean redSide = false;
     // Overarching Initialization Method
     public void init(HardwareMap hardwareMap, boolean isRedAlliance, boolean manualTesting) {
         initSlideSystem(hardwareMap);
