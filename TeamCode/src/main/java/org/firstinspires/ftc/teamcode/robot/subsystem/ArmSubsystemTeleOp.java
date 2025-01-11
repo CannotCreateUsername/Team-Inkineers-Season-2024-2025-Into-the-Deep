@@ -25,6 +25,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
     private int buttonCount = 0;
     ElapsedTime buttonTimer = new ElapsedTime();
 
+    private double slidePower = DEFAULT_SLIDE_POWER;
     public void runSlides(GamepadEx gamepad) {
         // Arm control logic
         switch (slideState) {
@@ -33,7 +34,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 // Prevent stalling
                 if (stallTimer.seconds() > 2 || (slideSwitch.isPressed() && resetting)) {
                     resetSlideEncoders();
-                    resetting = false;
                 }
 
                 slideDisplayText = "REST";
@@ -111,7 +111,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         }
 
         // Run methods to go to the target position
-        runSlideMotorsPID(DEFAULT_SLIDE_POWER);
+        runSlideMotorsPID(slidePower);
     }
 
     public void getDrivePos(MecanumDrive drive) {
@@ -208,8 +208,8 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 break;
             case HANG:
-                specimenBar.setPosition(SPECIMEN_BAR_NEUTRAL);
-                specimenWrist.setPosition(SPECIMEN_WRIST_NEUTRAL);
+                specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
+                specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
                 break;
         }
 
@@ -291,43 +291,80 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
     }
 
     ElapsedTime hangTimer = new ElapsedTime();
-    boolean hanging = false;
+    private boolean unhang = false;
     public void runHang(GamepadEx gamepad) {
-        if (gamepad.wasJustPressed(GamepadKeys.Button.BACK)) {
-            // tuck everything in
-            hangTimer.reset();
-            wormMotor.setTargetPosition(0);
-
-            hanging = true;
-        }
-
-        if (hanging) {
-            // Ensure arms are pulled backed
-            setWristState(WristState.UP, false);
-            setArmState(ArmState.HANG, false);
-            setSpecimenState(SpecimenState.HANG);
-
-            if (hangTimer.seconds() > 4) {
-                targetSlidePosition = REST_POSITION_SLIDES;
-                if (slideSwitch.isPressed()) {
-                    resetSlideEncoders();
+        switch (hangState) {
+            case REST:
+                if (gamepad.wasJustPressed(GamepadKeys.Button.BACK)) {
+                    // tuck everything in
+                    hangTimer.reset();
+                    wormMotor.setTargetPosition(0);
+                    hangState = HangState.HANGING;
                 }
-                wormMotor.setPower(0);
-            } else if (hangTimer.seconds() > 3) {
-                wormMotor.setTargetPosition(HANG_WORM_LV2);
-                targetSlidePosition = ASCENT_LV2;
-                wormMotor.setPower(1);
-            } else if (hangTimer.seconds() > 2) {
-                targetSlidePosition = PRE_ASCENT_LV2;
-                wormMotor.setPower(0);
-            } else if (hangTimer.seconds() > 1) {
-                wormMotor.setTargetPosition(HANG_WORM_READY);
-                wormMotor.setPower(1);
-            } else {
-                targetSlidePosition = ASCENT_LV2_READY;
-                wormMotor.setPower(0);
-            }
-            wormMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                if (unhang) {
+                    if (hangTimer.seconds() > 1.5) {
+                        setWristState(WristState.NEUTRAL, false);
+                        setArmState(ArmState.REST, false);
+                        setSlideState(SlideState.REST, false);
+                        setSpecimenState(SpecimenState.INTAKE);
+                        unhang = false;
+                    }
+                    wormMotor.setTargetPosition(0);
+                    wormMotor.setPower(0.8);
+                    wormMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                }
+                break;
+            case HANGING:
+                // Ensure arms are pulled backed
+                setWristState(WristState.UP, false);
+                setArmState(ArmState.HANG, false);
+                setSlideState(SlideState.HANG, false);
+                setSpecimenState(SpecimenState.HANG);
+
+                if (hangTimer.seconds() > 4) {
+                    wormMotor.setPower(0);
+                    wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                } else if (hangTimer.seconds() > 3) {
+                    wormMotor.setTargetPosition(HANG_WORM_LV2);
+                    targetSlidePosition = ASCENT_LV2;
+                    wormMotor.setPower(0.8);
+                } else if (hangTimer.seconds() > 2) {
+                    targetSlidePosition = PRE_ASCENT_LV2;
+                    wormMotor.setPower(0);
+                } else if (hangTimer.seconds() > 0.5) {
+                    wormMotor.setTargetPosition(HANG_WORM_READY);
+                    wormMotor.setPower(0.8);
+                } else {
+                    targetSlidePosition = ASCENT_LV2_READY;
+                    wormMotor.setPower(0);
+                }
+
+                // Manual Control
+                if (gamepad.isDown(GamepadKeys.Button.A)) {
+                    targetSlidePosition += 30;
+                } else if (gamepad.isDown(GamepadKeys.Button.B)) {
+                    targetSlidePosition -= 30;
+                } else if (gamepad.isDown(GamepadKeys.Button.X)) {
+                    wormMotor.setPower(-0.8);
+                } else if (gamepad.isDown(GamepadKeys.Button.Y)) {
+                    wormMotor.setPower(0.8);
+                }
+
+                if (gamepad.wasJustPressed(GamepadKeys.Button.BACK)) {
+                    hangTimer.reset();
+                    wormMotor.setTargetPosition(0);
+                    slidePower = DEFAULT_SLIDE_POWER;
+
+                    unhang = true;
+                    hangState = HangState.REST;
+                }
+
+                // Stop running to allow for manual control
+                if (hangTimer.seconds() < 4) {
+                    wormMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                }
+                break;
         }
     }
 }

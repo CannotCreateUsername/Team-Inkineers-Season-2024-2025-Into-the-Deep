@@ -65,11 +65,17 @@ public abstract class ArmSubsystem {
         DOWN
     }
 
+    public enum HangState {
+        REST,
+        HANGING
+    }
+
     SlideState slideState;
     ArmState armState;
     SpecimenState specimenState;
     IntakeState intakeState;
     WristState wristState;
+    HangState hangState;
 
     public int targetSlidePosition;
 
@@ -82,9 +88,9 @@ public abstract class ArmSubsystem {
     protected final int MANUAL_INCREMENT = 40;
     protected final double DEFAULT_SLIDE_POWER = 1;
     // Hanging
-    protected final int ASCENT_LV2_READY = 1400;
+    protected final int ASCENT_LV2_READY = 1500;
     protected final int PRE_ASCENT_LV2 = 1100;
-    protected final int ASCENT_LV2 = 575;
+    protected final int ASCENT_LV2 = 400;
 
 
     private final double MAX_INTAKE_WRIST_ROTATION = 236.0; // The new neutral. 12/7/24
@@ -138,7 +144,7 @@ public abstract class ArmSubsystem {
 
     // Worm Gear
     protected final int HANG_WORM_READY = 500;
-    protected final int HANG_WORM_LV2 = -700;
+    protected final int HANG_WORM_LV2 = -420;
 
     // Declare actuator variables
     public List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
@@ -175,6 +181,7 @@ public abstract class ArmSubsystem {
             specimenState = SpecimenState.INTAKE;
             intakeState = IntakeState.IDLE;
             wristState = WristState.NEUTRAL;
+            hangState = HangState.REST;
 
             targetSlidePosition = REST_POSITION_SLIDES;
             intakeWrist.setPosition(WRIST_UP);
@@ -290,6 +297,7 @@ public abstract class ArmSubsystem {
             m.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
             m.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
+        resetting = false;
     }
     // Method to simplify getting the current linear slides position
     public int getSlidesPosition() {
