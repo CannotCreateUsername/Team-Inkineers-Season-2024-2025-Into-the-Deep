@@ -14,12 +14,13 @@ public class TestHang extends LinearOpMode {
         armSubsystem.init(hardwareMap, true);
 
         GamepadEx gamepad = new GamepadEx(gamepad1);
+        GamepadEx gamepadEx2 = new GamepadEx(gamepad2);
 
         waitForStart();
 
         while (opModeIsActive()) {
             armSubsystem.runSlideMotorsPID(1);
-            armSubsystem.runHang(gamepad);
+            armSubsystem.runHang(gamepad, gamepadEx2);
             armSubsystem.specimenBar.setPosition(0.5);
             armSubsystem.specimenWrist.setPosition(0.5);
 

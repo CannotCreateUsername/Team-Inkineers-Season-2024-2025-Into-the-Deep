@@ -223,7 +223,7 @@ public abstract class ArmSubsystem {
         // Worm Motor Behavior
         wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        wormMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
@@ -328,6 +328,7 @@ public abstract class ArmSubsystem {
         }
     }
 
+    // Delay time must be specified in the state loop
     ElapsedTime armTimer = new ElapsedTime();
     public void setArmState(ArmState state, boolean delayed) {
         if (delayed) {

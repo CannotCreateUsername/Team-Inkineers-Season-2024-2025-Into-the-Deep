@@ -19,7 +19,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         runSlides(gamepadEx1);
         runArm(gamepadEx1);
         runIntake(gamepad);
-        runHang(gamepadEx1);
+        runHang(gamepadEx1, gamepadEx2);
     }
 
     private int buttonCount = 0;
@@ -131,7 +131,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     setSpecimenState(SpecimenState.OUTTAKE);
                     setWristState(WristState.PICKUP, true);
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
-                    setArmState(ArmState.INTAKE, false);
+                    setArmState(ArmState.INTAKE, true);
                     setSpecimenState(SpecimenState.INTAKE);
                     setWristState(WristState.PICKUP, true);
                 }
@@ -155,12 +155,14 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case INTAKE:
                 armDisplayText = "Intake Extended";
-                setV4BPosition(ARM_INTAKE_POS);
+                if (armTimer.seconds() > 0.4) {
+                    setV4BPosition(ARM_INTAKE_POS);
+                }
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X) || gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.NEUTRAL, false);
                     setSpecimenState(SpecimenState.INTAKE);
-                } else if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                } else if (gamepad.isDown(GamepadKeys.Button.DPAD_LEFT) || gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
                     setArmState(ArmState.RIGHT, false);
                 }
                 break;
@@ -193,7 +195,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
                 if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
                     setArmState(ArmState.REST, false);
-                    setWristState(WristState.NEUTRAL, false);
+                    setWristState(WristState.UP, false);
                     setSpecimenState(SpecimenState.OUTTAKE);
                 }
                 break;
@@ -203,7 +205,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
                 if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
                     setArmState(ArmState.REST, false);
-                    setWristState(WristState.NEUTRAL, false);
                     setSpecimenState(SpecimenState.INTAKE);
                 }
                 break;
@@ -292,19 +293,19 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
     ElapsedTime hangTimer = new ElapsedTime();
     private boolean unhang = false;
-    public void runHang(GamepadEx gamepad) {
+    public void runHang(GamepadEx gamepad1, GamepadEx gamepad2) {
         switch (hangState) {
             case REST:
-                if (gamepad.wasJustPressed(GamepadKeys.Button.BACK)) {
+                if (gamepad1.wasJustPressed(GamepadKeys.Button.BACK)) {
                     // tuck everything in
                     hangTimer.reset();
+                    wormMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     wormMotor.setTargetPosition(0);
                     hangState = HangState.HANGING;
                 }
 
                 if (unhang) {
                     if (hangTimer.seconds() > 1.5) {
-                        setWristState(WristState.NEUTRAL, false);
                         setArmState(ArmState.REST, false);
                         setSlideState(SlideState.REST, false);
                         setSpecimenState(SpecimenState.INTAKE);
@@ -314,6 +315,14 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     wormMotor.setPower(0.8);
                     wormMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 }
+
+                if (gamepad2.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    wormMotor.setPower(-0.5);
+                } else if (gamepad2.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                    wormMotor.setPower(0.5);
+                } else {
+                    wormMotor.setPower(0);
+                }
                 break;
             case HANGING:
                 // Ensure arms are pulled backed
@@ -322,14 +331,15 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setSlideState(SlideState.HANG, false);
                 setSpecimenState(SpecimenState.HANG);
 
-                if (hangTimer.seconds() > 4) {
+                if (hangTimer.seconds() > 3) {
+                    hangDisplayText = "A: to Release Slides, X: to Grapple Worm";
                     wormMotor.setPower(0);
                     wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                } else if (hangTimer.seconds() > 3) {
+                } else if (hangTimer.seconds() > 2) {
                     wormMotor.setTargetPosition(HANG_WORM_LV2);
                     targetSlidePosition = ASCENT_LV2;
                     wormMotor.setPower(0.8);
-                } else if (hangTimer.seconds() > 2) {
+                } else if (hangTimer.seconds() > 1.5) {
                     targetSlidePosition = PRE_ASCENT_LV2;
                     wormMotor.setPower(0);
                 } else if (hangTimer.seconds() > 0.5) {
@@ -341,17 +351,17 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
 
                 // Manual Control
-                if (gamepad.isDown(GamepadKeys.Button.A)) {
+                if (gamepad1.isDown(GamepadKeys.Button.A)) {
                     targetSlidePosition += 30;
-                } else if (gamepad.isDown(GamepadKeys.Button.B)) {
+                } else if (gamepad1.isDown(GamepadKeys.Button.B)) {
                     targetSlidePosition -= 30;
-                } else if (gamepad.isDown(GamepadKeys.Button.X)) {
+                } else if (gamepad1.isDown(GamepadKeys.Button.X)) {
                     wormMotor.setPower(-0.8);
-                } else if (gamepad.isDown(GamepadKeys.Button.Y)) {
+                } else if (gamepad1.isDown(GamepadKeys.Button.Y)) {
                     wormMotor.setPower(0.8);
                 }
 
-                if (gamepad.wasJustPressed(GamepadKeys.Button.BACK)) {
+                if (gamepad1.wasJustPressed(GamepadKeys.Button.BACK)) {
                     hangTimer.reset();
                     wormMotor.setTargetPosition(0);
                     slidePower = DEFAULT_SLIDE_POWER;
