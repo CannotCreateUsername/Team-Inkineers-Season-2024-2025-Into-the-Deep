@@ -44,7 +44,7 @@ public class RightSideAutoBlue extends LinearOpMode {
 
         Action runToIntake = drive.actionBuilder(new Pose2d(coords.samplePos2, coords.ROTATED))
                 .setTangent(-Math.PI)
-                .splineToConstantHeading(new Vector2d(coords.specimenPickupPos.x, coords.specimenPickupPos.y - 1), -Math.PI/2)
+                .splineToConstantHeading(new Vector2d(coords.specimenPickupPos.x, coords.specimenPickupPos.y - 2), -Math.PI/2)
                 .build();
 
         telemetry.addLine("Wait for wrist! ^-^");
@@ -56,6 +56,7 @@ public class RightSideAutoBlue extends LinearOpMode {
                 new ParallelAction(
                         armSubsystem.controlActuators(),
                         new SequentialAction(
+                                new SleepAction(2),
                                 new ParallelAction(
                                         runToScore,
                                         armSubsystem.readySpecimen()

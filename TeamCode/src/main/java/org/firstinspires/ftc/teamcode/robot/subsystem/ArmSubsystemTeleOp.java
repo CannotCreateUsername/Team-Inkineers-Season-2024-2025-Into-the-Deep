@@ -131,7 +131,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     setSpecimenState(SpecimenState.OUTTAKE);
                     setWristState(WristState.PICKUP, true);
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
-                    setArmState(ArmState.INTAKE, true);
+                    setArmState(ArmState.INTAKE, false);
                     setSpecimenState(SpecimenState.INTAKE);
                     setWristState(WristState.PICKUP, true);
                 }
@@ -149,15 +149,13 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     setSpecimenState(SpecimenState.INTAKE);
                 } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     setArmState(ArmState.INTAKE, false);
-                    setWristState(WristState.PICKUP, true);
+                    setWristState(WristState.PICKUP, false);
                     setSpecimenState(SpecimenState.INTAKE);
                 }
                 break;
             case INTAKE:
                 armDisplayText = "Intake Extended";
-                if (armTimer.seconds() > 0.4) {
-                    setV4BPosition(ARM_INTAKE_POS);
-                }
+                setV4BPosition(ARM_INTAKE_POS);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.X) || gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.NEUTRAL, false);
@@ -236,7 +234,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (wristTimer.seconds() > 0.2)
                     intakeWrist.setPosition(WRIST_PICKUP);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
-                    wristState = WristState.LOW;
+                    wristState = WristState.NEUTRAL;
                 }
                 break;
             case LOW:
@@ -317,9 +315,9 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
 
                 if (gamepad2.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-                    wormMotor.setPower(-0.5);
+                    wormMotor.setPower(-0.4);
                 } else if (gamepad2.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
-                    wormMotor.setPower(0.5);
+                    wormMotor.setPower(0.4);
                 } else {
                     wormMotor.setPower(0);
                 }

@@ -102,7 +102,6 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 moveV4B(ArmState.REST),
                 moveWrist(WristState.UP),
                 new SequentialAction(
-                        new SleepAction(0.5),
                         moveSpecimen(SpecimenState.OUTTAKE)
                 )
         );
