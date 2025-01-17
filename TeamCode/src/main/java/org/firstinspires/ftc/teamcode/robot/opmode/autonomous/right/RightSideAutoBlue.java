@@ -26,6 +26,8 @@ public class RightSideAutoBlue extends LinearOpMode {
         // Get coordinates to use
         RightAutoCoords coords = new RightAutoCoords();
 
+
+        // TODO: Fix everything
         Action runToScore = drive.actionBuilder(startPos)
                 .strafeToLinearHeading(coords.scoreSpecimenPos, coords.ROTATED)
                 .build();
@@ -56,7 +58,6 @@ public class RightSideAutoBlue extends LinearOpMode {
                 new ParallelAction(
                         armSubsystem.controlActuators(),
                         new SequentialAction(
-                                new SleepAction(2),
                                 new ParallelAction(
                                         runToScore,
                                         armSubsystem.readySpecimen()

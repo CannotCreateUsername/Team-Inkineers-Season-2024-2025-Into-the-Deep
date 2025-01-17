@@ -10,6 +10,8 @@ public class RightAutoCoords {
     // NEGATIVE SIDEWAYS FOR RIGHT, POSITIVE FOR LEFT
 
     public double ROTATED = Math.toRadians(0);
+    public double PICKUP = Math.toRadians(30);
+    public double DROPOFF = Math.toRadians(-40);
     public double STRAIGHT = Math.toRadians(90);
 
     public Vector2d scoreSpecimenPos = new Vector2d(-6, 36);

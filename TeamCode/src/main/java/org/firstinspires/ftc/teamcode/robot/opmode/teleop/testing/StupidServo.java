@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.robot.opmode.teleop.testing;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Singular Test", group = "Testing")
+@Disabled
+@TeleOp(name = "Singular Lower Servo Test", group = "Testing")
 public class StupidServo extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

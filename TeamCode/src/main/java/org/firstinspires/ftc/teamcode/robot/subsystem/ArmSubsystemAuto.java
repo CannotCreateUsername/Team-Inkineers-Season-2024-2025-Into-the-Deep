@@ -34,7 +34,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                         setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_INITIAL);
                         break;
                     case LEFT:
-                        setV4BPosition(ARM_LEFT_POS);
+                        setV4BPosition(ARM_LEFT_POS_AUTO);
                         break;
                     case RIGHT:
                         setV4BPosition(V4B_LOWER_CENTER, UPPER_ALT_INTAKE_ANGLE + 0.5);
