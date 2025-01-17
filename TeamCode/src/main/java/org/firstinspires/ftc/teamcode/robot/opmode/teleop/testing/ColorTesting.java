@@ -17,6 +17,7 @@ public class ColorTesting extends LinearOpMode {
             boolean specialIntaked = (racist.red() > 200) || (racist.blue() > 200);
             telemetry.addData("Red", racist.red());
             telemetry.addData("Blue", racist.blue());
+            telemetry.addData("Green", racist.green());
             telemetry.addData("Intaked Specimen?", specialIntaked);
             telemetry.update();
         }

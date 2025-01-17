@@ -84,6 +84,7 @@ public class SquidDriveRed extends LinearOpMode {
             telemetry.addData("Drive Heading", drive.pose.heading);
             telemetry.addData("Drive X", drive.pose.position.x);
             telemetry.addData("Drive Y", drive.pose.position.y);
+            telemetry.addData("Color State", armSubsystem.getColorState());
             telemetry.update();
         }
     }

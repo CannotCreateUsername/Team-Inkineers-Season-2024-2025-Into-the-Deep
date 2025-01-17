@@ -70,12 +70,20 @@ public abstract class ArmSubsystem {
         HANGING
     }
 
+    public enum SampleState {
+        NONE,
+        RED,
+        YELLOW,
+        BLUE
+    }
+
     SlideState slideState;
     ArmState armState;
     SpecimenState specimenState;
     IntakeState intakeState;
     WristState wristState;
     HangState hangState;
+    SampleState sampleState;
 
     public int targetSlidePosition;
 
@@ -167,7 +175,7 @@ public abstract class ArmSubsystem {
     public LED red;
     public LED green;
 
-    private boolean redSide = false;
+    protected boolean redSide = false;
     // Overarching Initialization Method
     public void init(HardwareMap hardwareMap, boolean isRedAlliance, boolean manualTesting) {
         initSlideSystem(hardwareMap);
@@ -193,6 +201,8 @@ public abstract class ArmSubsystem {
             specimenBar.setPosition(SPECIMEN_BAR_INITIAL_ANGLE);
             specimenWrist.setPosition(SPECIMEN_WRIST_INITIAL_ANGLE);
         }
+
+        sampleState = SampleState.NONE;
     }
     public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
         init(hardwareMap, isRedAlliance, false);
@@ -266,6 +276,9 @@ public abstract class ArmSubsystem {
         slideSwitch = hardwareMap.get(TouchSensor.class, "slide_limit");
         red = hardwareMap.get(LED.class, "red");
         green = hardwareMap.get(LED.class, "green");
+
+        green.off();
+        red.off();
     }
 
     // Method to run intake servos
@@ -363,6 +376,51 @@ public abstract class ArmSubsystem {
             specimenTimer.reset(); // Allow to go to transition state to score
         }
         specimenState = state;
+    }
+
+    public String getColorState() {
+        return sampleState.name();
+    }
+
+    // Color Sensing
+    public boolean withinYellowRange() {
+        return racist.green() > racist.red() && racist.red() > racist.blue() && racist.green() > racist.blue() * 2.9;
+    }
+    public boolean withinRedRange() {
+        return racist.red() > racist.green() && racist.green() > racist.blue() && racist.red() > racist.blue() * 2.9;
+    }
+    public boolean withinBlueRange() {
+        return racist.blue() > racist.red() && racist.green() > racist.red() && racist.blue() > racist.red() * 2.9;
+    }
+    private int prevRed = 0;
+    private int prevGreen = 0;
+    private int prevBlue = 0;
+    private int redDelta = 0;
+    private int greenDelta = 0;
+    private int blueDelta = 0;
+    final int DELTA_THRESHOLD = 100;
+    public boolean getSampleDetected() {
+        return (redDelta > DELTA_THRESHOLD) || (greenDelta > DELTA_THRESHOLD) || (blueDelta > DELTA_THRESHOLD);
+    }
+    public void getColorDetections() {
+        redDelta = Math.abs(racist.red() - prevRed);
+        greenDelta = Math.abs(racist.green() - prevGreen);
+        blueDelta = Math.abs(racist.blue() - prevBlue);
+
+        prevRed = racist.red();
+        prevGreen = racist.green();
+        prevBlue = racist.blue();
+    }
+    public void switchColorState() {
+        if (withinYellowRange()) {
+            sampleState = SampleState.YELLOW;
+        } else if (withinRedRange()) {
+            sampleState = SampleState.RED;
+        } else if (withinBlueRange()) {
+            sampleState = SampleState.BLUE;
+        } else {
+            sampleState = SampleState.NONE;
+        }
     }
 
     // RGB for yellow is (255, 255, 0)

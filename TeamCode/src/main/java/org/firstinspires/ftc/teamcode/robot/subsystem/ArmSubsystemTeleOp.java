@@ -20,6 +20,44 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         runArm(gamepadEx1);
         runIntake(gamepad);
         runHang(gamepadEx1, gamepadEx2);
+        runLED();
+    }
+
+    public void runLED() {
+        getColorDetections();
+        if (getSampleDetected()) {
+            if (wristState != WristState.UP) {
+                switchColorState();
+            }
+        }
+        switch (sampleState) {
+            case RED:
+                if (redSide) {
+                    green.on();
+                    red.off();
+                } else {
+                    red.on();
+                    green.off();
+                }
+                break;
+            case BLUE:
+                if (redSide) {
+                    green.off();
+                    red.on();
+                } else {
+                    red.off();
+                    green.on();
+                }
+                break;
+            case YELLOW:
+                red.on();
+                green.on();
+                break;
+            case NONE:
+                red.off();
+                green.off();
+                break;
+        }
     }
 
     private int buttonCount = 0;
@@ -48,11 +86,11 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 break;
             case INTAKE:
+                // 2nd Intake Level
                 if (intakeState == IntakeState.IN) {
                     if (stallTimer.seconds() > 0.1)
-                        targetSlidePosition = REST_POSITION_SLIDES;
-                }
-                else {
+                        targetSlidePosition = REST_POSITION_SLIDES + 100;
+                } else {
                     targetSlidePosition = INTAKE_POSITION_SLIDES;
                 }
                 setWristState(WristState.DOWN, false);
