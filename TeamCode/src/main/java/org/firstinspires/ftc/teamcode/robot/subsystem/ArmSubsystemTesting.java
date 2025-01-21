@@ -71,10 +71,12 @@ public class ArmSubsystemTesting extends ArmSubsystem {
     }
 
     private boolean yeah2 = false;
+    private boolean yeah3 = false;
     public void runSpecimenTesting(GamepadEx gamepad) {
         if (gamepad.wasJustPressed(GamepadKeys.Button.BACK)) {
             specimenBar.setPosition(SPECIMEN_BAR_NEUTRAL);
             specimenWrist.setPosition(SPECIMEN_WRIST_NEUTRAL);
+            specimenClaw.setPosition(SPECIMEN_CLAW_NEUTRAL);
         } else if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
             if (yeah2) {
                 specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
@@ -86,16 +88,26 @@ public class ArmSubsystemTesting extends ArmSubsystem {
                 yeah2 = true;
             }
         } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
-            specimenBar.setPosition(SPECIMEN_BAR_STOP_ANGLE);
+            specimenBar.setPosition(SPECIMEN_BAR_TRANSITION_ANGLE);
             specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
         } else if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
             specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
+        }
+
+        if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
+            if (yeah3) {
+                specimenClaw.setPosition(SPECIMEN_CLAW_CLOSED);
+            } else {
+                specimenClaw.setPosition(SPECIMEN_CLAW_OPEN);
+            }
+            yeah3 = !yeah3;
         }
 
         opMode.telemetry.addData("BACK", "Neutral");
         opMode.telemetry.addData("A", "Toggle Intake/Outtake");
         opMode.telemetry.addData("Not X", "Auto Ready");
         opMode.telemetry.addData("B", "Wrist Transition Off");
+        opMode.telemetry.addData("Y", "Toggle Claw");
     }
 
     public void runIntakeTesting(Gamepad gamepad) {

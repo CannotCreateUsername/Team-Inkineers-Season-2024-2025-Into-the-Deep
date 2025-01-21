@@ -64,6 +64,15 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                         break;
                 }
 
+                switch(specimenClawState) {
+                    case CLOSED:
+                        specimenClaw.setPosition(SPECIMEN_CLAW_CLOSED);
+                        break;
+                    case OPEN:
+                        specimenClaw.setPosition(SPECIMEN_CLAW_OPEN);
+                        break;
+                }
+
                 // Control Wrist
                 switch (wristState) {
                     case NEUTRAL:
@@ -99,6 +108,7 @@ public class ArmSubsystemAuto extends ArmSubsystem {
 
     public Action readySpecimen() {
         return new ParallelAction(
+                moveSpecimenClaw(SpecimenClawState.CLOSED),
                 moveV4B(ArmState.REST),
                 moveWrist(WristState.UP),
                 new SequentialAction(
@@ -183,6 +193,13 @@ public class ArmSubsystemAuto extends ArmSubsystem {
     public Action moveSpecimen(SpecimenState state) {
         return telemetryPacket -> {
             setSpecimenState(state);
+            return false;
+        };
+    }
+
+    public Action moveSpecimenClaw(SpecimenClawState state) {
+        return telemetryPacket -> {
+            setSpecimenClawState(state);
             return false;
         };
     }

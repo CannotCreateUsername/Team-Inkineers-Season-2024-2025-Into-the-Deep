@@ -80,7 +80,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     setSlideState(SlideState.INTAKE, false);
 
-                    setArmState(ArmState.LEFT, false);
+                    setArmState(ArmState.INTAKE, false);
                     setWristState(WristState.DOWN, false);
                     setSpecimenState(SpecimenState.INTAKE);
                 }
@@ -89,7 +89,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 // 2nd Intake Level
                 if (intakeState == IntakeState.IN) {
                     if (stallTimer.seconds() > 0.1)
-                        targetSlidePosition = REST_POSITION_SLIDES + 100;
+                        targetSlidePosition = 350;
                 } else {
                     targetSlidePosition = INTAKE_POSITION_SLIDES;
                 }
@@ -165,39 +165,19 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
 
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    setArmState(ArmState.LEFT, false);
-                    setSpecimenState(SpecimenState.OUTTAKE);
-                    setWristState(WristState.PICKUP, true);
-                } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
                     setArmState(ArmState.INTAKE, false);
                     setSpecimenState(SpecimenState.INTAKE);
                     setWristState(WristState.PICKUP, true);
-                }
-                break;
-            case LEFT:
-                armDisplayText = "Left Extended";
-                if (slideState == SlideState.INTAKE) {
-                    setV4BPosition(V4B_LOWER_CENTER - 32.0/MAX_LOWER_BAR_ROTATION, V4B_UPPER_LEFT);
-                } else {
-                    setV4BPosition(ARM_LEFT_POS);
-                }
-                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    setArmState(ArmState.REST, false);
-                    setWristState(WristState.NEUTRAL, false);
-                    setSpecimenState(SpecimenState.INTAKE);
-                } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
-                    setArmState(ArmState.INTAKE, false);
-                    setWristState(WristState.PICKUP, false);
-                    setSpecimenState(SpecimenState.INTAKE);
                 }
                 break;
             case INTAKE:
                 armDisplayText = "Intake Extended";
                 setV4BPosition(ARM_INTAKE_POS);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.X) || gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+                if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.NEUTRAL, false);
                     setSpecimenState(SpecimenState.INTAKE);
+                    setSlideState(SlideState.REST, true);
                 } else if (gamepad.isDown(GamepadKeys.Button.DPAD_LEFT) || gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
                     setArmState(ArmState.RIGHT, false);
                 }
@@ -221,14 +201,12 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         // The Specimen Arm should interact closely with the Virtual Four Bar.
         switch (specimenState) {
             case INTAKE:
-                if (specimenTimer.seconds() > 0.6) {
+                if (specimenClawState == SpecimenClawState.CLOSED && specimenTimer.seconds() > 0.2) {
+                    specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                } else if (specimenClawState == SpecimenClawState.OPEN) {
                     specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
-                } else if (specimenTimer.seconds() > 0.4) {
-                    specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
                 }
-
                 specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
-
                 if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.UP, false);
@@ -236,17 +214,40 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 break;
             case OUTTAKE:
-                specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
                 specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
-
+                if (specimenTimer.seconds() > 0.4) {
+                    specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
+                } else {
+                    specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                }
+                if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
+                    setArmState(ArmState.REST, false);
+                    setSpecimenState(SpecimenState.TRANSITION);
+                }
+                break;
+            case TRANSITION:
+                specimenBar.setPosition(SPECIMEN_BAR_TRANSITION_ANGLE);
+                specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
                     setArmState(ArmState.REST, false);
                     setSpecimenState(SpecimenState.INTAKE);
+                    specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
+                    setSpecimenClawState(SpecimenClawState.OPEN);
                 }
                 break;
             case HANG:
                 specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
                 specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                specimenClaw.setPosition(SPECIMEN_CLAW_CLOSED);
+                break;
+        }
+
+        switch (specimenClawState) {
+            case CLOSED:
+                specimenClaw.setPosition(SPECIMEN_CLAW_CLOSED);
+                break;
+            case OPEN:
+                specimenClaw.setPosition(SPECIMEN_CLAW_OPEN);
                 break;
         }
 
@@ -255,39 +256,32 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 wristDisplayText = "Neutral";
                 if (wristTimer.seconds() > 0.2)
                     intakeWrist.setPosition(WRIST_NEUTRAL);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
-                    wristState = WristState.PICKUP;
-                }
+                if (gamepad.wasJustPressed(GamepadKeys.Button.Y))
+                    setWristState(WristState.LOW, false);
                 break;
             case UP:
                 wristDisplayText = "Up";
                 if (wristTimer.seconds() > 0.2)
                     intakeWrist.setPosition(WRIST_UP);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
-                    wristState = WristState.NEUTRAL;
-                }
                 break;
             case PICKUP:
                 wristDisplayText = "Pickup";
                 if (wristTimer.seconds() > 0.2)
                     intakeWrist.setPosition(WRIST_PICKUP);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
-                    wristState = WristState.NEUTRAL;
-                }
                 break;
             case LOW:
                 wristDisplayText = "Low";
                 if (wristTimer.seconds() > 0.1)
                     intakeWrist.setPosition(WRIST_LOW);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.Y)) {
-                    wristState = armState == ArmState.LEFT ? WristState.PICKUP : WristState.NEUTRAL;
-                }
+                if (gamepad.wasJustPressed(GamepadKeys.Button.Y))
+                    setWristState(WristState.NEUTRAL, false);
                 break;
             case DOWN:
                 wristDisplayText = "Down";
-                if (wristTimer.seconds() > 0.1) {
+                if (wristTimer.seconds() > 0.1)
                     intakeWrist.setPosition(WRIST_DOWN);
-                }
+                if (gamepad.wasJustPressed(GamepadKeys.Button.Y))
+                    setWristState(WristState.NEUTRAL, false);
                 break;
         }
     }
@@ -301,10 +295,16 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (gamepad.left_trigger > 0) {
                     intakeState = IntakeState.OUT;
                     setWristState(WristState.PICKUP, false);
+
+                    setSpecimenClawState(SpecimenClawState.OPEN);
                 } else if (gamepad.right_trigger > 0) {
-                    intakeState = IntakeState.IN;
-                    setWristState(slideState == SlideState.INTAKE ? WristState.DOWN : WristState.LOW, true);
-                    stallTimer.reset();
+                    if (armState != ArmState.REST) {
+                        intakeState = IntakeState.IN;
+                        setWristState(slideState == SlideState.INTAKE ? WristState.DOWN : WristState.LOW, true);
+                        stallTimer.reset();
+                    } else {
+                        setSpecimenClawState(SpecimenClawState.CLOSED);
+                    }
                 }
                 break;
             case IN:

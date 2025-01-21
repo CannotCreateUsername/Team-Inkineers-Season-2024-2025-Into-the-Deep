@@ -46,7 +46,13 @@ public abstract class ArmSubsystem {
     public enum SpecimenState {
         INTAKE,
         OUTTAKE, // The state right before scoring
+        TRANSITION,
         HANG
+    }
+
+    public enum SpecimenClawState {
+        CLOSED,
+        OPEN
     }
 
     public enum IntakeState {
@@ -80,6 +86,7 @@ public abstract class ArmSubsystem {
     SlideState slideState;
     ArmState armState;
     SpecimenState specimenState;
+    SpecimenClawState specimenClawState;
     IntakeState intakeState;
     WristState wristState;
     HangState hangState;
@@ -90,7 +97,7 @@ public abstract class ArmSubsystem {
     // Constants, needs to be adjusted based on testing
     // Linear Slides
     protected final int REST_POSITION_SLIDES = 0;
-    protected final int  INTAKE_POSITION_SLIDES = 500;
+    protected final int  INTAKE_POSITION_SLIDES = 600;
     protected final int OUTTAKE_POSITION_SLIDES = 2500;
     protected final int MAX_EXTEND_POSITION = 3000;
     protected final int MANUAL_INCREMENT = 40;
@@ -106,9 +113,9 @@ public abstract class ArmSubsystem {
     protected final double WRIST_NEUTRAL = 0.5;
     protected final double WRIST_UP = WRIST_NEUTRAL + 120.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_DROPOFF = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
-    protected final double WRIST_LOW = WRIST_NEUTRAL - 54.0/MAX_INTAKE_WRIST_ROTATION;
-    protected final double WRIST_PICKUP = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
-    protected final double WRIST_DOWN = WRIST_NEUTRAL - 90.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_LOW = WRIST_NEUTRAL - 35.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_PICKUP = WRIST_NEUTRAL; // - 30.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_DOWN = WRIST_NEUTRAL - 100.0/MAX_INTAKE_WRIST_ROTATION;
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.
@@ -135,7 +142,7 @@ public abstract class ArmSubsystem {
 //    protected final double[] ARM_RIGHT_POS_AUTO = {V4B_LOWER_RIGHT_AUTO, 0.5+UPPER_ALT_INTAKE_ANGLE, WRIST_NEUTRAL};
 //    protected final double[] ARM_RIGHT_POS = {V4B_LOWER_CENTER, V4B_UPPER_RIGHT, WRIST_NEUTRAL};
     protected final double[] ARM_REST_POS = {V4B_LOWER_REST, V4B_UPPER_LEFT, WRIST_NEUTRAL};
-    protected final double[] ARM_INTAKE_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_PICKUP};
+    protected final double[] ARM_INTAKE_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};
     protected final double[] MEGA_REST_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};
 
     // Specimen Actuator Positions.
@@ -145,14 +152,18 @@ public abstract class ArmSubsystem {
     protected final double SPECIMEN_BAR_NEUTRAL = 0.5;
     protected final double SPECIMEN_BAR_INITIAL_ANGLE = SPECIMEN_BAR_NEUTRAL +(69.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
     protected final double SPECIMEN_BAR_INTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL +(69.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
-    protected final double SPECIMEN_BAR_OUTTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL -55.0/MAX_SPECIMEN_BAR_ROTATION;
-    protected final double SPECIMEN_BAR_STOP_ANGLE = SPECIMEN_BAR_NEUTRAL +10.0/MAX_SPECIMEN_BAR_ROTATION;
+    protected final double SPECIMEN_BAR_OUTTAKE_ANGLE = SPECIMEN_BAR_NEUTRAL -50.0/MAX_SPECIMEN_BAR_ROTATION;
+    protected final double SPECIMEN_BAR_TRANSITION_ANGLE = SPECIMEN_BAR_NEUTRAL +10.0/MAX_SPECIMEN_BAR_ROTATION;
 
     protected final double SPECIMEN_WRIST_NEUTRAL = 0.5;
     protected final double SPECIMEN_WRIST_INITIAL_ANGLE = SPECIMEN_WRIST_NEUTRAL -(90.0+30.0)/MAX_SPECIMEN_WRIST_ROTATION;
-    protected final double SPECIMEN_WRIST_INTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL -60.0/MAX_SPECIMEN_WRIST_ROTATION;
-    protected final double SPECIMEN_WRIST_OUTTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL +1.0/MAX_SPECIMEN_WRIST_ROTATION;
-    protected final double SPECIMEN_WRIST_TRANSITION_OFF = SPECIMEN_WRIST_NEUTRAL -120.0/MAX_SPECIMEN_WRIST_ROTATION;
+    protected final double SPECIMEN_WRIST_INTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL -50.0/MAX_SPECIMEN_WRIST_ROTATION;
+    protected final double SPECIMEN_WRIST_OUTTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL -85.0/MAX_SPECIMEN_WRIST_ROTATION; //+1.0/MAX_SPECIMEN_WRIST_ROTATION;
+    protected final double SPECIMEN_WRIST_TRANSITION_OFF = SPECIMEN_WRIST_NEUTRAL; //-120.0/MAX_SPECIMEN_WRIST_ROTATION;
+
+    protected final double SPECIMEN_CLAW_NEUTRAL = 0.5;
+    protected final double SPECIMEN_CLAW_CLOSED = 0.7;
+    protected final double SPECIMEN_CLAW_OPEN = 0.3;
 
     // Worm Gear
     protected final int HANG_WORM_READY = 500;
@@ -166,6 +177,7 @@ public abstract class ArmSubsystem {
     public Servo intakeWrist;
     public Servo specimenBar;
     public Servo specimenWrist;
+    public Servo specimenClaw;
 
     public DcMotor wormMotor;
 
@@ -174,6 +186,8 @@ public abstract class ArmSubsystem {
     public TouchSensor slideSwitch;
     public LED red;
     public LED green;
+
+
 
     protected boolean redSide = false;
     // Overarching Initialization Method
@@ -191,6 +205,7 @@ public abstract class ArmSubsystem {
             slideState = SlideState.REST;
             armState = ArmState.REST;
             specimenState = SpecimenState.INTAKE;
+            specimenClawState = SpecimenClawState.CLOSED;
             intakeState = IntakeState.IDLE;
             wristState = WristState.NEUTRAL;
             hangState = HangState.REST;
@@ -200,6 +215,7 @@ public abstract class ArmSubsystem {
             setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_INITIAL);
             specimenBar.setPosition(SPECIMEN_BAR_INITIAL_ANGLE);
             specimenWrist.setPosition(SPECIMEN_WRIST_INITIAL_ANGLE);
+            specimenClaw.setPosition(SPECIMEN_CLAW_CLOSED);
         }
 
         sampleState = SampleState.NONE;
@@ -268,6 +284,8 @@ public abstract class ArmSubsystem {
     public void initSpecimen(HardwareMap hardwareMap) {
         specimenBar = hardwareMap.get(Servo.class, "specimen_bar");
         specimenWrist = hardwareMap.get(Servo.class, "specimen_wrist");
+        specimenClaw = hardwareMap.get(Servo.class, "specimen_claw");
+
     }
 
     public void initSensors(HardwareMap hardwareMap, boolean isRedAlliance) {
@@ -372,10 +390,16 @@ public abstract class ArmSubsystem {
 
     public ElapsedTime specimenTimer = new ElapsedTime();
     public void setSpecimenState(SpecimenState state) {
-        if (specimenState == SpecimenState.OUTTAKE && state != SpecimenState.OUTTAKE) {
+        if (specimenState == SpecimenState.INTAKE && state != SpecimenState.INTAKE) {
             specimenTimer.reset(); // Allow to go to transition state to score
         }
         specimenState = state;
+    }
+    public void setSpecimenClawState(SpecimenClawState state) {
+        if (state == SpecimenClawState.CLOSED) {
+            specimenTimer.reset();
+        }
+        specimenClawState = state;
     }
 
     public String getColorState() {

@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.robot.opmode.teleop.testing;
 
-import androidx.annotation.NonNull;
-
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -66,14 +63,11 @@ public class SplineTurnTest extends LinearOpMode {
 
     boolean finished = false;
     public Action getHeading(MecanumDrive drive) {
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                drive.updatePoseEstimate();
-                telemetry.addData("Heading", drive.pose.heading);
-                telemetry.update();
-                return !finished;
-            }
+        return telemetryPacket -> {
+            drive.updatePoseEstimate();
+            telemetry.addData("Heading", drive.pose.heading);
+            telemetry.update();
+            return !finished;
         };
     }
 
