@@ -26,12 +26,11 @@ public class RightSideAutoBlue extends LinearOpMode {
         // Get coordinates to use
         RightAutoCoords coords = new RightAutoCoords();
 
-
         // TODO: Fix everything
 
-        Action runToIntake = drive.actionBuilder(new Pose2d(coords.samplePos2, coords.ROTATED))
+        Action runToIntake = drive.actionBuilder(coords.samplePos3)
                 .setTangent(-Math.PI)
-                .splineToConstantHeading(new Vector2d(coords.specimenPickupPos.x, coords.specimenPickupPos.y - 2), -Math.PI/2)
+                .splineToConstantHeading(new Vector2d(coords.specimenPickupPos.position.x, coords.specimenPickupPos.position.y - 2), -Math.PI/2)
                 .build();
 
         telemetry.addLine("Wait for wrist! ^-^");
@@ -67,17 +66,17 @@ public class RightSideAutoBlue extends LinearOpMode {
         );
 
         for (int i = 1; i <= 3; i++) {
-            Vector2d newScorePos = new Vector2d(coords.scoreSpecimenPos.x - i * 1.5, coords.scoreSpecimenPos.y);
+            Pose2d newScorePos = new Pose2d(coords.scoreSpecimenPos.position.x - i * 1.5, coords.scoreSpecimenPos.position.y, coords.ROTATED);
 
-            Action runToNewScore = drive.actionBuilder(new Pose2d(coords.specimenPickupPos, coords.ROTATED))
+            Action runToNewScore = drive.actionBuilder(coords.specimenPickupPos)
                     .setTangent(Math.PI/2)
-                    .splineToConstantHeading(newScorePos, Math.PI/2)
+                    .splineToConstantHeading(newScorePos.position, Math.PI/2)
                     .build();
 
-            Action runToPickUp = drive.actionBuilder(new Pose2d(newScorePos, coords.ROTATED))
+            Action runToPickUp = drive.actionBuilder(newScorePos)
 //                    .strafeToLinearHeading(new Vector2d(newScorePos.x-8, newScorePos.y), coords.ROTATED)
                     .setTangent(-Math.PI/2)
-                    .splineToConstantHeading(coords.specimenPickupPos, -Math.PI/2)
+                    .splineToConstantHeading(coords.specimenPickupPos.position, -Math.PI/2)
                     .build();
 
             Actions.runBlocking(
