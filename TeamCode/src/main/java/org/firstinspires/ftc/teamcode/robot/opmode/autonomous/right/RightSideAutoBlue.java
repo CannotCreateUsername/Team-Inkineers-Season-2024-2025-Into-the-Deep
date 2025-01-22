@@ -28,6 +28,11 @@ public class RightSideAutoBlue extends LinearOpMode {
 
         // TODO: Fix everything
 
+        Action runPickupSamples = drive.actionBuilder(startPos)
+                .setTangent(0)
+                .splineToConstantHeading(coords.samplePos1.position, Math.toRadians(0))
+                .build();
+
         Action runToIntake = drive.actionBuilder(coords.samplePos3)
                 .setTangent(-Math.PI)
                 .splineToConstantHeading(new Vector2d(coords.specimenPickupPos.position.x, coords.specimenPickupPos.position.y - 2), -Math.PI/2)
