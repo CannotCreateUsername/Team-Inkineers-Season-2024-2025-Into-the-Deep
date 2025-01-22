@@ -28,21 +28,6 @@ public class RightSideAutoBlue extends LinearOpMode {
 
 
         // TODO: Fix everything
-        Action runToScore = drive.actionBuilder(startPos)
-                .strafeToLinearHeading(coords.scoreSpecimenPos, coords.ROTATED)
-                .build();
-
-        Action runToSample1 = drive.actionBuilder(new Pose2d(coords.scoreSpecimenPos, coords.ROTATED))
-                .setTangent(-Math.PI/2)
-                .splineToConstantHeading(coords.samplePos1, 0)
-                .build();
-
-        Action runToSample2 = drive.actionBuilder(new Pose2d(coords.samplePos1, coords.ROTATED))
-                .strafeToLinearHeading(coords.sampleTransition, coords.ROTATED)
-                .waitSeconds(0.5)
-                .setTangent(0)
-                .splineToConstantHeading(coords.samplePos2, Math.PI/2)
-                .build();
 
         Action runToIntake = drive.actionBuilder(new Pose2d(coords.samplePos2, coords.ROTATED))
                 .setTangent(-Math.PI)

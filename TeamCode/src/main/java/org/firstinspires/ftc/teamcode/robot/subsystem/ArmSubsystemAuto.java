@@ -45,18 +45,25 @@ public class ArmSubsystemAuto extends ArmSubsystem {
                 switch(specimenState) {
                     case INTAKE:
                         if (armState != ArmState.RIGHT) {
-                            if (specimenTimer.seconds() > 0.6) {
+                            if (specimenTimer.seconds() < 0.15) {
                                 specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
-                            } else if (specimenTimer.seconds() > 0.3) {
-                                specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
+                            } else {
+                                specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
                             }
-
                             specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
                         }
                         break;
                     case OUTTAKE:
                         specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
-                        specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                        if (specimenTimer.seconds() > 0.4) {
+                            specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
+                        } else {
+                            specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                        }
+                        break;
+                    case TRANSITION:
+                        specimenBar.setPosition(SPECIMEN_BAR_TRANSITION_ANGLE);
+                        specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
                         break;
                     case HANG:
                         specimenBar.setPosition(SPECIMEN_BAR_NEUTRAL);

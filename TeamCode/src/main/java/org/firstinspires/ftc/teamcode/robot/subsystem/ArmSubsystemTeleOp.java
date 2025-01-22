@@ -188,7 +188,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     setV4BPosition(V4B_LOWER_CENTER, 0.5 - UPPER_ALT_INTAKE_ANGLE);
                 } else if (gamepad.wasJustReleased(GamepadKeys.Button.DPAD_RIGHT)) {
                     setV4BPosition(V4B_LOWER_CENTER, 0.5 + UPPER_ALT_INTAKE_ANGLE);
-                } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                } else if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
                     setArmState(ArmState.INTAKE, false);
                 }
                 break;
@@ -201,7 +201,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         // The Specimen Arm should interact closely with the Virtual Four Bar.
         switch (specimenState) {
             case INTAKE:
-                if (specimenClawState == SpecimenClawState.CLOSED && specimenTimer.seconds() > 0.2) {
+                if (specimenClawState == SpecimenClawState.CLOSED && specimenTimer.seconds() > 0.15) {
                     specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
                 } else if (specimenClawState == SpecimenClawState.OPEN) {
                     specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
@@ -233,6 +233,10 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     setSpecimenState(SpecimenState.INTAKE);
                     specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
                     setSpecimenClawState(SpecimenClawState.OPEN);
+                } else if (gamepad.wasJustPressed(GamepadKeys.Button.X)) {
+                    setArmState(ArmState.REST, false);
+                    setSpecimenState(SpecimenState.INTAKE);
+                    specimenWrist.setPosition(SPECIMEN_WRIST_INTAKE_ANGLE);
                 }
                 break;
             case HANG:

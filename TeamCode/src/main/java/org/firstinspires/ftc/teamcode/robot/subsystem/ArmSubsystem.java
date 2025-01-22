@@ -113,7 +113,7 @@ public abstract class ArmSubsystem {
     protected final double WRIST_NEUTRAL = 0.5;
     protected final double WRIST_UP = WRIST_NEUTRAL + 120.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_DROPOFF = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
-    protected final double WRIST_LOW = WRIST_NEUTRAL - 35.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_LOW = WRIST_NEUTRAL - 38.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_PICKUP = WRIST_NEUTRAL; // - 30.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_DOWN = WRIST_NEUTRAL - 100.0/MAX_INTAKE_WRIST_ROTATION;
 
