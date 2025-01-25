@@ -113,7 +113,7 @@ public abstract class ArmSubsystem {
     protected final double WRIST_NEUTRAL = 0.5;
     protected final double WRIST_UP = WRIST_NEUTRAL + 120.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_DROPOFF = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
-    protected final double WRIST_LOW = WRIST_NEUTRAL - 38.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_LOW = WRIST_NEUTRAL - 40.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_PICKUP = WRIST_NEUTRAL; // - 30.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_DOWN = WRIST_NEUTRAL - 100.0/MAX_INTAKE_WRIST_ROTATION;
 
@@ -138,8 +138,8 @@ public abstract class ArmSubsystem {
 
     // 0 is lower servo position. 1 is upper servo position.
     protected final double[] ARM_LEFT_POS = {V4B_LOWER_CENTER, V4B_UPPER_LEFT, WRIST_NEUTRAL};
-    protected final double[] ARM_LEFT_POS_AUTO = {V4B_LOWER_LEFT_AUTO, 0.5-UPPER_ALT_INTAKE_ANGLE, WRIST_NEUTRAL};
-//    protected final double[] ARM_RIGHT_POS_AUTO = {V4B_LOWER_RIGHT_AUTO, 0.5+UPPER_ALT_INTAKE_ANGLE, WRIST_NEUTRAL};
+//    protected final double[] ARM_LEFT_POS_AUTO = {V4B_LOWER_LEFT_AUTO, 0.5-UPPER_ALT_INTAKE_ANGLE, WRIST_NEUTRAL};
+    protected final double[] ARM_RIGHT_POS_AUTO = {V4B_LOWER_CENTER, 0.5+UPPER_ALT_INTAKE_ANGLE, WRIST_NEUTRAL};
 //    protected final double[] ARM_RIGHT_POS = {V4B_LOWER_CENTER, V4B_UPPER_RIGHT, WRIST_NEUTRAL};
     protected final double[] ARM_REST_POS = {V4B_LOWER_REST, V4B_UPPER_LEFT, WRIST_NEUTRAL};
     protected final double[] ARM_INTAKE_POS = {V4B_LOWER_CENTER, V4B_UPPER_CENTER, WRIST_NEUTRAL};

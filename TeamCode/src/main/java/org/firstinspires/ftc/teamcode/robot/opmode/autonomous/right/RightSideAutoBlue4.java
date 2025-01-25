@@ -7,22 +7,21 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemAuto;
 
-@Disabled
-@Autonomous(name = "Right Auto +5", group = "Autonomous")
-public class RightSideAutoBlue extends LinearOpMode {
+@Autonomous(name = "Right Auto +4", group = "Autonomous")
+public class RightSideAutoBlue4 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
         // Get coordinates to use
         RightAutoCoords coords = new RightAutoCoords();
 
-        Pose2d startPos = new Pose2d(0, 0, Math.toRadians(0));
+        Pose2d startPos = new Pose2d(0, 0, coords.ROTATED);
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPos);
 
         ArmSubsystemAuto armSubsystem = new ArmSubsystemAuto();
@@ -30,20 +29,17 @@ public class RightSideAutoBlue extends LinearOpMode {
 
         Action runPickupSamples = drive.actionBuilder(startPos)
                 .setTangent(0)
-                .afterDisp(8, armSubsystem.pickUpAndDropOff())
-                .splineToLinearHeading(coords.samplePos1, Math.toRadians(0))
-                .strafeToLinearHeading(coords.samplePosBack.position, coords.DROPOFF)
-                .afterDisp(4, armSubsystem.pickUpAndDropOff())
-                .splineToLinearHeading(coords.samplePos2, Math.toRadians(0))
-                .strafeToLinearHeading(coords.samplePosBack2.position, coords.DROPOFF)
-                .afterDisp(4, armSubsystem.pickUpSample())
-                .splineToLinearHeading(coords.samplePos3, Math.toRadians(0))
+                .splineToLinearHeading(coords.samplePos1Push, 0)
+                .strafeToConstantHeading(coords.observationPos.position)
+                .setTangent(Math.PI/2)
+                .splineToLinearHeading(coords.samplePos2Push, 0)
+                .strafeToConstantHeading(coords.observationPos2.position)
                 .build();
 
-        Action runToIntake = drive.actionBuilder(coords.samplePos3)
-                .afterDisp(4, armSubsystem.readyIntake())
+        Action runToIntake = drive.actionBuilder(coords.observationPos2)
+                .afterDisp(0, armSubsystem.readyIntake())
                 .setTangent(-Math.PI)
-                .splineToLinearHeading(new Pose2d(coords.specimenPickupPos.position.x, coords.specimenPickupPos.position.y-0.5, coords.ROTATED), -Math.PI/2)
+                .strafeToConstantHeading(coords.specimenPickupPos.position)
                 .build();
 
         telemetry.addLine("Wait for wrist! ^-^");
@@ -55,23 +51,21 @@ public class RightSideAutoBlue extends LinearOpMode {
                 new ParallelAction(
                         armSubsystem.controlActuators(),
                         new SequentialAction(
+                                armSubsystem.moveSpecimen(ArmSubsystem.SpecimenState.HANG),
                                 new ParallelAction(
                                         runPickupSamples
                                 ),
                                 new ParallelAction(
-                                        runToIntake,
-                                        new SequentialAction(
-                                                new SleepAction(0.2),
-                                                armSubsystem.dropOffSample2()
-                                        )
+                                        runToIntake
                                 ),
                                 armSubsystem.terminate()
                         )
                 )
         );
-
-        for (int i = 0; i < 5; i++) {
-            Pose2d newScorePos = new Pose2d(coords.scoreSpecimenPos.position.x - i * 1.5, coords.scoreSpecimenPos.position.y, coords.ROTATED);
+        int cycles = 4;
+        for (int i = 0; i < cycles; i++) {
+            boolean ending = i == cycles-1;
+            Pose2d newScorePos = new Pose2d(coords.scoreSpecimenPos.position.x - i * 2.5, coords.scoreSpecimenPos.position.y, coords.ROTATED);
 
             Action runToNewScore = drive.actionBuilder(coords.specimenPickupPos)
                     .setTangent(Math.PI/2)
@@ -80,7 +74,7 @@ public class RightSideAutoBlue extends LinearOpMode {
 
             Action runToPickUp = drive.actionBuilder(newScorePos)
                     .setTangent(-Math.PI/2)
-                    .splineToConstantHeading(coords.specimenPickupPos.position, -Math.PI/2)
+                    .splineToLinearHeading(coords.specimenPickupPos, ending ? -Math.PI/3 : -Math.PI/2)
                     .build();
 
             Actions.runBlocking(
@@ -89,12 +83,12 @@ public class RightSideAutoBlue extends LinearOpMode {
                             new SequentialAction(
                                     new ParallelAction(
                                             new SequentialAction(
-                                                    new SleepAction(0.1),
+                                                    new SleepAction(0.2),
                                                     runToNewScore
                                             ),
                                             armSubsystem.readySpecimen()
                                     ),
-                                    armSubsystem.hangSpecimenTransition(runToPickUp, false),
+                                    armSubsystem.hangSpecimenTransition(runToPickUp, ending),
                                     armSubsystem.terminate()
                             )
                     )

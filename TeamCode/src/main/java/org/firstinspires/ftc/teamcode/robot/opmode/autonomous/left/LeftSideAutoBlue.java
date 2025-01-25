@@ -1,12 +1,6 @@
 package org.firstinspires.ftc.teamcode.robot.opmode.autonomous.left;
 
-import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -26,11 +20,6 @@ public class LeftSideAutoBlue extends LinearOpMode {
         armSubsystem.init(hardwareMap, false);
         // Get coordinates to use
         RightAutoCoords coords = new RightAutoCoords();
-
-        Action runToScore = drive.actionBuilder(startPos)
-                .waitSeconds(0.5)
-                .strafeToLinearHeading(new Vector2d(coords.scoreSpecimenPos.x, coords.scoreSpecimenPos.y-14), coords.ROTATED)
-                .build();
 
         telemetry.addLine("Wait for wrist! ^-^");
         telemetry.update();

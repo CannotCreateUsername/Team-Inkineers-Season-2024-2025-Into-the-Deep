@@ -93,7 +93,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 } else {
                     targetSlidePosition = INTAKE_POSITION_SLIDES;
                 }
-                setWristState(WristState.DOWN, false);
 
                 if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
                     targetSlidePosition = REST_POSITION_SLIDES;
@@ -316,7 +315,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setIntakePowers(1);
                 if (gamepad.right_trigger == 0) {
                     intakeState = IntakeState.IDLE;
-                    setWristState(WristState.PICKUP, false);
+                    setWristState(slideState == SlideState.INTAKE ? WristState.DOWN : WristState.PICKUP, false);
                 }
                 break;
             case OUT:
