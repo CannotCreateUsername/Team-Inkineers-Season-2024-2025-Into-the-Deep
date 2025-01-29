@@ -105,7 +105,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     setSlideState(SlideState.OUTTAKE, false);
 
                     setArmState(ArmState.HANG, false);
-                    setWristState(WristState.UP, false);
+                    setWristState(WristState.LOW, false);
                 }
                 break;
             case OUTTAKE:
@@ -364,19 +364,30 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 break;
             case HANGING:
+                // B X A Combo
                 // Ensure arms are pulled backed
                 setWristState(WristState.UP, false);
                 setArmState(ArmState.HANG, false);
                 setSlideState(SlideState.HANG, false);
                 setSpecimenState(SpecimenState.HANG);
 
+//                if (hangTimer.seconds() > 5) {
+//                    hangDisplayText = "A: to Release Slides, X: to Grapple Worm";
+//                    wormMotor.setPower(0);
+//                    wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//                } else if (hangTimer.seconds() > 4) {
+//                    targetSlidePosition = ASCENT_LV2 + 500;
+//                } else if (hangTimer.seconds() > 3) {
+//                    wormMotor.setTargetPosition(HANG_WORM_LV22);
+//                    wormMotor.setPower(0.8);
+//                } else if (hangTimer.seconds() > 2) {
                 if (hangTimer.seconds() > 3) {
                     hangDisplayText = "A: to Release Slides, X: to Grapple Worm";
                     wormMotor.setPower(0);
                     wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 } else if (hangTimer.seconds() > 2) {
-                    wormMotor.setTargetPosition(HANG_WORM_LV2);
                     targetSlidePosition = ASCENT_LV2;
+                    wormMotor.setTargetPosition(HANG_WORM_LV2);
                     wormMotor.setPower(0.8);
                 } else if (hangTimer.seconds() > 1.5) {
                     targetSlidePosition = PRE_ASCENT_LV2;

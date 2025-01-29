@@ -105,7 +105,7 @@ public abstract class ArmSubsystem {
     // Hanging
     protected final int ASCENT_LV2_READY = 1500;
     protected final int PRE_ASCENT_LV2 = 1100;
-    protected final int ASCENT_LV2 = 400;
+    protected final int ASCENT_LV2 = 200;
 
 
     private final double MAX_INTAKE_WRIST_ROTATION = 236.0; // The new neutral. 12/7/24
@@ -125,8 +125,6 @@ public abstract class ArmSubsystem {
     protected final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 70.0/MAX_LOWER_BAR_ROTATION;
-    protected final double V4B_LOWER_LEFT_AUTO = V4B_LOWER_CENTER - 40.0/MAX_LOWER_BAR_ROTATION;
-    protected final double V4B_LOWER_RIGHT_AUTO = V4B_LOWER_CENTER + 40.0/MAX_LOWER_BAR_ROTATION;
 
     // Upper servo. Axon, standard rotation of 180.98 degrees.
     private final double MAX_UPPER_BAR_ROTATION = 236.7; // 170/255
@@ -167,7 +165,8 @@ public abstract class ArmSubsystem {
 
     // Worm Gear
     protected final int HANG_WORM_READY = 500;
-    protected final int HANG_WORM_LV2 = -420;
+    protected final int HANG_WORM_LV2 = -700;
+    protected final int HANG_WORM_LV22 = -1400;
 
     // Declare actuator variables
     public List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
@@ -289,7 +288,7 @@ public abstract class ArmSubsystem {
     }
 
     public void initSensors(HardwareMap hardwareMap, boolean isRedAlliance) {
-        racist = hardwareMap.get(ColorSensor.class, "racist");
+        racist = hardwareMap.get(ColorSensor.class, "color");
         redSide = isRedAlliance;
         slideSwitch = hardwareMap.get(TouchSensor.class, "slide_limit");
         red = hardwareMap.get(LED.class, "red");

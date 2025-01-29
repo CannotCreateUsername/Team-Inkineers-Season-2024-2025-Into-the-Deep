@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.robot.opmode.autonomous.right;
 
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Vector2d;
 
 public class RightAutoCoords {
     // To make final adjustments quickly
@@ -24,7 +23,7 @@ public class RightAutoCoords {
     public Pose2d samplePosBack2 = new Pose2d(33, 14, DROPOFF);
     public Pose2d samplePos3 = new Pose2d(48, 20, PICKUP);
 
-    public Pose2d samplePos1Push = new Pose2d(34, 50, ROTATED);
+    public Pose2d samplePos1Push = new Pose2d(33, 56, ROTATED);
     public Pose2d samplePos2Push = new Pose2d(40, 50, ROTATED);
     public Pose2d samplePos3Push = new Pose2d(46, 50, STRAIGHT);
 

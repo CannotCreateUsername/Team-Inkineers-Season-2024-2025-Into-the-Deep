@@ -29,7 +29,7 @@ public class RightSideAutoBlue4 extends LinearOpMode {
 
         Action runPickupSamples = drive.actionBuilder(startPos)
                 .setTangent(0)
-                .splineToLinearHeading(coords.samplePos1Push, 0)
+                .splineToLinearHeading(coords.samplePos1Push, Math.PI/3)
                 .strafeToConstantHeading(coords.observationPos.position)
                 .setTangent(Math.PI/2)
                 .splineToLinearHeading(coords.samplePos2Push, 0)
