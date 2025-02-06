@@ -17,7 +17,7 @@ public class LeftSideAutoBlue extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPos);
 
         ArmSubsystemAuto armSubsystem = new ArmSubsystemAuto();
-        armSubsystem.init(hardwareMap, false);
+        armSubsystem.init(hardwareMap, false, true);
         // Get coordinates to use
         RightAutoCoords coords = new RightAutoCoords();
 

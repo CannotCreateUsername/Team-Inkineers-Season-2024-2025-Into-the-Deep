@@ -24,8 +24,7 @@ public class SquidDriveRed extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
-        ArmSubsystemTeleOp armSubsystem = new ArmSubsystemTeleOp();
-        armSubsystem.init(hardwareMap, true);
+        ArmSubsystemTeleOp armSubsystem = new ArmSubsystemTeleOp(hardwareMap, true);
 
         // More Gamepad functionality
         GamepadEx gamepadEx1 = new GamepadEx(gamepad1);

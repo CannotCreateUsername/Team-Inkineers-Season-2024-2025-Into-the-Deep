@@ -27,7 +27,7 @@ public class SplineTurnTest extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPos);
 
         ArmSubsystemAuto armSubsystem = new ArmSubsystemAuto();
-        armSubsystem.init(hardwareMap, true);
+        armSubsystem.init(hardwareMap, true, true);
 
         Action runSwiggly = drive.actionBuilder(startPos)
                 .setTangent(0)

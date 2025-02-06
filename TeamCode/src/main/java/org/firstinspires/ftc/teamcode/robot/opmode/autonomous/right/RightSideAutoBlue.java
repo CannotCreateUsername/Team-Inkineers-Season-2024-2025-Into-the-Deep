@@ -26,7 +26,7 @@ public class RightSideAutoBlue extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPos);
 
         ArmSubsystemAuto armSubsystem = new ArmSubsystemAuto();
-        armSubsystem.init(hardwareMap, false);
+        armSubsystem.init(hardwareMap, false, true);
 
         Action runPickupSamples = drive.actionBuilder(startPos)
                 .setTangent(0)

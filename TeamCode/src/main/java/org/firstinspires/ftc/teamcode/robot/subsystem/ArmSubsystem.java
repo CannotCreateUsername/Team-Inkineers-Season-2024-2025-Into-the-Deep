@@ -190,7 +190,7 @@ public abstract class ArmSubsystem {
 
     protected boolean redSide = false;
     // Overarching Initialization Method
-    public void init(HardwareMap hardwareMap, boolean isRedAlliance, boolean manualTesting) {
+    private void init(HardwareMap hardwareMap, boolean manualTesting, boolean isRedAlliance, boolean auto) {
         initSlideSystem(hardwareMap);
 
         // Activate all other subsystems if not manual testing
@@ -210,21 +210,23 @@ public abstract class ArmSubsystem {
             hangState = HangState.REST;
 
             targetSlidePosition = REST_POSITION_SLIDES;
-            intakeWrist.setPosition(WRIST_UP);
-            setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_INITIAL);
-            specimenBar.setPosition(SPECIMEN_BAR_INITIAL_ANGLE);
-            specimenWrist.setPosition(SPECIMEN_WRIST_INITIAL_ANGLE);
-            specimenClaw.setPosition(SPECIMEN_CLAW_CLOSED);
+            if (auto) {
+                intakeWrist.setPosition(WRIST_UP);
+                setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_INITIAL);
+                specimenBar.setPosition(SPECIMEN_BAR_INITIAL_ANGLE);
+                specimenWrist.setPosition(SPECIMEN_WRIST_INITIAL_ANGLE);
+                specimenClaw.setPosition(SPECIMEN_CLAW_CLOSED);
+            }
         }
 
         sampleState = SampleState.NONE;
     }
-    public void init(HardwareMap hardwareMap, boolean isRedAlliance) {
-        init(hardwareMap, isRedAlliance, false);
+    public void init(HardwareMap hardwareMap, boolean isRedAlliance, boolean auto) {
+        init(hardwareMap, false, isRedAlliance, auto);
     }
     // For manual adjustment in a separate OpMode
     public void initManualTesting(HardwareMap hardwareMap) {
-        init(hardwareMap, false, true);
+        init(hardwareMap, true, true, true);
         initIntake(hardwareMap);
         initV4B(hardwareMap);
         intakeWrist.setPosition(WRIST_UP);

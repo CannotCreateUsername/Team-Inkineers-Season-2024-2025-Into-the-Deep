@@ -10,8 +10,7 @@ import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemTeleOp;
 public class TestHang extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        ArmSubsystemTeleOp armSubsystem = new ArmSubsystemTeleOp();
-        armSubsystem.init(hardwareMap, true);
+        ArmSubsystemTeleOp armSubsystem = new ArmSubsystemTeleOp(hardwareMap, true);
 
         GamepadEx gamepad = new GamepadEx(gamepad1);
         GamepadEx gamepadEx2 = new GamepadEx(gamepad2);

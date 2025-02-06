@@ -5,12 +5,16 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 /** @noinspection FieldCanBeLocal*/
 public class ArmSubsystemTeleOp extends ArmSubsystem {
+    public ArmSubsystemTeleOp(HardwareMap hardwareMap, boolean isRedAlliance)  {
+        init(hardwareMap, isRedAlliance, false);
+    }
 
     public double driveMultiplier = 1;
     Pose2d drivePos;
