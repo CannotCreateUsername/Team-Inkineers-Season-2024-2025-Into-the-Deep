@@ -22,10 +22,24 @@ public class TestHang extends LinearOpMode {
             armSubsystem.runHang(gamepad, gamepadEx2);
             armSubsystem.specimenBar.setPosition(0.5);
             armSubsystem.specimenWrist.setPosition(0.5);
+//            if (gamepad1.a) {
+//                armSubsystem.hangMotor.setTargetPosition(500);
+//            } else if (gamepad1.b) {
+//                armSubsystem.hangMotor.setTargetPosition(1000);
+//            } else if (gamepad1.x) {
+//                armSubsystem.hangMotor.setTargetPosition(0);
+//            }
+
+//            armSubsystem.hangPID(1);
 
             gamepad.readButtons();
             telemetry.addData("Slide Position", armSubsystem.getSlidesPosition());
             telemetry.addData("Arm Position", armSubsystem.wormMotor.getCurrentPosition());
+            telemetry.addData("Hang Target", armSubsystem.hangMotor.getTargetPosition());
+            telemetry.addData("Hang Position", armSubsystem.hangMotor.getCurrentPosition());
+            telemetry.addData("Hang Reset should be false to move", armSubsystem.isHangReset());
+            telemetry.addData("Lower Limit Pressed", armSubsystem.lowerSwitch.isPressed());
+            telemetry.addData("Upper Limit Pressed", armSubsystem.upperSwitch.isPressed());
             telemetry.update();
         }
     }

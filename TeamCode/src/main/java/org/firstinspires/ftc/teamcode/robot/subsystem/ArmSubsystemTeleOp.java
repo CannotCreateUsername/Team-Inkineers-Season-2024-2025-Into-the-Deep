@@ -343,7 +343,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         }
     }
 
-    ElapsedTime hangTimer = new ElapsedTime();
+    private final ElapsedTime hangTimer = new ElapsedTime();
     private boolean unhang = false;
     public void runHang(GamepadEx gamepad1, GamepadEx gamepad2) {
         switch (hangState) {
@@ -375,6 +375,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     wormMotor.setPower(0);
                 }
                 resetHangSwitches();
+                hangPID(1);
                 break;
             case READY:
                 // Ensure arms are pulled backed
@@ -391,8 +392,8 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     hangMotor.setTargetPosition(HANG_DOWN);
                     hangState = HangState.HANGING;
                 }
-                hangPID(1);
                 resetHangSwitches();
+                hangPID(1);
                 break;
             case HANGING:
                 // B X A Combo
@@ -402,39 +403,28 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setSlideState(SlideState.HANG, false);
                 setSpecimenState(SpecimenState.HANG);
 
-                if (hangTimer.seconds() > 6) {
+                if (hangTimer.seconds() > 9) {
                     hangDisplayText = "A: to Release Slides, X: to Grapple Worm";
                     wormMotor.setPower(0);
                     wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                } else if (hangTimer.seconds() > 5.5) {
+                } else if (hangTimer.seconds() > 6.5) {
                     targetSlidePosition = REST_POSITION_SLIDES;
                     wormMotor.setPower(0);
-                } else if (hangTimer.seconds() > 4.8) {
+                } else if (hangTimer.seconds() > 5.8) {
                     wormMotor.setTargetPosition(0);
                     wormMotor.setPower(0.8);
-                } else if (hangTimer.seconds() > 2.8) {
+                } else if (hangTimer.seconds() > 5) {
                     targetSlidePosition = ASCENT_LV3_SLIDES;
-                    hangMotor.setTargetPosition(HANG_DOWN);
+                    hangMotor.setTargetPosition(HANG_REST);
                     wormMotor.setPower(0);
-                } else if (hangTimer.seconds() > 2) {
+                } else if (hangTimer.seconds() > 3) {
                     wormMotor.setTargetPosition(HANG_WORM_READY);
                     wormMotor.setPower(0.8);
-                } else if (hangTimer.seconds() > 0.5) {
+                } else if (hangTimer.seconds() > 1) {
                     targetSlidePosition = ASCENT_LV3_READY_SLIDES;
                 } else {
                     hangMotor.setTargetPosition(HANG_DOWN);
                 }
-
-                // Manual Control
-//                if (gamepad1.isDown(GamepadKeys.Button.A)) {
-//                    targetSlidePosition += 30;
-//                } else if (gamepad1.isDown(GamepadKeys.Button.B)) {
-//                    targetSlidePosition -= 30;
-//                } else if (gamepad1.isDown(GamepadKeys.Button.X)) {
-//                    wormMotor.setPower(-0.8);
-//                } else if (gamepad1.isDown(GamepadKeys.Button.Y)) {
-//                    wormMotor.setPower(0.8);
-//                }
 
                 if (gamepad1.wasJustPressed(GamepadKeys.Button.BACK)) {
                     hangTimer.reset();
@@ -445,11 +435,11 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
 
                 // Stop running to allow for manual control
-                if (hangTimer.seconds() < 4) {
+                if (hangTimer.seconds() < 9) {
                     wormMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 }
-                hangPID(1);
                 resetHangSwitches();
+                hangPID(1);
                 break;
         }
     }

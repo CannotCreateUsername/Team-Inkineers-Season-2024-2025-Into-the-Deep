@@ -165,11 +165,10 @@ public abstract class ArmSubsystem {
 
     // Worm Gear
     protected final int HANG_WORM_READY = 500;
-    protected final int HANG_WORM_LV3 = -700;
 
     // Linear Actuator
-    protected final int HANG_UP = 3050;
-    protected final int HANG_DOWN = 1100;
+    protected final int HANG_UP = 2560;
+    protected final int HANG_DOWN = 1700;
     protected final int HANG_REST = 0;
 
 
@@ -271,6 +270,7 @@ public abstract class ArmSubsystem {
         hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         hangMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        hangMotor.setTargetPosition(0);
     }
 
     public void initIntake(HardwareMap hardwareMap) {
@@ -469,20 +469,24 @@ public abstract class ArmSubsystem {
     private int prevTargetPosHang = 0;
     private final ElapsedTime hangTimer = new ElapsedTime();
     public void resetHangSwitches () {
-        if (prevTargetPosHang != hangMotor.getCurrentPosition()) {
+        if (prevTargetPosHang != hangMotor.getTargetPosition()) {
             hangReset = false;
             hangTimer.reset();
         }
         if (!hangReset && hangTimer.seconds() > 0.8) {
             if (lowerSwitch.isPressed()) {
                 hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                hangMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 hangReset = true;
             } else if (upperSwitch.isPressed()) {
-                hangMotor.setPower(0);
                 hangReset = true;
             }
         }
-        prevTargetPosHang = hangMotor.getCurrentPosition();
+        prevTargetPosHang = hangMotor.getTargetPosition();
+    }
+
+    public boolean isHangReset() {
+        return hangReset;
     }
 
     // RGB for yellow is (255, 255, 0)

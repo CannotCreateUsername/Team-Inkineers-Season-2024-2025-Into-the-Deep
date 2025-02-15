@@ -29,6 +29,10 @@ public class WormGearReset extends LinearOpMode {
             telemetry.addData("Move Slides", "Right/Left Bumpers");
             telemetry.addData("Slides Position", arm.getSlidesPosition());
             telemetry.addData("Slides Target", arm.targetSlidePosition);
+            telemetry.addLine();
+            telemetry.addData("Move Linear Actuator", "Up/Down DPAD");
+            telemetry.addData("Linear Actuator Position", arm.hangMotor.getCurrentPosition());
+            telemetry.addData("Linear Actuator Target", arm.hangMotor.getTargetPosition());
             telemetry.update();
         }
     }

@@ -30,6 +30,14 @@ public class ArmSubsystemTesting extends ArmSubsystem {
         } else {
             wormMotor.setPower(0);
         }
+
+        if (gamepad.isDown(GamepadKeys.Button.DPAD_UP)) {
+            hangMotor.setPower(1);
+        } else if (gamepad.isDown(GamepadKeys.Button.DPAD_DOWN)) {
+            hangMotor.setPower(-1);
+        } else {
+            hangMotor.setPower(0);
+        }
     }
 
     private boolean yeah = false;
