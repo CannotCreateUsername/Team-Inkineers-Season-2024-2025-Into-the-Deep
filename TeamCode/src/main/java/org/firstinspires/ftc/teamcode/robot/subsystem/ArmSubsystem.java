@@ -73,6 +73,7 @@ public abstract class ArmSubsystem {
 
     public enum HangState {
         REST,
+        READY,
         HANGING
     }
 
@@ -103,9 +104,8 @@ public abstract class ArmSubsystem {
     protected final int MANUAL_INCREMENT = 40;
     protected final double DEFAULT_SLIDE_POWER = 1;
     // Hanging
-    protected final int ASCENT_LV2_READY = 1500;
-    protected final int PRE_ASCENT_LV2 = 1100;
-    protected final int ASCENT_LV2 = 200;
+    protected final int ASCENT_LV3_READY_SLIDES = 3000;
+    protected final int ASCENT_LV3_SLIDES = 800;
 
 
     private final double MAX_INTAKE_WRIST_ROTATION = 236.0; // The new neutral. 12/7/24
@@ -165,8 +165,13 @@ public abstract class ArmSubsystem {
 
     // Worm Gear
     protected final int HANG_WORM_READY = 500;
-    protected final int HANG_WORM_LV2 = -700;
-    protected final int HANG_WORM_LV22 = -1400;
+    protected final int HANG_WORM_LV3 = -700;
+
+    // Linear Actuator
+    protected final int HANG_UP = 3050;
+    protected final int HANG_DOWN = 1100;
+    protected final int HANG_REST = 0;
+
 
     // Declare actuator variables
     public List<DcMotorEx> slideMotors; // Initialize as list to support potential multiple motors
@@ -179,10 +184,13 @@ public abstract class ArmSubsystem {
     public Servo specimenClaw;
 
     public DcMotor wormMotor;
+    public DcMotor hangMotor;
 
     // Sensors
     public ColorSensor racist;
     public TouchSensor slideSwitch;
+    public TouchSensor lowerSwitch;
+    public TouchSensor upperSwitch;
     public LED red;
     public LED green;
 
@@ -249,13 +257,20 @@ public abstract class ArmSubsystem {
         // Reverse a slide motor. Depends on orientation.
         slideMotors.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // Worm Gear
+        // Hanging Stuff
         wormMotor = hardwareMap.get(DcMotor.class, "worm_motor");
+        hangMotor = hardwareMap.get(DcMotor.class, "hang_motor");
+
         // Worm Motor Behavior
         wormMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         wormMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         wormMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Hang Motor Behavior
+        hangMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        hangMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void initIntake(HardwareMap hardwareMap) {
@@ -293,6 +308,8 @@ public abstract class ArmSubsystem {
         racist = hardwareMap.get(ColorSensor.class, "color");
         redSide = isRedAlliance;
         slideSwitch = hardwareMap.get(TouchSensor.class, "slide_limit");
+        lowerSwitch = hardwareMap.get(TouchSensor.class, "bottom_limit");
+        upperSwitch = hardwareMap.get(TouchSensor.class, "top_limit");
         red = hardwareMap.get(LED.class, "red");
         green = hardwareMap.get(LED.class, "green");
 
@@ -446,6 +463,26 @@ public abstract class ArmSubsystem {
         } else {
             sampleState = SampleState.NONE;
         }
+    }
+
+    protected boolean hangReset = false;
+    private int prevTargetPosHang = 0;
+    private final ElapsedTime hangTimer = new ElapsedTime();
+    public void resetHangSwitches () {
+        if (prevTargetPosHang != hangMotor.getCurrentPosition()) {
+            hangReset = false;
+            hangTimer.reset();
+        }
+        if (!hangReset && hangTimer.seconds() > 0.8) {
+            if (lowerSwitch.isPressed()) {
+                hangMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                hangReset = true;
+            } else if (upperSwitch.isPressed()) {
+                hangMotor.setPower(0);
+                hangReset = true;
+            }
+        }
+        prevTargetPosHang = hangMotor.getCurrentPosition();
     }
 
     // RGB for yellow is (255, 255, 0)
