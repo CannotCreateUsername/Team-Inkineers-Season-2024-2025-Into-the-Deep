@@ -105,7 +105,7 @@ public abstract class ArmSubsystem {
     protected final double DEFAULT_SLIDE_POWER = 1;
     // Hanging
     protected final int ASCENT_LV3_READY_SLIDES = 3000;
-    protected final int ASCENT_LV3_SLIDES = 800;
+    protected final int ASCENT_LV3_SLIDES = 1000;
 
 
     private final double MAX_INTAKE_WRIST_ROTATION = 236.0; // The new neutral. 12/7/24
@@ -124,7 +124,7 @@ public abstract class ArmSubsystem {
     protected final double V4B_LOWER_REST = V4B_LOWER_CENTER + 45.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
-    protected final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 70.0/MAX_LOWER_BAR_ROTATION;
+    protected final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 80.0/MAX_LOWER_BAR_ROTATION;
 
     // Upper servo. Axon, standard rotation of 180.98 degrees.
     private final double MAX_UPPER_BAR_ROTATION = 236.7; // 170/255
@@ -164,10 +164,11 @@ public abstract class ArmSubsystem {
     protected final double SPECIMEN_CLAW_OPEN = 0.3;
 
     // Worm Gear
-    protected final int HANG_WORM_READY = 500;
+    protected final int HANG_WORM_HALF_READY = 270;
+    protected final int HANG_WORM_READY = 600;
 
     // Linear Actuator
-    protected final int HANG_UP = 2560;
+    protected final int HANG_UP = 2650;
     protected final int HANG_DOWN = 1700;
     protected final int HANG_REST = 0;
 
@@ -279,7 +280,7 @@ public abstract class ArmSubsystem {
                 hardwareMap.get(CRServo.class, "intake_right")
         );
         // Reverse the right intake servo
-        intakeServos.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeServos.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
 
         intakeWrist = hardwareMap.get(Servo.class, "intake_wrist");
     }

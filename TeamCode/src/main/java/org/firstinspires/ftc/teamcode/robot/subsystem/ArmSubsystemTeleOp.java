@@ -334,10 +334,11 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         }
     }
 
+    private double hangError = 0;
     public void hangPID(double power) {
-        double error = hangMotor.getTargetPosition() - hangMotor.getCurrentPosition();
-        if (Math.abs(error) > 20 && !hangReset) {
-            hangMotor.setPower((error * 0.02)*power);
+        hangError = hangMotor.getTargetPosition() - hangMotor.getCurrentPosition();
+        if (Math.abs(hangError) > 20 && !hangReset) {
+            hangMotor.setPower((hangError * 0.02)*power);
         } else {
             hangMotor.setPower(0.0);
         }
@@ -403,26 +404,38 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setSlideState(SlideState.HANG, false);
                 setSpecimenState(SpecimenState.HANG);
 
-                if (hangTimer.seconds() > 9) {
-                    hangDisplayText = "A: to Release Slides, X: to Grapple Worm";
+                if (hangTimer.seconds() > 15) {
+                    hangDisplayText = "Finished";
                     wormMotor.setPower(0);
                     wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                } else if (hangTimer.seconds() > 6.5) {
+                    slidePower /= 1.1;
+                } else if (hangTimer.seconds() > 5) {
                     targetSlidePosition = REST_POSITION_SLIDES;
                     wormMotor.setPower(0);
-                } else if (hangTimer.seconds() > 5.8) {
-                    wormMotor.setTargetPosition(0);
-                    wormMotor.setPower(0.8);
-                } else if (hangTimer.seconds() > 5) {
+                    if (slideSwitch.isPressed()) {
+                        resetSlideEncoders();
+                    }
+                } else if (hangTimer.seconds() > 3.5) {
                     targetSlidePosition = ASCENT_LV3_SLIDES;
                     hangMotor.setTargetPosition(HANG_REST);
-                    wormMotor.setPower(0);
+                    if (Math.abs(hangError) < 5 || hangTimer.seconds() > 4.3) {
+                        // Should move 0.8 seconds after
+                        wormMotor.setTargetPosition(0);
+                        wormMotor.setPower(0.8);
+                        resetting = true;
+                    } else {
+                        wormMotor.setPower(0);
+                    }
                 } else if (hangTimer.seconds() > 3) {
                     wormMotor.setTargetPosition(HANG_WORM_READY);
                     wormMotor.setPower(0.8);
                 } else if (hangTimer.seconds() > 1) {
                     targetSlidePosition = ASCENT_LV3_READY_SLIDES;
+                } else if (hangTimer.seconds() > 0.5) {
+                    wormMotor.setTargetPosition(HANG_WORM_HALF_READY);
+                    wormMotor.setPower(0.8);
                 } else {
+                    targetSlidePosition = ASCENT_LV3_SLIDES;
                     hangMotor.setTargetPosition(HANG_DOWN);
                 }
 
@@ -435,7 +448,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
 
                 // Stop running to allow for manual control
-                if (hangTimer.seconds() < 9) {
+                if (hangTimer.seconds() < 15) {
                     wormMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 }
                 resetHangSwitches();
