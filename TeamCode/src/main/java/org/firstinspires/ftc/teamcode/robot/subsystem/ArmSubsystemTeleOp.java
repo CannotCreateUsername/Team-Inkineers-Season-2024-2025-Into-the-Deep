@@ -405,7 +405,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setSpecimenState(SpecimenState.HANG);
 
                 hangDisplayText = "X To Cancel";
-                releaseTime = 4.5;
+                releaseTime = 4.0;
 
                 if (hangTimer.seconds() > releaseTime) {
                     wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -416,14 +416,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 } else if (hangTimer.seconds() > 3.5) {
                     targetSlidePosition = ASCENT_LV3_SLIDES;
                     hangMotor.setTargetPosition(HANG_REST);
-                    if (Math.abs(hangError) < 5 || hangTimer.seconds() > 4.3) {
-                        // Should move 0.8 seconds after
-                        wormMotor.setTargetPosition(0);
-                        wormMotor.setPower(0.8);
-                        resetting = true;
-                    } else {
-                        wormMotor.setPower(0);
-                    }
+                    wormMotor.setPower(0);
                 } else if (hangTimer.seconds() > 2) {
                     wormMotor.setTargetPosition(HANG_WORM_READY);
                     wormMotor.setPower(0.8);
@@ -464,17 +457,19 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setSlideState(SlideState.HANG, false);
                 setSpecimenState(SpecimenState.HANG);
 
-                releaseTime = 10;
+                releaseTime = 10.0;
 
                 if (hangTimer.seconds() > releaseTime) {
                     hangDisplayText = "Finished";
-                    wormMotor.setPower(0);
                     wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    // Slowly Release
                     slidePower /= 1.1;
                 } else {
                     hangDisplayText = "X To Cancel";
                     targetSlidePosition = REST_POSITION_SLIDES;
-                    wormMotor.setPower(0);
+                    wormMotor.setTargetPosition(0);
+                    wormMotor.setPower(0.8);
+                    resetting = true;
                     if (slideSwitch.isPressed()) {
                         resetSlideEncoders();
                     }
