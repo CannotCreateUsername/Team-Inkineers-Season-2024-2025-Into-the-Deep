@@ -346,6 +346,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
     private final ElapsedTime hangTimer = new ElapsedTime();
     private boolean unhang = false;
+    private double releaseTime = 15;
     public void runHang(GamepadEx gamepad1, GamepadEx gamepad2) {
         switch (hangState) {
             case REST:
@@ -391,29 +392,26 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     wormMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     wormMotor.setTargetPosition(0);
                     hangMotor.setTargetPosition(HANG_DOWN);
-                    hangState = HangState.HANGING;
+                    hangState = HangState.ASCENT_2;
                 }
                 resetHangSwitches();
                 hangPID(1);
                 break;
-            case HANGING:
-                // B X A Combo
+            case ASCENT_2:
                 // Ensure arms are pulled backed
                 setWristState(WristState.UP, false);
                 setArmState(ArmState.HANG, false);
                 setSlideState(SlideState.HANG, false);
                 setSpecimenState(SpecimenState.HANG);
 
-                if (hangTimer.seconds() > 15) {
-                    hangDisplayText = "Finished";
-                    wormMotor.setPower(0);
+                hangDisplayText = "X To Cancel";
+                releaseTime = 4.5;
+
+                if (hangTimer.seconds() > releaseTime) {
                     wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    slidePower /= 1.1;
-                } else if (hangTimer.seconds() > 5) {
-                    targetSlidePosition = REST_POSITION_SLIDES;
-                    wormMotor.setPower(0);
-                    if (slideSwitch.isPressed()) {
-                        resetSlideEncoders();
+                    if (gamepad1.wasJustReleased(GamepadKeys.Button.BACK)) {
+                        hangTimer.reset();
+                        hangState = HangState.ASCENT_3;
                     }
                 } else if (hangTimer.seconds() > 3.5) {
                     targetSlidePosition = ASCENT_LV3_SLIDES;
@@ -426,7 +424,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     } else {
                         wormMotor.setPower(0);
                     }
-                } else if (hangTimer.seconds() > 3) {
+                } else if (hangTimer.seconds() > 2) {
                     wormMotor.setTargetPosition(HANG_WORM_READY);
                     wormMotor.setPower(0.8);
                 } else if (hangTimer.seconds() > 1) {
@@ -439,18 +437,85 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     hangMotor.setTargetPosition(HANG_DOWN);
                 }
 
+                // Pause Hanging IF NEEDED
+                if (gamepad1.wasJustReleased(GamepadKeys.Button.X)) {
+                    hangState = HangState.PAUSE;
+                }
+
+                // Only run worm gear for automated to allow for manual control after
+                if (hangTimer.seconds() < releaseTime) {
+                    wormMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                } else {
+                    if (gamepad1.isDown(GamepadKeys.Button.A)) {
+                        wormMotor.setPower(0.8);
+                    } else if (gamepad1.isDown(GamepadKeys.Button.B)) {
+                        wormMotor.setPower(-0.8);
+                    } else {
+                        wormMotor.setPower(0);
+                    }
+                }
+                resetHangSwitches();
+                hangPID(1);
+                break;
+            case ASCENT_3:
+                // Ensure arms are pulled backed
+                setWristState(WristState.UP, false);
+                setArmState(ArmState.HANG, false);
+                setSlideState(SlideState.HANG, false);
+                setSpecimenState(SpecimenState.HANG);
+
+                releaseTime = 10;
+
+                if (hangTimer.seconds() > releaseTime) {
+                    hangDisplayText = "Finished";
+                    wormMotor.setPower(0);
+                    wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    slidePower /= 1.1;
+                } else {
+                    hangDisplayText = "X To Cancel";
+                    targetSlidePosition = REST_POSITION_SLIDES;
+                    wormMotor.setPower(0);
+                    if (slideSwitch.isPressed()) {
+                        resetSlideEncoders();
+                    }
+                }
+
+
+                // Pause Hanging IF NEEDED
+                if (gamepad1.wasJustReleased(GamepadKeys.Button.X)) {
+                    hangState = HangState.PAUSE;
+                }
+
+                // Only run worm gear for automated to allow for manual control after
+                if (hangTimer.seconds() < releaseTime) {
+                    wormMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                } else {
+                    if (gamepad1.isDown(GamepadKeys.Button.A)) {
+                        wormMotor.setPower(0.8);
+                    } else if (gamepad1.isDown(GamepadKeys.Button.B)) {
+                        wormMotor.setPower(-0.8);
+                    } else {
+                        wormMotor.setPower(0);
+                    }
+                }
+                resetHangSwitches();
+                hangPID(1);
+                break;
+            case PAUSE:
+                wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                wormMotor.setPower(0);
+                slidePower = 0;
+
+                hangDisplayText = "Paused: press BACK to reset";
+
                 if (gamepad1.wasJustPressed(GamepadKeys.Button.BACK)) {
                     hangTimer.reset();
-                    slidePower = DEFAULT_SLIDE_POWER;
+                    slidePower = DEFAULT_SLIDE_POWER; // Return to normal power
 
                     unhang = true;
                     hangState = HangState.REST;
                 }
 
-                // Stop running to allow for manual control
-                if (hangTimer.seconds() < 15) {
-                    wormMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                }
                 resetHangSwitches();
                 hangPID(1);
                 break;

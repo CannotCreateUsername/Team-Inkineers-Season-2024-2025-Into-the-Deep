@@ -74,7 +74,9 @@ public abstract class ArmSubsystem {
     public enum HangState {
         REST,
         READY,
-        HANGING
+        ASCENT_2,
+        ASCENT_3,
+        PAUSE
     }
 
     public enum SampleState {
