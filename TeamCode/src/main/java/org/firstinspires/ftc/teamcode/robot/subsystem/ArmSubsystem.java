@@ -107,13 +107,13 @@ public abstract class ArmSubsystem {
     protected final double DEFAULT_SLIDE_POWER = 1;
     // Hanging
     protected final int ASCENT_LV3_READY_SLIDES = 3000;
-    protected final int ASCENT_LV3_SLIDES = 1000;
+    protected final int ASCENT_LV3_SLIDES = 1500;
 
 
     private final double MAX_INTAKE_WRIST_ROTATION = 236.0; // The new neutral. 12/7/24
 
     protected final double WRIST_NEUTRAL = 0.5;
-    protected final double WRIST_UP = WRIST_NEUTRAL + 120.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_UP = WRIST_NEUTRAL + 100.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_DROPOFF = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_LOW = WRIST_NEUTRAL - 40.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_PICKUP = WRIST_NEUTRAL; // - 30.0/MAX_INTAKE_WRIST_ROTATION;
@@ -126,7 +126,7 @@ public abstract class ArmSubsystem {
     protected final double V4B_LOWER_REST = V4B_LOWER_CENTER + 45.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
-    protected final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 80.0/MAX_LOWER_BAR_ROTATION;
+    protected final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 72.0/MAX_LOWER_BAR_ROTATION;
 
     // Upper servo. Axon, standard rotation of 180.98 degrees.
     private final double MAX_UPPER_BAR_ROTATION = 236.7; // 170/255
@@ -168,6 +168,7 @@ public abstract class ArmSubsystem {
     // Worm Gear
     protected final int HANG_WORM_HALF_READY = 270;
     protected final int HANG_WORM_READY = 600;
+    protected final int HANG_WORM_FINISH= -600;
 
     // Linear Actuator
     protected final int HANG_UP = 2650;

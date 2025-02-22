@@ -20,9 +20,11 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
     Pose2d drivePos;
 
     public void runSubsystem(GamepadEx gamepadEx1, GamepadEx gamepadEx2, Gamepad gamepad) {
+        if (hangState != HangState.ASCENT_2) {
+            runArm(gamepadEx1);
+            runIntake(gamepad);
+        }
         runSlides(gamepadEx1);
-        runArm(gamepadEx1);
-        runIntake(gamepad);
         runHang(gamepadEx1, gamepadEx2);
         runLED();
     }
@@ -163,21 +165,27 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         switch (armState) {
             case REST:
                 armDisplayText = "Rest";
-                if (armTimer.seconds() > 0.5) {
+                if (armTimer.seconds() > 0.2) {
                     setV4BPosition(ARM_REST_POS);
                 }
 
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    setArmState(ArmState.INTAKE, false);
+                    setArmState(ArmState.INTAKE, true);
+                    setV4BPosition(V4B_LOWER_REST, V4B_UPPER_CENTER);
+
                     setSpecimenState(SpecimenState.INTAKE);
                     setWristState(WristState.PICKUP, true);
                 }
                 break;
             case INTAKE:
                 armDisplayText = "Intake Extended";
-                setV4BPosition(ARM_INTAKE_POS);
+                if (armTimer.seconds() > 0.2) {
+                    setV4BPosition(ARM_INTAKE_POS);
+                }
                 if (gamepad.wasJustPressed(GamepadKeys.Button.A)) {
-                    setArmState(ArmState.REST, false);
+                    setArmState(ArmState.REST, true);
+                    setV4BPosition(V4B_LOWER_REST, V4B_UPPER_CENTER);
+
                     setWristState(WristState.NEUTRAL, false);
                     setSpecimenState(SpecimenState.INTAKE);
                     setSlideState(SlideState.REST, true);
@@ -197,7 +205,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case HANG:
                 armDisplayText = "Hanging";
-                setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_INITIAL);
+                setV4BPosition(ARM_REST_POS);
                 break;
         }
 
@@ -356,6 +364,8 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     hangState = HangState.READY;
                 }
 
+                hangDisplayText = "Not Hanging; In REST";
+
                 if (unhang) {
                     if (hangTimer.seconds() > 1.5) {
                         setArmState(ArmState.REST, false);
@@ -420,13 +430,12 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 } else if (hangTimer.seconds() > 2) {
                     wormMotor.setTargetPosition(HANG_WORM_READY);
                     wormMotor.setPower(0.8);
-                } else if (hangTimer.seconds() > 1) {
-                    targetSlidePosition = ASCENT_LV3_READY_SLIDES;
-                } else if (hangTimer.seconds() > 0.5) {
-                    wormMotor.setTargetPosition(HANG_WORM_HALF_READY);
-                    wormMotor.setPower(0.8);
+//                } else if (hangTimer.seconds() > 0.5) {
+//                    wormMotor.setTargetPosition(HANG_WORM_HALF_READY);
+//                    wormMotor.setPower(0.8);
                 } else {
-                    targetSlidePosition = ASCENT_LV3_SLIDES;
+                    targetSlidePosition = ASCENT_LV3_READY_SLIDES;
+                    wormMotor.setTargetPosition(0);
                     hangMotor.setTargetPosition(HANG_DOWN);
                 }
 
@@ -464,6 +473,10 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     // Slowly Release
                     slidePower /= 1.1;
+                } else if (hangTimer.seconds() > 2) {
+                    hangDisplayText = "Finished";
+                    wormMotor.setTargetPosition(HANG_WORM_FINISH);
+                    wormMotor.setPower(0.8);
                 } else {
                     hangDisplayText = "X To Cancel";
                     targetSlidePosition = REST_POSITION_SLIDES;
@@ -479,6 +492,12 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 // Pause Hanging IF NEEDED
                 if (gamepad1.wasJustReleased(GamepadKeys.Button.X)) {
                     hangState = HangState.PAUSE;
+                } else if (gamepad1.wasJustPressed(GamepadKeys.Button.BACK)) {
+                    hangTimer.reset();
+                    slidePower = DEFAULT_SLIDE_POWER; // Return to normal power
+
+                    unhang = true;
+                    hangState = HangState.REST;
                 }
 
                 // Only run worm gear for automated to allow for manual control after

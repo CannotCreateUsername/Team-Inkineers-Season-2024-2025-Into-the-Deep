@@ -40,6 +40,7 @@ public class TestHang extends LinearOpMode {
             telemetry.addData("Hang Reset should be false to move", armSubsystem.isHangReset());
             telemetry.addData("Lower Limit Pressed", armSubsystem.lowerSwitch.isPressed());
             telemetry.addData("Upper Limit Pressed", armSubsystem.upperSwitch.isPressed());
+            telemetry.addLine(armSubsystem.hangDisplayText);
             telemetry.update();
         }
     }
