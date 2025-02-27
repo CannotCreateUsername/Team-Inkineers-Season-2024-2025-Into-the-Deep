@@ -126,13 +126,13 @@ public abstract class ArmSubsystem {
     protected final double V4B_LOWER_REST = V4B_LOWER_CENTER + 45.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
-    protected final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 72.0/MAX_LOWER_BAR_ROTATION;
+    protected final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 70.0/MAX_LOWER_BAR_ROTATION;
 
     // Upper servo. Axon, standard rotation of 180.98 degrees.
     private final double MAX_UPPER_BAR_ROTATION = 236.7; // 170/255
     protected final double V4B_UPPER_CENTER = 0.5;
     protected final double V4B_UPPER_LEFT = V4B_UPPER_CENTER - 100.0/MAX_UPPER_BAR_ROTATION;
-    protected final double V4B_UPPER_INITIAL = V4B_UPPER_CENTER - 80.0/MAX_UPPER_BAR_ROTATION;
+    protected final double V4B_UPPER_INITIAL = V4B_UPPER_CENTER - 100.0/MAX_UPPER_BAR_ROTATION;
     protected final double V4B_UPPER_RIGHT = V4B_UPPER_CENTER + 100.0/MAX_UPPER_BAR_ROTATION;
     protected final double UPPER_ALT_INTAKE_ANGLE = 40.0/MAX_UPPER_BAR_ROTATION;
 
@@ -166,7 +166,6 @@ public abstract class ArmSubsystem {
     protected final double SPECIMEN_CLAW_OPEN = 0.3;
 
     // Worm Gear
-    protected final int HANG_WORM_HALF_READY = 270;
     protected final int HANG_WORM_READY = 600;
     protected final int HANG_WORM_FINISH= -600;
 
