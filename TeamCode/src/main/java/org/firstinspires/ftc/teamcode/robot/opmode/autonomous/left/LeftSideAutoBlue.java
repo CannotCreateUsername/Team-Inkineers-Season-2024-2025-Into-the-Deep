@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.robot.opmode.autonomous.right.RightAutoCoords;
+import org.firstinspires.ftc.teamcode.robot.opmode.autonomous.right.rr.RightAutoCoords;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemAuto;
 
 @Autonomous(name = "Left Auto", group = "Autonomous")

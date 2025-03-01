@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemAutoPP;
 
 @Autonomous(name = "PP Auto", group = "Autonomous")
-public class ExamplePPAuto extends OpMode {
+public class PPSpecimenAuto extends OpMode {
 
     private Follower follower;
     private ArmSubsystemAutoPP armSubsystem;

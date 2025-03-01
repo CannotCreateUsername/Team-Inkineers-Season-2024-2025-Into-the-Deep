@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
+import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemAutoPP;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.pathgen.BezierLine;
@@ -49,6 +50,10 @@ public class StraightBackAndForth extends OpMode {
      */
     @Override
     public void init() {
+        // Tuck in Arm
+        ArmSubsystemAutoPP armSubsystem = new ArmSubsystemAutoPP();
+        armSubsystem.init(hardwareMap, false, true);
+
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(hardwareMap);
 
