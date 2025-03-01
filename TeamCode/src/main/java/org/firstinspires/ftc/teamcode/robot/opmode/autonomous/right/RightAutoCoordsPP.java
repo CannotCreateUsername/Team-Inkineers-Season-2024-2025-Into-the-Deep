@@ -27,9 +27,9 @@ public class RightAutoCoordsPP {
     public final Pose push3Pose = new Pose(60, 8);
     public final Pose controlPush3 = new Pose(push3Pose.getX() + 2, push3Pose.getY()+12);
 
-    public final Pose observationPose1 = new Pose(18, 26);
-    public final Pose observationPose2 = new Pose(18, 16);
-    public final Pose observationPose3 = new Pose(18, 8);
+    public final Pose observationPose1 = new Pose(21, 26);
+    public final Pose observationPose2 = new Pose(21, 16);
+    public final Pose observationPose3 = new Pose(21, 8);
 
     public final Pose pickupSpecimenPose = new Pose(8, 30, ROTATED);
     public final Pose controlSpecimen0 = new Pose(18, 32); // Rotate -90 Degrees

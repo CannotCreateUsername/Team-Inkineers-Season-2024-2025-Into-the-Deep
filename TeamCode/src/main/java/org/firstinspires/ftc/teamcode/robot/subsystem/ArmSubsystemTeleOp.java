@@ -205,7 +205,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case HANG:
                 armDisplayText = "Hanging";
-                setV4BPosition(ARM_REST_POS);
+                setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_INITIAL);
                 break;
         }
 
@@ -391,7 +391,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case READY:
                 // Ensure arms are pulled backed
-                setWristState(WristState.UP, false);
+                setWristState(WristState.NEUTRAL, false);
                 setArmState(ArmState.HANG, false);
                 setSlideState(SlideState.HANG, false);
                 setSpecimenState(SpecimenState.HANG);
@@ -409,7 +409,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case ASCENT_2:
                 // Ensure arms are pulled backed
-                setWristState(WristState.UP, false);
+                setWristState(WristState.NEUTRAL, false);
                 setArmState(ArmState.HANG, false);
                 setSlideState(SlideState.HANG, false);
                 setSpecimenState(SpecimenState.HANG);
@@ -461,7 +461,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 break;
             case ASCENT_3:
                 // Ensure arms are pulled backed
-                setWristState(WristState.UP, false);
+                setWristState(WristState.NEUTRAL, false);
                 setArmState(ArmState.HANG, false);
                 setSlideState(SlideState.HANG, false);
                 setSpecimenState(SpecimenState.HANG);
@@ -512,6 +512,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                         wormMotor.setPower(0);
                     }
                 }
+
                 resetHangSwitches();
                 hangPID(1);
                 break;

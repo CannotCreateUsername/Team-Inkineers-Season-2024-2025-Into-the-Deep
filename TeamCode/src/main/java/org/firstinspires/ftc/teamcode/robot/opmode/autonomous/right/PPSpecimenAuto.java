@@ -108,12 +108,11 @@ public class PPSpecimenAuto extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                // Run to Push 1 Pose
+                /* Run pushing path chain */
                 follower.followPath(pushSamples);
                 setPathState(1);
                 break;
             case 1:
-
                 /* You could check for
                 - Follower State: "if(!follower.isBusy() {}"
                 - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
@@ -123,13 +122,30 @@ public class PPSpecimenAuto extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close
                 (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
-                    // Ready Specimen Arm
+                    // Position Pickup
+                    armSubsystem.setSpecimenArmState(0);
 
                     follower.followPath(specimenRebound,true);
                     setPathState(2);
                 }
                 break;
             case 2:
+                if(!follower.isBusy()) {
+                    // Run to score OR Terminate when X cycles are complete
+                    if (cycles > 4) {
+                        setPathState(-1);
+                    } else {
+                        // Position Score
+                        armSubsystem.setSpecimenArmState(1);
+                        cycles++;
+
+                        // follower.setPose(coords.pickupSpecimenPose);
+                        setPathState(3);
+                    }
+                }
+                break;
+            case 3:
+                // Create new paths to avoid scoring in the same place
                 scoreSpecimen = new Path(new BezierCurve(
                         new Point(coords.pickupSpecimenPose),
                         new Point(40, 30),
@@ -137,6 +153,20 @@ public class PPSpecimenAuto extends OpMode {
                         new Point(coords.scorePose0.getX(), coords.scorePose0.getY()+2*cycles)
                 ));
                 scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
+
+                if (pathTimer.getElapsedTimeSeconds() > 1) {
+                    follower.followPath(scoreSpecimen,true);
+                    setPathState(4);
+                }
+                break;
+            case 4:
+                if(!follower.isBusy()) {
+                    // Score and Release! (method already returns to zero)
+                    armSubsystem.setSpecimenArmState(2);
+                    setPathState(5);
+                }
+                break;
+            case 5:
                 pickUpSpecimen = new Path(new BezierCurve(
                         new Point(coords.scorePose0.getX(), coords.scorePose0.getY()+2*cycles),
                         new Point(30, 62),
@@ -145,23 +175,8 @@ public class PPSpecimenAuto extends OpMode {
                 ));
                 pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
 
-                if(!follower.isBusy()) {
-                    // Run to score OR Terminate when X cycles are complete
-                    if (cycles > 4) { // X
-                        setPathState(-1);
-                    } else {
-//                        follower.setPose(coords.pickupSpecimenPose);
-                        follower.followPath(scoreSpecimen,true);
-                        setPathState(3);
-                        cycles++;
-                    }
-                }
-                break;
-            case 3:
-
-                if(!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > 1) {
                     // Run to go back.
-
                     follower.followPath(pickUpSpecimen,true);
                     setPathState(2);
                 }
@@ -183,6 +198,9 @@ public class PPSpecimenAuto extends OpMode {
         // These loop the movements of the robot
         follower.update();
         autonomousPathUpdate();
+
+        // Control arm subsystem
+        armSubsystem.controlSpecimenArm();
 
         // Feedback to Driver Hub
         telemetry.addData("path state", pathState);
