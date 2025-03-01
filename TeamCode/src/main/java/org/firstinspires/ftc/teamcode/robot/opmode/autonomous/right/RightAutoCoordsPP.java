@@ -4,8 +4,8 @@ import com.pedropathing.localization.Pose;
 
 public class RightAutoCoordsPP {
 
-    public double ROTATED = Math.toRadians(0);
-    public double STRAIGHT = Math.toRadians(90);
+    public double ROTATED = Math.toRadians(-90);
+    public double STRAIGHT = Math.toRadians(0);
 
     /* Create and Define Poses + Paths
      * Poses are built with three constructors: x, y, and heading (in Radians).
@@ -15,27 +15,24 @@ public class RightAutoCoordsPP {
      * This visualizer is very easy to use to find and create paths/pathchains/poses: <https://pedro-path-generator.vercel.app/>
 
     /** Start Pose of our robot */
-    public final Pose startPose = new Pose(0, 0, STRAIGHT);
+    public final Pose startPose = new Pose(8, 66, STRAIGHT);
 
-    public final Pose scorePose1 = new Pose(-11, 35, ROTATED);
-    public final Pose scorePose2 = new Pose(-13, 35, ROTATED);
-    public final Pose scorePose3 = new Pose(-15, 35, ROTATED);
-    public final Pose scorePose4 = new Pose(-17, 35, ROTATED);
-    public final Pose scorePose5 = new Pose(-19, 35, ROTATED);
+    // From Start Pose
+    public final Pose push1Pose = new Pose(60, 26);
+    public final Pose controlPush1 = new Pose(10, 20);
+    public final Pose controlPush12 = new Pose(60, 48);
 
-    public final Pose specimenPickupPose = new Pose(20, 0, ROTATED);
+    public final Pose push2Pose = new Pose(60, 16);
+    public final Pose controlPush2 = new Pose(push2Pose.getX() + 2, push2Pose.getY()+12);
+    public final Pose push3Pose = new Pose(60, 8);
+    public final Pose controlPush3 = new Pose(push3Pose.getX() + 2, push3Pose.getY()+12);
 
-    public final Pose push1Pose = new Pose(33, 52, STRAIGHT);
-    public final Pose push2Pose = new Pose(39, 52, STRAIGHT);
-    public final Pose push3Pose = new Pose(45, 52, STRAIGHT);
+    public final Pose observationPose1 = new Pose(18, 26);
+    public final Pose observationPose2 = new Pose(18, 16);
+    public final Pose observationPose3 = new Pose(18, 8);
 
-    public final Pose observationPos1 = new Pose(32, 12, STRAIGHT);
-    public final Pose observationPos2 = new Pose(39, 12, STRAIGHT);
-    public final Pose observationPos3 = new Pose(45, 12, STRAIGHT);
+    public final Pose pickupSpecimenPose = new Pose(8, 30, ROTATED);
+    public final Pose controlSpecimen0 = new Pose(18, 32); // Rotate -90 Degrees
 
-    public final Pose parkPose = new Pose(60, 98, ROTATED);
-
-    /** Park Control Pose for our robot, this is used to manipulate the bezier curve that we will create for the parking.
-     * The Robot will not go to this pose, it is used a control point for our bezier curve. */
-    public final Pose parkControlPose = new Pose(60, 98, Math.toRadians(90));
+    public final Pose scorePose0 = new Pose(40, 68, ROTATED);
 }

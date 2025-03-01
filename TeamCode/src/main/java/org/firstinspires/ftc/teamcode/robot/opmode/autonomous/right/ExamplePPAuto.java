@@ -29,9 +29,8 @@ public class ExamplePPAuto extends OpMode {
     RightAutoCoordsPP coords = new RightAutoCoordsPP();
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
-    private Path park;
-    private PathChain pushSample1, backSample1, pushSample2, backSample2, pushSample3, backSample3;
-    private PathChain pickUpSpecimen0, scoreSpecimen, pickUpSpecimen;
+    private Path scoreSpecimen, pickUpSpecimen;
+    private PathChain pushSamples, specimenRebound;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -55,54 +54,62 @@ public class ExamplePPAuto extends OpMode {
         scorePreload.setConstantInterpolation(startPose.getHeading()); */
 
         /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        pushSample1 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(coords.startPose), new Point(coords.push1Pose)))
-                .setConstantHeadingInterpolation(coords.ROTATED)
+        pushSamples = follower.pathBuilder()
+                // Go to Above Sample 1
+                .addPath(new BezierCurve(
+                        new Point(coords.startPose),
+                        new Point(coords.controlPush1),
+                        new Point(coords.controlPush12),
+                        new Point(coords.push1Pose)
+                ))
+                .setConstantHeadingInterpolation(coords.STRAIGHT)
+                // Push Sample 1 Back
+                .addPath(new BezierLine(new Point(coords.push1Pose), new Point(coords.observationPose1)))
+                .setConstantHeadingInterpolation(coords.STRAIGHT)
+                // Go to Above Sample 2
+                .addPath(new BezierCurve(
+                        new Point(coords.observationPose1),
+                        new Point(coords.controlPush2),
+                        new Point(coords.push2Pose)
+                ))
+                .setConstantHeadingInterpolation(coords.STRAIGHT)
+                // Push Sample 2 Back
+                .addPath(new BezierLine(new Point(coords.push2Pose), new Point(coords.observationPose2)))
+                .setConstantHeadingInterpolation(coords.STRAIGHT)
+                // Go to Above Sample 3
+                .addPath(new BezierCurve(
+                        new Point(coords.observationPose2),
+                        new Point(coords.controlPush3),
+                        new Point(coords.push3Pose)
+                ))
+                .setConstantHeadingInterpolation(coords.STRAIGHT)
+                // Push Sample 3 Back
+                .addPath(new BezierLine(new Point(coords.push3Pose), new Point(coords.observationPose3)))
+                .setConstantHeadingInterpolation(coords.STRAIGHT)
                 .build();
 
-        backSample2 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(coords.push1Pose), new Point(coords.observationPos1)))
-                .setConstantHeadingInterpolation(coords.ROTATED)
+        // RESET COORDS HERE
+        specimenRebound = follower.pathBuilder()
+                // Position robot for specimen pickup
+                .addPath(new BezierCurve(
+                        new Point(coords.observationPose3),
+                        new Point(coords.controlSpecimen0),
+                        new Point(coords.pickupSpecimenPose)
+                ))
+                .setLinearHeadingInterpolation(coords.STRAIGHT, coords.ROTATED)
                 .build();
-
-        backSample1 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(coords.observationPos1), new Point(coords.push2Pose)))
-                .setConstantHeadingInterpolation(coords.ROTATED)
-                .build();
-
-        pushSample3 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(coords.push2Pose), new Point(coords.observationPos2)))
-                .setConstantHeadingInterpolation(coords.ROTATED)
-                .build();
-
-        pushSample2 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(coords.observationPos2), new Point(coords.push3Pose)))
-                .setConstantHeadingInterpolation(coords.ROTATED)
-                .build();
-
-        backSample3 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(coords.push3Pose), new Point(coords.observationPos3)))
-                .setConstantHeadingInterpolation(coords.ROTATED)
-                .build();
-
-        // Do something weird here. IDK.
-        pickUpSpecimen0 = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(coords.observationPos3), new Point(coords.specimenPickupPose)))
-                .build();
-
-        /* This is our park path. We are using a BezierCurve with 3 points, which is a curved line that is curved based off of the control point */
-//        park = new Path(new BezierCurve(new Point(coords.scorePose), /* Control Point */ new Point(coords.parkControlPose), new Point(coords.parkPose)));
-//        park.setLinearHeadingInterpolation(coords.scorePose.getHeading(), coords.parkPose.getHeading());
     }
 
     /** This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
      * Everytime the switch changes case, it will reset the timer. (This is because of the setPathState() method)
      * The followPath() function sets the follower to run the specific path, but does NOT wait for it to finish before moving on. */
+
+    private int cycles = 0;
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
                 // Run to Push 1 Pose
-                follower.followPath(pushSample1);
+                follower.followPath(pushSamples);
                 setPathState(1);
                 break;
             case 1:
@@ -116,71 +123,47 @@ public class ExamplePPAuto extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close
                 (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
-                    // Run to Observation Pose 1
+                    // Ready Specimen Arm
 
-                    follower.followPath(backSample1,true);
+                    follower.followPath(specimenRebound,true);
                     setPathState(2);
                 }
                 break;
             case 2:
+                scoreSpecimen = new Path(new BezierCurve(
+                        new Point(coords.pickupSpecimenPose),
+                        new Point(40, 30),
+                        new Point(30, 62),
+                        new Point(coords.scorePose0.getX(), coords.scorePose0.getY()+2*cycles)
+                ));
+                scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
+                pickUpSpecimen = new Path(new BezierCurve(
+                        new Point(coords.scorePose0.getX(), coords.scorePose0.getY()+2*cycles),
+                        new Point(30, 62),
+                        new Point(40, 27),
+                        new Point(coords.pickupSpecimenPose)
+                ));
+                pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
 
                 if(!follower.isBusy()) {
-                    // Run to Push 2 Pose
-
-                    follower.followPath(pushSample2,true);
-                    setPathState(3);
+                    // Run to score OR Terminate when X cycles are complete
+                    if (cycles > 4) { // X
+                        setPathState(-1);
+                    } else {
+//                        follower.setPose(coords.pickupSpecimenPose);
+                        follower.followPath(scoreSpecimen,true);
+                        setPathState(3);
+                        cycles++;
+                    }
                 }
                 break;
             case 3:
 
                 if(!follower.isBusy()) {
-                    // Run to Observation Pose 2
+                    // Run to go back.
 
-                    follower.followPath(backSample2,true);
-                    setPathState(4);
-                }
-                break;
-            case 4:
-
-                if(!follower.isBusy()) {
-                    // Run to Push 3 Pose
-
-                    follower.followPath(pushSample3,true);
-                    setPathState(5);
-                }
-                break;
-            case 5:
-
-                if(!follower.isBusy()) {
-                    // Run to Observation Pose 3
-
-                    follower.followPath(backSample3,true);
-                    setPathState(6);
-                }
-                break;
-            case 6:
-
-                if(!follower.isBusy()) {
-                    // Run to Pick Up Specimen Pose
-
-                    follower.followPath(backSample3, true);
-                    setPathState(7);
-                }
-                break;
-            case 7:
-                if(!follower.isBusy()) {
-                    // Run to Score Pose
-
-                    follower.followPath(park,true);
-                    setPathState(8);
-                }
-                break;
-            case 8:
-                if(!follower.isBusy()) {
-                    /* Level 1 Ascent */
-
-                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
-                    setPathState(-1);
+                    follower.followPath(pickUpSpecimen,true);
+                    setPathState(2);
                 }
                 break;
         }
