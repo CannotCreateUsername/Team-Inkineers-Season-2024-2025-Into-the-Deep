@@ -15,6 +15,10 @@ public class ArmSubsystemAutoPP extends ArmSubsystem {
         specimenSystemTimer.reset();
     }
 
+    public void pullUpWrist() {
+        intakeWrist.setPosition(WRIST_UP);
+    }
+
     public void controlSpecimenArm() {
         /* Timer conditions handle post initialization movements.
         else {} statements handle the default (initial) positions */

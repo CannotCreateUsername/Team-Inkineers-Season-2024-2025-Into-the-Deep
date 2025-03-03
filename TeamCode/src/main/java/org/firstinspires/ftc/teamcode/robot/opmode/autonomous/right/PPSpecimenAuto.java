@@ -30,7 +30,7 @@ public class PPSpecimenAuto extends OpMode {
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path scoreSpecimen, pickUpSpecimen;
-    private PathChain pushSamples, specimenRebound;
+    private PathChain pushSample1, pushSample2, pushSample3, specimenRebound;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -53,8 +53,7 @@ public class PPSpecimenAuto extends OpMode {
         /* Here is an example for Constant Interpolation
         scorePreload.setConstantInterpolation(startPose.getHeading()); */
 
-        /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        pushSamples = follower.pathBuilder()
+        pushSample1 = follower.pathBuilder()
                 // Go to Above Sample 1
                 .addPath(new BezierCurve(
                         new Point(coords.startPose),
@@ -66,6 +65,9 @@ public class PPSpecimenAuto extends OpMode {
                 // Push Sample 1 Back
                 .addPath(new BezierLine(new Point(coords.push1Pose), new Point(coords.observationPose1)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
+                .build();
+
+        pushSample2 = follower.pathBuilder()
                 // Go to Above Sample 2
                 .addPath(new BezierCurve(
                         new Point(coords.observationPose1),
@@ -76,6 +78,9 @@ public class PPSpecimenAuto extends OpMode {
                 // Push Sample 2 Back
                 .addPath(new BezierLine(new Point(coords.push2Pose), new Point(coords.observationPose2)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
+                .build();
+
+        pushSample3 = follower.pathBuilder()
                 // Go to Above Sample 3
                 .addPath(new BezierCurve(
                         new Point(coords.observationPose2),
@@ -109,10 +114,23 @@ public class PPSpecimenAuto extends OpMode {
         switch (pathState) {
             case 0:
                 /* Run pushing path chain */
-                follower.followPath(pushSamples);
+                armSubsystem.pullUpWrist();
+                follower.followPath(pushSample1);
                 setPathState(1);
                 break;
             case 1:
+                if (!follower.isBusy()) {
+                    follower.followPath(pushSample2);
+                    setPathState(2);
+                }
+                break;
+            case 2:
+                if (!follower.isBusy()) {
+                    follower.followPath(pushSample3);
+                    setPathState(3);
+                }
+                break;
+            case 3:
                 /* You could check for
                 - Follower State: "if(!follower.isBusy() {}"
                 - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
@@ -126,10 +144,10 @@ public class PPSpecimenAuto extends OpMode {
                     armSubsystem.setSpecimenArmState(0);
 
                     follower.followPath(specimenRebound,true);
-                    setPathState(2);
+                    setPathState(4);
                 }
                 break;
-            case 2:
+            case 4:
                 if(!follower.isBusy()) {
                     // Run to score OR Terminate when X cycles are complete
                     if (cycles > 4) {
@@ -140,11 +158,11 @@ public class PPSpecimenAuto extends OpMode {
                         cycles++;
 
                         // follower.setPose(coords.pickupSpecimenPose);
-                        setPathState(3);
+                        setPathState(5);
                     }
                 }
                 break;
-            case 3:
+            case 5:
                 // Create new paths to avoid scoring in the same place
                 scoreSpecimen = new Path(new BezierCurve(
                         new Point(coords.pickupSpecimenPose),
@@ -156,17 +174,17 @@ public class PPSpecimenAuto extends OpMode {
 
                 if (pathTimer.getElapsedTimeSeconds() > 1) {
                     follower.followPath(scoreSpecimen,true);
-                    setPathState(4);
+                    setPathState(6);
                 }
                 break;
-            case 4:
+            case 6:
                 if(!follower.isBusy()) {
                     // Score and Release! (method already returns to zero)
                     armSubsystem.setSpecimenArmState(2);
-                    setPathState(5);
+                    setPathState(7);
                 }
                 break;
-            case 5:
+            case 7:
                 pickUpSpecimen = new Path(new BezierCurve(
                         new Point(coords.scorePose0.getX(), coords.scorePose0.getY()+2*cycles),
                         new Point(30, 62),
@@ -178,7 +196,7 @@ public class PPSpecimenAuto extends OpMode {
                 if (pathTimer.getElapsedTimeSeconds() > 1) {
                     // Run to go back.
                     follower.followPath(pickUpSpecimen,true);
-                    setPathState(2);
+                    setPathState(4);
                 }
                 break;
         }

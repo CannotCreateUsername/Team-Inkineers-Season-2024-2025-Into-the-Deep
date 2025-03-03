@@ -18,20 +18,20 @@ public class RightAutoCoordsPP {
     public final Pose startPose = new Pose(8, 66, STRAIGHT);
 
     // From Start Pose
-    public final Pose push1Pose = new Pose(60, 26);
+    public final Pose push1Pose = new Pose(60, 28);
     public final Pose controlPush1 = new Pose(10, 20);
     public final Pose controlPush12 = new Pose(60, 48);
+    public final Pose observationPose1 = new Pose(28, 26);
 
-    public final Pose push2Pose = new Pose(60, 16);
+    public final Pose push2Pose = new Pose(60, 22);
     public final Pose controlPush2 = new Pose(push2Pose.getX() + 2, push2Pose.getY()+12);
-    public final Pose push3Pose = new Pose(60, 8);
+    public final Pose observationPose2 = new Pose(28, 22);
+
+    public final Pose push3Pose = new Pose(60, 14);
     public final Pose controlPush3 = new Pose(push3Pose.getX() + 2, push3Pose.getY()+12);
+    public final Pose observationPose3 = new Pose(28, 13);
 
-    public final Pose observationPose1 = new Pose(21, 26);
-    public final Pose observationPose2 = new Pose(21, 16);
-    public final Pose observationPose3 = new Pose(21, 8);
-
-    public final Pose pickupSpecimenPose = new Pose(8, 30, ROTATED);
+    public final Pose pickupSpecimenPose = new Pose(14, 30, ROTATED);
     public final Pose controlSpecimen0 = new Pose(18, 32); // Rotate -90 Degrees
 
     public final Pose scorePose0 = new Pose(40, 68, ROTATED);
