@@ -16,6 +16,7 @@ public class ArmSubsystemAutoPP extends ArmSubsystem {
     }
 
     public void pullUpWrist() {
+        setV4BPosition(ARM_REST_POS);
         intakeWrist.setPosition(WRIST_UP);
     }
 
@@ -38,7 +39,11 @@ public class ArmSubsystemAutoPP extends ArmSubsystem {
                 specimenClaw.setPosition(SPECIMEN_CLAW_CLOSED);
                 if (specimenSystemTimer.seconds() > 0.2) {
                     specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
-                    specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                    if (specimenSystemTimer.seconds() > 0.4) {
+                        specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
+                    } else {
+                        specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);
+                    }
                 }
                 break;
             case 2:

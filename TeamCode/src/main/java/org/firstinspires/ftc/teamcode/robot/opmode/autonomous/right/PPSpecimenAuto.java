@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robot.opmode.autonomous.right;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.pathgen.BezierCurve;
 import com.pedropathing.pathgen.BezierLine;
@@ -11,12 +13,14 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemAutoPP;
 
 @Autonomous(name = "PP Auto", group = "Autonomous")
 public class PPSpecimenAuto extends OpMode {
+    private Telemetry telemetryA;
 
     private Follower follower;
     private ArmSubsystemAutoPP armSubsystem;
@@ -149,6 +153,9 @@ public class PPSpecimenAuto extends OpMode {
                 break;
             case 4:
                 if(!follower.isBusy()) {
+                    // Correct because the localization is STUPID
+                    follower.setPose(coords.pickupSpecimenPose);
+
                     // Run to score OR Terminate when X cycles are complete
                     if (cycles > 4) {
                         setPathState(-1);
@@ -164,15 +171,27 @@ public class PPSpecimenAuto extends OpMode {
                 break;
             case 5:
                 // Create new paths to avoid scoring in the same place
+                // From Pickup to Score
+                Point newScore = new Point(coords.scorePose0.getX(), coords.scorePose0.getY()+ 2*cycles);
                 scoreSpecimen = new Path(new BezierCurve(
                         new Point(coords.pickupSpecimenPose),
                         new Point(40, 30),
                         new Point(30, 62),
-                        new Point(coords.scorePose0.getX(), coords.scorePose0.getY()+2*cycles)
+                        newScore
                 ));
                 scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
+                scoreSpecimen.setZeroPowerAccelerationMultiplier(4);
+                // From Score to Pickup
+                pickUpSpecimen = new Path(new BezierCurve(
+                        newScore,
+                        new Point(30, 62),
+                        new Point(40, 27),
+                        new Point(coords.pickupSpecimenPose)
+                ));
+                pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
+                pickUpSpecimen.setZeroPowerAccelerationMultiplier(2);
 
-                if (pathTimer.getElapsedTimeSeconds() > 1) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.1) {
                     follower.followPath(scoreSpecimen,true);
                     setPathState(6);
                 }
@@ -185,15 +204,7 @@ public class PPSpecimenAuto extends OpMode {
                 }
                 break;
             case 7:
-                pickUpSpecimen = new Path(new BezierCurve(
-                        new Point(coords.scorePose0.getX(), coords.scorePose0.getY()+2*cycles),
-                        new Point(30, 62),
-                        new Point(40, 27),
-                        new Point(coords.pickupSpecimenPose)
-                ));
-                pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
-
-                if (pathTimer.getElapsedTimeSeconds() > 1) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.3) {
                     // Run to go back.
                     follower.followPath(pickUpSpecimen,true);
                     setPathState(4);
@@ -226,6 +237,7 @@ public class PPSpecimenAuto extends OpMode {
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.update();
+        follower.telemetryDebug(telemetryA);
     }
 
     /** This method is called once at the init of the OpMode. **/
@@ -243,6 +255,10 @@ public class PPSpecimenAuto extends OpMode {
         // Robot Systems
         armSubsystem = new ArmSubsystemAutoPP();
         armSubsystem.init(hardwareMap, false, true);
+
+        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetryA.addLine("This opmode has a serious case of LIGMA. Ong, no cap.");
+        telemetryA.update();
     }
 
     /** This method is called continuously after Init while waiting for "play". **/
