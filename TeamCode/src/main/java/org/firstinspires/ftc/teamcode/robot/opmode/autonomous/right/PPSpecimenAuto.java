@@ -66,9 +66,11 @@ public class PPSpecimenAuto extends OpMode {
                         new Point(coords.push1Pose)
                 ))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
+                .setZeroPowerAccelerationMultiplier(6)
                 // Push Sample 1 Back
                 .addPath(new BezierLine(new Point(coords.push1Pose), new Point(coords.observationPose1)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
+                .setZeroPowerAccelerationMultiplier(4)
                 .build();
 
         pushSample2 = follower.pathBuilder()
@@ -79,9 +81,11 @@ public class PPSpecimenAuto extends OpMode {
                         new Point(coords.push2Pose)
                 ))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
+                .setZeroPowerAccelerationMultiplier(6)
                 // Push Sample 2 Back
                 .addPath(new BezierLine(new Point(coords.push2Pose), new Point(coords.observationPose2)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
+                .setZeroPowerAccelerationMultiplier(4)
                 .build();
 
         pushSample3 = follower.pathBuilder()
@@ -92,9 +96,11 @@ public class PPSpecimenAuto extends OpMode {
                         new Point(coords.push3Pose)
                 ))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
+                .setZeroPowerAccelerationMultiplier(6)
                 // Push Sample 3 Back
                 .addPath(new BezierLine(new Point(coords.push3Pose), new Point(coords.observationPose3)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
+                .setZeroPowerAccelerationMultiplier(4)
                 .build();
 
         // RESET COORDS HERE
