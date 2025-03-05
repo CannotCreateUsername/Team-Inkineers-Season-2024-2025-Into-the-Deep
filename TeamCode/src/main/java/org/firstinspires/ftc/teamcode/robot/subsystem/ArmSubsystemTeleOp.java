@@ -95,7 +95,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 // 2nd Intake Level
                 if (intakeState == IntakeState.IN) {
                     if (stallTimer.seconds() > 0.1)
-                        targetSlidePosition = 350;
+                        targetSlidePosition = 440;
                 } else {
                     targetSlidePosition = INTAKE_POSITION_SLIDES;
                 }
@@ -474,7 +474,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     // Slowly Release
                     slidePower /= 1.1;
                 } else if (hangTimer.seconds() > 2) {
-                    hangDisplayText = "Finished";
+                    hangDisplayText = "Press Y to add +5.0 Seconds";
                     wormMotor.setTargetPosition(HANG_WORM_FINISH);
                     wormMotor.setPower(0.8);
                 } else {
@@ -488,6 +488,9 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     }
                 }
 
+                if (gamepad1.wasJustPressed(GamepadKeys.Button.Y)) {
+                    releaseTime += 5.0;
+                }
 
                 // Pause Hanging IF NEEDED
                 if (gamepad1.wasJustReleased(GamepadKeys.Button.X)) {
@@ -535,5 +538,9 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 hangPID(1);
                 break;
         }
+    }
+
+    public double getHangTime() {
+        return hangTimer.seconds();
     }
 }
