@@ -117,7 +117,7 @@ public abstract class ArmSubsystem {
     protected final double WRIST_DROPOFF = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_LOW = WRIST_NEUTRAL - 40.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_PICKUP = WRIST_NEUTRAL; // - 30.0/MAX_INTAKE_WRIST_ROTATION;
-    protected final double WRIST_DOWN = WRIST_NEUTRAL - 100.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_DOWN = WRIST_NEUTRAL - MAX_INTAKE_WRIST_ROTATION/2;
 
     // Coaxial V4B positions
     // Lower servos. Axon, standard rotation of 180.98 degrees.

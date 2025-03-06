@@ -100,6 +100,10 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     targetSlidePosition = INTAKE_POSITION_SLIDES;
                 }
 
+                if (intakeState != IntakeState.OUT) {
+                    setWristState(WristState.DOWN, false);
+                }
+
                 if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
                     targetSlidePosition = REST_POSITION_SLIDES;
                     setSlideState(SlideState.REST, true);
