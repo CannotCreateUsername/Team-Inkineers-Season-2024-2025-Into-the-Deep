@@ -81,10 +81,16 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
 
                 slideDisplayText = "REST";
-                targetSlidePosition = REST_POSITION_SLIDES;
+                if (slideDelay) {
+                    if (stallTimer.seconds() > 0.2) {
+                        targetSlidePosition = REST_POSITION_SLIDES;
+                    }
+                } else {
+                    targetSlidePosition = REST_POSITION_SLIDES;
+                }
 
                 if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
-                    setSlideState(SlideState.INTAKE, false);
+                    setSlideState(SlideState.INTAKE, false, false);
 
                     setArmState(ArmState.INTAKE, false);
                     setWristState(WristState.DOWN, false);
@@ -95,7 +101,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 // 2nd Intake Level
                 if (intakeState == IntakeState.IN) {
                     if (stallTimer.seconds() > 0.1)
-                        targetSlidePosition = 440;
+                        targetSlidePosition = 410;
                 } else {
                     targetSlidePosition = INTAKE_POSITION_SLIDES;
                 }
@@ -105,14 +111,13 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
 
                 if (gamepad.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER)) {
-                    targetSlidePosition = REST_POSITION_SLIDES;
-                    setSlideState(SlideState.REST, true);
+                    setSlideState(SlideState.REST, true, true);
 
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.NEUTRAL, false);
                 } else if (gamepad.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER)) {
                     targetSlidePosition = OUTTAKE_POSITION_SLIDES;
-                    setSlideState(SlideState.OUTTAKE, false);
+                    setSlideState(SlideState.OUTTAKE, false, false);
 
                     setArmState(ArmState.HANG, false);
                     setWristState(WristState.LOW, false);
@@ -137,7 +142,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 if (buttonCount > 1 && buttonTimer.seconds() < 0.5) {
                     // Move back down to rest
-                    setSlideState(SlideState.REST, true);
+                    setSlideState(SlideState.REST, true, false);
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.NEUTRAL, true);
 
@@ -192,7 +197,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
                     setWristState(WristState.NEUTRAL, false);
                     setSpecimenState(SpecimenState.INTAKE);
-                    setSlideState(SlideState.REST, true);
+                    setSlideState(SlideState.REST, true, false);
                 } else if (gamepad.isDown(GamepadKeys.Button.DPAD_LEFT) || gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
                     setArmState(ArmState.RIGHT, false);
                 }
@@ -223,6 +228,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 }
                 specimenBar.setPosition(SPECIMEN_BAR_INTAKE_ANGLE);
                 if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
+                    setSlideState(SlideState.REST, true, true);
                     setArmState(ArmState.REST, false);
                     setWristState(WristState.UP, false);
                     setSpecimenState(SpecimenState.OUTTAKE);
@@ -373,7 +379,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 if (unhang) {
                     if (hangTimer.seconds() > 1.5) {
                         setArmState(ArmState.REST, false);
-                        setSlideState(SlideState.REST, false);
+                        setSlideState(SlideState.REST, false, false);
                         setSpecimenState(SpecimenState.INTAKE);
                         unhang = false;
                     }
@@ -397,7 +403,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 // Ensure arms are pulled backed
                 setWristState(WristState.NEUTRAL, false);
                 setArmState(ArmState.HANG, false);
-                setSlideState(SlideState.HANG, false);
+                setSlideState(SlideState.HANG, false, false);
                 setSpecimenState(SpecimenState.HANG);
 
                 if (gamepad1.wasJustPressed(GamepadKeys.Button.BACK)) {
@@ -415,7 +421,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 // Ensure arms are pulled backed
                 setWristState(WristState.NEUTRAL, false);
                 setArmState(ArmState.HANG, false);
-                setSlideState(SlideState.HANG, false);
+                setSlideState(SlideState.HANG, false, false);
                 setSpecimenState(SpecimenState.HANG);
 
                 hangDisplayText = "X To Cancel";
@@ -467,7 +473,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 // Ensure arms are pulled backed
                 setWristState(WristState.NEUTRAL, false);
                 setArmState(ArmState.HANG, false);
-                setSlideState(SlideState.HANG, false);
+                setSlideState(SlideState.HANG, false, false);
                 setSpecimenState(SpecimenState.HANG);
 
                 releaseTime = 10.0;

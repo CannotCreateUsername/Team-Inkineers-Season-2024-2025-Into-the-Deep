@@ -348,6 +348,7 @@ public abstract class ArmSubsystem {
     // Method to reset slide encoders
     ElapsedTime stallTimer = new ElapsedTime();
     boolean resetting = false;
+    protected boolean slideDelay = false;
     public void resetSlideEncoders() {
         for (DcMotorEx m : slideMotors) {
             m.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -360,8 +361,9 @@ public abstract class ArmSubsystem {
         return slideMotors.get(0).getCurrentPosition();
     }
 
-    public void setSlideState(SlideState state, boolean reset) {
+    public void setSlideState(SlideState state, boolean reset, boolean delay) {
         resetting = reset;
+        slideDelay = delay;
         stallTimer.reset();
         slideState = state;
     }

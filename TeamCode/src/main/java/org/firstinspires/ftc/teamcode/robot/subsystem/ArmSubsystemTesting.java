@@ -135,11 +135,14 @@ public class ArmSubsystemTesting extends ArmSubsystem {
             intakeWrist.setPosition(WRIST_UP);
         } else if (gamepad.b) {
             intakeWrist.setPosition(WRIST_PICKUP);
-        } else if (gamepad.back) {
+        } else if (gamepad.start) {
             intakeWrist.setPosition(WRIST_NEUTRAL);
         }
 
         opMode.telemetry.addData("Test Intake", "Left/Right Trigger");
         opMode.telemetry.addData("Individual Servos", "Left Bumper for Left. Should Intake");
+        opMode.telemetry.addLine();
+        opMode.telemetry.addData("Wrist Up", "A");
+        opMode.telemetry.addData("Wrist Neutral", "Start");
     }
 }
