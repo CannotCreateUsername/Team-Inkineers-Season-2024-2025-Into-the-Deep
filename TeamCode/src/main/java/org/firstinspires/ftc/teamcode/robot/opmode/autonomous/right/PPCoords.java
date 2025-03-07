@@ -22,17 +22,19 @@ public class PPCoords {
     public final Pose controlPush1 = new Pose(10, 20);
     public final Pose controlPush12 = new Pose(60, 48);
     public final Pose observationPose1 = new Pose(28, 26);
+    public final Pose controlObservationPose1 = new Pose(observationPose1.getX() + 4, observationPose1.getY() + 10);
 
-    public final Pose push2Pose = new Pose(54, 24);
+    public final Pose push2Pose = new Pose(56, 22);
     public final Pose controlPush2 = new Pose(push2Pose.getX() + 2, push2Pose.getY()+12);
-    public final Pose observationPose2 = new Pose(28, 22);
+    public final Pose observationPose2 = new Pose(28, 20);
+    public final Pose controlObservationPose2 = new Pose(observationPose2.getX() + 4, observationPose2.getY() + 10);
 
-    public final Pose push3Pose = new Pose(54, 12);
+    public final Pose push3Pose = new Pose(58, 12);
     public final Pose controlPush3 = new Pose(push3Pose.getX() + 2, push3Pose.getY()+14);
     public final Pose observationPose3 = new Pose(28, 12);
 
     public final Pose pickupSpecimenPose = new Pose(14, 37, ROTATED); // 0.5 in to the left of hole
     public final Pose controlSpecimen0 = new Pose(pickupSpecimenPose.getX() + 10, pickupSpecimenPose.getY() + 2); // Rotate -90 Degrees
 
-    public final Pose scorePose0 = new Pose(42, 68, ROTATED);
+    public final Pose scorePose = new Pose(42, 68, ROTATED);
 }

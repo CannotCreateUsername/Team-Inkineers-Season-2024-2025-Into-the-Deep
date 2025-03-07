@@ -281,8 +281,6 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 wristDisplayText = "Neutral";
                 if (wristTimer.seconds() > 0.2)
                     intakeWrist.setPosition(WRIST_NEUTRAL);
-                if (gamepad.wasJustPressed(GamepadKeys.Button.Y))
-                    setWristState(WristState.LOW, false);
                 break;
             case UP:
                 wristDisplayText = "Up";
