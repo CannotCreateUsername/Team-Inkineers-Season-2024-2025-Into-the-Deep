@@ -113,7 +113,7 @@ public abstract class ArmSubsystem {
     private final double MAX_INTAKE_WRIST_ROTATION = 236.0; // The new neutral. 12/7/24
 
     protected final double WRIST_NEUTRAL = 0.5;
-    protected final double WRIST_UP = WRIST_NEUTRAL + 100.0/MAX_INTAKE_WRIST_ROTATION;
+    protected final double WRIST_UP = WRIST_NEUTRAL + 85.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_DROPOFF = WRIST_NEUTRAL - 30.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_LOW = WRIST_NEUTRAL - 40.0/MAX_INTAKE_WRIST_ROTATION;
     protected final double WRIST_PICKUP = WRIST_NEUTRAL; // - 30.0/MAX_INTAKE_WRIST_ROTATION;
@@ -221,7 +221,7 @@ public abstract class ArmSubsystem {
 
             targetSlidePosition = REST_POSITION_SLIDES;
             if (auto) {
-                intakeWrist.setPosition(WRIST_NEUTRAL);
+                intakeWrist.setPosition(WRIST_UP);
                 setV4BPosition(V4B_LOWER_INITIAL, V4B_UPPER_INITIAL);
                 specimenBar.setPosition(SPECIMEN_BAR_INITIAL_ANGLE);
                 specimenWrist.setPosition(SPECIMEN_WRIST_INITIAL_ANGLE);
@@ -348,6 +348,7 @@ public abstract class ArmSubsystem {
     // Method to reset slide encoders
     ElapsedTime stallTimer = new ElapsedTime();
     boolean resetting = false;
+    protected boolean slideDelay = false;
     public void resetSlideEncoders() {
         for (DcMotorEx m : slideMotors) {
             m.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -360,8 +361,9 @@ public abstract class ArmSubsystem {
         return slideMotors.get(0).getCurrentPosition();
     }
 
-    public void setSlideState(SlideState state, boolean reset) {
+    public void setSlideState(SlideState state, boolean reset, boolean delay) {
         resetting = reset;
+        slideDelay = delay;
         stallTimer.reset();
         slideState = state;
     }

@@ -3,15 +3,12 @@ package org.firstinspires.ftc.teamcode.robot.opmode.autonomous;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.pathgen.BezierCurve;
 import com.pedropathing.pathgen.BezierLine;
-import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -20,9 +17,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 import org.firstinspires.ftc.teamcode.robot.opmode.autonomous.right.PPCoords;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemAutoPP;
 
-@Disabled
-@Autonomous(name = "PP Swiggly Test", group = "Autonomous")
-public class PPSwigglyTest extends OpMode {
+@Autonomous(name = "PP Strafe Right Test", group = "Autonomous")
+public class PPStrafeRightTest extends OpMode {
     private Telemetry telemetryA;
 
     private Follower follower;
@@ -36,8 +32,7 @@ public class PPSwigglyTest extends OpMode {
     PPCoords coords = new PPCoords();
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
-    private Path scoreSpecimen, pickUpSpecimen;
-    private PathChain pushSample1, pushSample2, specimenRebound;
+    private PathChain goBack, goForth;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -60,45 +55,14 @@ public class PPSwigglyTest extends OpMode {
         /* Here is an example for Constant Interpolation
         scorePreload.setConstantInterpolation(startPose.getHeading()); */
 
-        pushSample1 = follower.pathBuilder()
-                // Go to Above Sample 1
-                .addPath(new BezierCurve(
-                        new Point(coords.startPose),
-                        new Point(coords.controlPush1),
-                        new Point(coords.controlPush12),
-                        new Point(coords.push1Pose)
-                ))
+        goForth = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(coords.startPose), new Point(coords.startPose.getX(), coords.startPose.getY() - 48)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(5)
                 .build();
 
-        pushSample2 = follower.pathBuilder()
-                // Go to Above Sample 1
-                .addPath(new BezierCurve(
-                        new Point(coords.push1Pose),
-                        new Point(coords.controlPush12),
-                        new Point(coords.controlPush1),
-                        new Point(coords.startPose)
-                ))
+        goBack = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(coords.startPose.getX(), coords.startPose.getY() - 48), new Point(coords.startPose)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(5)
-                .build();
-
-        // RESET COORDS HERE
-        specimenRebound = follower.pathBuilder()
-                // Position robot for specimen pickup
-                .addPath(new BezierCurve(
-                        new Point(coords.observationPose3),
-                        new Point(coords.controlSpecimen0),
-                        new Point(coords.pickupSpecimenPose)
-                ))
-                .setLinearHeadingInterpolation(coords.STRAIGHT, coords.ROTATED)
-                .addPath(new BezierCurve(
-                        new Point(coords.pickupSpecimenPose),
-                        new Point(coords.controlSpecimen0),
-                        new Point(coords.observationPose3)
-                ))
-                .setLinearHeadingInterpolation(coords.ROTATED, coords.STRAIGHT)
                 .build();
     }
 
@@ -113,8 +77,8 @@ public class PPSwigglyTest extends OpMode {
                 armSubsystem.restArm(true);
                 /* Run pushing path chain */
                 if (!follower.isBusy()) {
-                    if (cycles < 4) {
-                        follower.followPath(pushSample1);
+                    if (cycles < 2) {
+                        follower.followPath(goForth);
                         setPathState(1);
 
                         cycles++;
@@ -124,34 +88,11 @@ public class PPSwigglyTest extends OpMode {
                 }
                 break;
             case 1:
-//                // Create new paths to avoid scoring in the same place
-//                // From Pickup to Score
-//                Point newScore = new Point(coords.scorePose0.getX(), coords.scorePose0.getY()+ 2*cycles);
-//                scoreSpecimen = new Path(new BezierCurve(
-//                        new Point(coords.pickupSpecimenPose),
-//                        new Point(40, 30),
-//                        new Point(30, 62),
-//                        newScore
-//                ));
-//                scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
-//                scoreSpecimen.setZeroPowerAccelerationMultiplier(4);
-//                // From Score to Pickup
-//                pickUpSpecimen = new Path(new BezierCurve(
-//                        newScore,
-//                        new Point(30, 62),
-//                        new Point(40, 27),
-//                        new Point(coords.pickupSpecimenPose)
-//                ));
-//                pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
-//                pickUpSpecimen.setZeroPowerAccelerationMultiplier(2);
-//
-//                if (pathTimer.getElapsedTimeSeconds() > 0.1) {
-//                    follower.followPath(scoreSpecimen,true);
-//                    setPathState(6);
-//                }
                 if (!follower.isBusy()) {
-                    follower.followPath(pushSample2);
-                    setPathState(0);
+                    if (cycles < 2) {
+                        follower.followPath(goBack);
+                        setPathState(0);
+                    }
                 }
                 break;
         }

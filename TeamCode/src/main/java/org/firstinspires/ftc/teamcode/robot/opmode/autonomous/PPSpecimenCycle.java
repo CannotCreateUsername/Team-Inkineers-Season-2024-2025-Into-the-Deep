@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode.robot.opmode.autonomous;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.pathgen.BezierLine;
+import com.pedropathing.pathgen.BezierCurve;
+import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -17,8 +19,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 import org.firstinspires.ftc.teamcode.robot.opmode.autonomous.right.PPCoords;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemAutoPP;
 
-@Autonomous(name = "PP Strafe Test", group = "Autonomous")
-public class PPStrafeTest extends OpMode {
+//@Disabled
+@Autonomous(name = "PP Auto Cycle Path", group = "Autonomous")
+public class PPSpecimenCycle extends OpMode {
     private Telemetry telemetryA;
 
     private Follower follower;
@@ -32,7 +35,8 @@ public class PPStrafeTest extends OpMode {
     PPCoords coords = new PPCoords();
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
-    private PathChain goBack, goForth;
+    private Path scoreSpecimen, pickUpSpecimen;
+    private PathChain specimenRebound;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -55,14 +59,15 @@ public class PPStrafeTest extends OpMode {
         /* Here is an example for Constant Interpolation
         scorePreload.setConstantInterpolation(startPose.getHeading()); */
 
-        goForth = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(coords.startPose), new Point(coords.startPose.getX(), coords.startPose.getY() - 48)))
-                .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .build();
-
-        goBack = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(coords.startPose.getX(), coords.startPose.getY() - 48), new Point(coords.startPose)))
-                .setConstantHeadingInterpolation(coords.STRAIGHT)
+        // RESET COORDS HERE
+        specimenRebound = follower.pathBuilder()
+                // Position robot for specimen pickup
+                .addPath(new BezierCurve(
+                        new Point(coords.observationPose3),
+                        new Point(coords.controlSpecimen0),
+                        new Point(coords.pickupSpecimenPose.getX(), coords.pickupSpecimenPose.getY() + 4)
+                ))
+                .setLinearHeadingInterpolation(coords.STRAIGHT, coords.ROTATED)
                 .build();
     }
 
@@ -74,22 +79,42 @@ public class PPStrafeTest extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                armSubsystem.restArm(false);
                 /* Run pushing path chain */
-                if (!follower.isBusy()) {
-                    if (cycles < 4) {
-                        follower.followPath(goForth);
-                        setPathState(1);
+                armSubsystem.restArm(true);
+                if (cycles > 4) {
+                    setPathState(-1);
+                } else if (!follower.isBusy()) {
+                    follower.setPose(coords.pickupSpecimenPose);
+                    // From Pickup to Score
+                    Point newScore = new Point(coords.scorePose.getX(), coords.scorePose.getY() + cycles);
+                    scoreSpecimen = new Path(new BezierCurve(
+                            new Point(coords.pickupSpecimenPose),
+                            new Point(newScore.getX(), coords.pickupSpecimenPose.getY()),
+                            new Point(20, newScore.getY()),
+                            newScore
+                    ));
+                    scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
+                    scoreSpecimen.setZeroPowerAccelerationMultiplier(4);
+                    // From Score to Pickup
+                    Point newPickup = new Point(coords.pickupSpecimenPose.getX(), coords.pickupSpecimenPose.getY());
+                    pickUpSpecimen = new Path(new BezierCurve(
+                            newScore,
+                            new Point(newPickup.getX(), newScore.getY()),
+                            new Point(newScore.getX(), newPickup.getY()),
+                            newPickup
+                    ));
+                    pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
+                    pickUpSpecimen.setZeroPowerAccelerationMultiplier(4);
 
-                        cycles++;
-                    } else {
-                        setPathState(-1);
-                    }
+                    cycles++;
+
+                    follower.followPath(scoreSpecimen);
+                    setPathState(1);
                 }
                 break;
             case 1:
-                if (!follower.isBusy()) {
-                    follower.followPath(goBack);
+                if(!follower.isBusy()) {
+                    follower.followPath(pickUpSpecimen);
                     setPathState(0);
                 }
                 break;
@@ -132,7 +157,7 @@ public class PPStrafeTest extends OpMode {
 
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(hardwareMap);
-        follower.setStartingPose(coords.startPose);
+        follower.setStartingPose(coords.pickupSpecimenPose);
         buildPaths();
 
         // Robot Systems

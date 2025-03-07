@@ -68,12 +68,12 @@ public class PPSpecimenAuto extends OpMode {
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
                 .setZeroPowerAccelerationMultiplier(6)
                 // Push Sample 1 Back
-                .addPath(new BezierLine(new Point(coords.push1Pose), new Point(coords.observationPose1)))
+                .addPath(new BezierCurve(
+                        new Point(coords.push1Pose),
+                        new Point (coords.controlObservationPose1),
+                        new Point(coords.observationPose1)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(4)
-                .build();
-
-        pushSample2 = follower.pathBuilder()
+                .setZeroPowerAccelerationMultiplier(8)
                 // Go to Above Sample 2
                 .addPath(new BezierCurve(
                         new Point(coords.observationPose1),
@@ -83,12 +83,12 @@ public class PPSpecimenAuto extends OpMode {
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
                 .setZeroPowerAccelerationMultiplier(6)
                 // Push Sample 2 Back
-                .addPath(new BezierLine(new Point(coords.push2Pose), new Point(coords.observationPose2)))
+                .addPath(new BezierCurve(
+                        new Point(coords.push2Pose),
+                        new Point (coords.controlObservationPose2),
+                        new Point(coords.observationPose2)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(4)
-                .build();
-
-        pushSample3 = follower.pathBuilder()
+                .setZeroPowerAccelerationMultiplier(8)
                 // Go to Above Sample 3
                 .addPath(new BezierCurve(
                         new Point(coords.observationPose2),
@@ -100,8 +100,41 @@ public class PPSpecimenAuto extends OpMode {
                 // Push Sample 3 Back
                 .addPath(new BezierLine(new Point(coords.push3Pose), new Point(coords.observationPose3)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(4)
+                .setZeroPowerAccelerationMultiplier(8)
                 .build();
+
+//        pushSample2 = follower.pathBuilder()
+//                // Go to Above Sample 2
+//                .addPath(new BezierCurve(
+//                        new Point(coords.observationPose1),
+//                        new Point(coords.controlPush2),
+//                        new Point(coords.push2Pose)
+//                ))
+//                .setConstantHeadingInterpolation(coords.STRAIGHT)
+//                .setZeroPowerAccelerationMultiplier(6)
+//                // Push Sample 2 Back
+//                .addPath(new BezierCurve(
+//                        new Point(coords.push2Pose),
+//                        new Point (coords.controlObservationPose2),
+//                        new Point(coords.observationPose2)))
+//                .setConstantHeadingInterpolation(coords.STRAIGHT)
+//                .setZeroPowerAccelerationMultiplier(5)
+//                .build();
+//
+//        pushSample3 = follower.pathBuilder()
+//                // Go to Above Sample 3
+//                .addPath(new BezierCurve(
+//                        new Point(coords.observationPose2),
+//                        new Point(coords.controlPush3),
+//                        new Point(coords.push3Pose)
+//                ))
+//                .setConstantHeadingInterpolation(coords.STRAIGHT)
+//                .setZeroPowerAccelerationMultiplier(6)
+//                // Push Sample 3 Back
+//                .addPath(new BezierLine(new Point(coords.push3Pose), new Point(coords.observationPose3)))
+//                .setConstantHeadingInterpolation(coords.STRAIGHT)
+//                .setZeroPowerAccelerationMultiplier(5)
+//                .build();
 
         // RESET COORDS HERE
         specimenRebound = follower.pathBuilder()
@@ -124,9 +157,9 @@ public class PPSpecimenAuto extends OpMode {
         switch (pathState) {
             case 0:
                 /* Run pushing path chain */
-                armSubsystem.restArm(false);
+                armSubsystem.restArm(true);
                 follower.followPath(pushSample1);
-                setPathState(1);
+                setPathState(3);
                 break;
             case 1:
                 if (!follower.isBusy()) {
@@ -160,7 +193,7 @@ public class PPSpecimenAuto extends OpMode {
             case 4:
                 if(!follower.isBusy()) {
                     // Correct because the localization is STUPID
-//                    follower.setPose(coords.pickupSpecimenPose);
+                    follower.setPose(coords.pickupSpecimenPose);
 
                     // Run to score OR Terminate when X cycles are complete
                     if (cycles > 4) {
@@ -168,7 +201,6 @@ public class PPSpecimenAuto extends OpMode {
                     } else {
                         // Position Score
                         armSubsystem.setSpecimenArmState(1);
-                        armSubsystem.restArm(true);
                         cycles++;
 
                         // follower.setPose(coords.pickupSpecimenPose);
@@ -179,21 +211,22 @@ public class PPSpecimenAuto extends OpMode {
             case 5:
                 // Create new paths to avoid scoring in the same place
                 // From Pickup to Score
-                Point newScore = new Point(coords.scorePose0.getX()+ 0.5*cycles, coords.scorePose0.getY()+ 2*cycles);
+                Point newScore = new Point(coords.scorePose.getX()+ 0.5*cycles, coords.scorePose.getY() + cycles);
                 scoreSpecimen = new Path(new BezierCurve(
                         new Point(coords.pickupSpecimenPose),
-                        new Point(40, 30),
-                        new Point(20, 62),
+                        new Point(newScore.getX(), coords.pickupSpecimenPose.getY()),
+                        new Point(20, newScore.getY()),
                         newScore
                 ));
                 scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
                 scoreSpecimen.setZeroPowerAccelerationMultiplier(4);
                 // From Score to Pickup
+                Point newPickup = new Point(coords.pickupSpecimenPose.getX()+ 0.2*cycles, coords.pickupSpecimenPose.getY());
                 pickUpSpecimen = new Path(new BezierCurve(
                         newScore,
-                        new Point(30, 62),
-                        new Point(40, 27),
-                        new Point(coords.pickupSpecimenPose)
+                        new Point(newPickup.getX(), newScore.getY()),
+                        new Point(newScore.getX(), newPickup.getY()),
+                        newPickup
                 ));
                 pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
                 pickUpSpecimen.setZeroPowerAccelerationMultiplier(4);
@@ -204,7 +237,7 @@ public class PPSpecimenAuto extends OpMode {
                 }
                 break;
             case 6:
-                if(!follower.isBusy()) {
+                if (!follower.isBusy()) {
                     // Score and Release! (method already returns to zero)
                     armSubsystem.setSpecimenArmState(2);
                     setPathState(7);
