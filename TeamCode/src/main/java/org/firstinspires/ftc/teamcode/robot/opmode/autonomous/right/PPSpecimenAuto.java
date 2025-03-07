@@ -73,7 +73,7 @@ public class PPSpecimenAuto extends OpMode {
                         new Point (coords.controlObservationPose1),
                         new Point(coords.observationPose1)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(6)
+                .setZeroPowerAccelerationMultiplier(8)
                 // Go to Above Sample 2
                 .addPath(new BezierCurve(
                         new Point(coords.observationPose1),
@@ -88,7 +88,7 @@ public class PPSpecimenAuto extends OpMode {
                         new Point (coords.controlObservationPose2),
                         new Point(coords.observationPose2)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(6)
+                .setZeroPowerAccelerationMultiplier(8)
                 // Go to Above Sample 3
                 .addPath(new BezierCurve(
                         new Point(coords.observationPose2),
@@ -100,41 +100,41 @@ public class PPSpecimenAuto extends OpMode {
                 // Push Sample 3 Back
                 .addPath(new BezierLine(new Point(coords.push3Pose), new Point(coords.observationPose3)))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(6)
+                .setZeroPowerAccelerationMultiplier(8)
                 .build();
 
-        pushSample2 = follower.pathBuilder()
-                // Go to Above Sample 2
-                .addPath(new BezierCurve(
-                        new Point(coords.observationPose1),
-                        new Point(coords.controlPush2),
-                        new Point(coords.push2Pose)
-                ))
-                .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(6)
-                // Push Sample 2 Back
-                .addPath(new BezierCurve(
-                        new Point(coords.push2Pose),
-                        new Point (coords.controlObservationPose2),
-                        new Point(coords.observationPose2)))
-                .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(6)
-                .build();
-
-        pushSample3 = follower.pathBuilder()
-                // Go to Above Sample 3
-                .addPath(new BezierCurve(
-                        new Point(coords.observationPose2),
-                        new Point(coords.controlPush3),
-                        new Point(coords.push3Pose)
-                ))
-                .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(6)
-                // Push Sample 3 Back
-                .addPath(new BezierLine(new Point(coords.push3Pose), new Point(coords.observationPose3)))
-                .setConstantHeadingInterpolation(coords.STRAIGHT)
-                .setZeroPowerAccelerationMultiplier(6)
-                .build();
+//        pushSample2 = follower.pathBuilder()
+//                // Go to Above Sample 2
+//                .addPath(new BezierCurve(
+//                        new Point(coords.observationPose1),
+//                        new Point(coords.controlPush2),
+//                        new Point(coords.push2Pose)
+//                ))
+//                .setConstantHeadingInterpolation(coords.STRAIGHT)
+//                .setZeroPowerAccelerationMultiplier(6)
+//                // Push Sample 2 Back
+//                .addPath(new BezierCurve(
+//                        new Point(coords.push2Pose),
+//                        new Point (coords.controlObservationPose2),
+//                        new Point(coords.observationPose2)))
+//                .setConstantHeadingInterpolation(coords.STRAIGHT)
+//                .setZeroPowerAccelerationMultiplier(5)
+//                .build();
+//
+//        pushSample3 = follower.pathBuilder()
+//                // Go to Above Sample 3
+//                .addPath(new BezierCurve(
+//                        new Point(coords.observationPose2),
+//                        new Point(coords.controlPush3),
+//                        new Point(coords.push3Pose)
+//                ))
+//                .setConstantHeadingInterpolation(coords.STRAIGHT)
+//                .setZeroPowerAccelerationMultiplier(6)
+//                // Push Sample 3 Back
+//                .addPath(new BezierLine(new Point(coords.push3Pose), new Point(coords.observationPose3)))
+//                .setConstantHeadingInterpolation(coords.STRAIGHT)
+//                .setZeroPowerAccelerationMultiplier(5)
+//                .build();
 
         // RESET COORDS HERE
         specimenRebound = follower.pathBuilder()
@@ -219,17 +219,17 @@ public class PPSpecimenAuto extends OpMode {
                         newScore
                 ));
                 scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
-                scoreSpecimen.setZeroPowerAccelerationMultiplier(6);
+                scoreSpecimen.setZeroPowerAccelerationMultiplier(4);
                 // From Score to Pickup
                 Point newPickup = new Point(coords.pickupSpecimenPose.getX()+ 0.2*cycles, coords.pickupSpecimenPose.getY());
                 pickUpSpecimen = new Path(new BezierCurve(
                         newScore,
                         new Point(newPickup.getX(), newScore.getY()),
-                        new Point(newScore.getX(), newPickup.getY()-2),
+                        new Point(newScore.getX(), newPickup.getY()),
                         newPickup
                 ));
                 pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
-                pickUpSpecimen.setZeroPowerAccelerationMultiplier(5);
+                pickUpSpecimen.setZeroPowerAccelerationMultiplier(4);
 
                 if (pathTimer.getElapsedTimeSeconds() > 0.1) {
                     follower.followPath(scoreSpecimen,true);
@@ -237,7 +237,7 @@ public class PPSpecimenAuto extends OpMode {
                 }
                 break;
             case 6:
-                if(!follower.isBusy()) {
+                if (!follower.isBusy()) {
                     // Score and Release! (method already returns to zero)
                     armSubsystem.setSpecimenArmState(2);
                     setPathState(7);

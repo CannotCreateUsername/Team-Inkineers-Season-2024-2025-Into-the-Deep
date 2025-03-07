@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.pathgen.BezierCurve;
-import com.pedropathing.pathgen.BezierLine;
 import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
@@ -20,7 +19,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 import org.firstinspires.ftc.teamcode.robot.opmode.autonomous.right.PPCoords;
 import org.firstinspires.ftc.teamcode.robot.subsystem.ArmSubsystemAutoPP;
 
-@Disabled
+//@Disabled
 @Autonomous(name = "PP Auto Cycle Path", group = "Autonomous")
 public class PPSpecimenCycle extends OpMode {
     private Telemetry telemetryA;
@@ -85,22 +84,24 @@ public class PPSpecimenCycle extends OpMode {
                 if (cycles > 4) {
                     setPathState(-1);
                 } else if (!follower.isBusy()) {
+                    follower.setPose(coords.pickupSpecimenPose);
                     // From Pickup to Score
-                    Point newScore = new Point(coords.scorePose.getX(), coords.scorePose.getY()+ 1*cycles);
+                    Point newScore = new Point(coords.scorePose.getX(), coords.scorePose.getY() + cycles);
                     scoreSpecimen = new Path(new BezierCurve(
                             new Point(coords.pickupSpecimenPose),
-                            new Point(40, 30),
-                            new Point(20, 62),
+                            new Point(newScore.getX(), coords.pickupSpecimenPose.getY()),
+                            new Point(20, newScore.getY()),
                             newScore
                     ));
                     scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
                     scoreSpecimen.setZeroPowerAccelerationMultiplier(4);
                     // From Score to Pickup
+                    Point newPickup = new Point(coords.pickupSpecimenPose.getX(), coords.pickupSpecimenPose.getY());
                     pickUpSpecimen = new Path(new BezierCurve(
                             newScore,
-                            new Point(30, 62),
-                            new Point(40, 27),
-                            new Point(coords.pickupSpecimenPose)
+                            new Point(newPickup.getX(), newScore.getY()),
+                            new Point(newScore.getX(), newPickup.getY()),
+                            newPickup
                     ));
                     pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
                     pickUpSpecimen.setZeroPowerAccelerationMultiplier(4);
