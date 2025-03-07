@@ -193,7 +193,7 @@ public class PPSpecimenAuto extends OpMode {
             case 4:
                 if(!follower.isBusy()) {
                     // Correct because the localization is STUPID
-//                    follower.setPose(coords.pickupSpecimenPose);
+                    follower.setPose(coords.pickupSpecimenPose);
 
                     // Run to score OR Terminate when X cycles are complete
                     if (cycles > 4) {
