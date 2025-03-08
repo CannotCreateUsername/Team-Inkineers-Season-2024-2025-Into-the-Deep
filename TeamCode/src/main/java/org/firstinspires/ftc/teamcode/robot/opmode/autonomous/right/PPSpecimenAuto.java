@@ -78,6 +78,7 @@ public class PPSpecimenAuto extends OpMode {
                 .addPath(new BezierCurve(
                         new Point(coords.observationPose1),
                         new Point(coords.controlPush2),
+                        new Point(coords.controlPush22),
                         new Point(coords.push2Pose)
                 ))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
@@ -109,7 +110,7 @@ public class PPSpecimenAuto extends OpMode {
                 .addPath(new BezierCurve(
                         new Point(coords.observationPose3),
                         new Point(coords.controlSpecimen0),
-                        new Point(coords.pickupSpecimenPose.getX() + 2.5, coords.pickupSpecimenPose.getY() + 2.5)
+                        new Point(coords.pickupSpecimenPose.getX() + 2, coords.pickupSpecimenPose.getY() + 2)
                 ))
                 .setLinearHeadingInterpolation(coords.STRAIGHT, coords.ROTATED)
                 .build();
@@ -178,7 +179,7 @@ public class PPSpecimenAuto extends OpMode {
             case 5:
                 // Create new paths to avoid scoring in the same place
                 // From Pickup to Score
-                Point newScore = new Point(coords.scorePose.getX(), coords.scorePose.getY() - 1.2*cycles);
+                Point newScore = new Point(coords.scorePose.getX(), coords.scorePose.getY() - 0.8*cycles);
                 scoreSpecimen = new Path(new BezierCurve(
                         new Point(coords.pickupSpecimenPose),
 //                        new Point(newScore.getX(), coords.pickupSpecimenPose.getY()),
@@ -186,22 +187,29 @@ public class PPSpecimenAuto extends OpMode {
                         newScore
                 ));
                 scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
-                scoreSpecimen.setZeroPowerAccelerationMultiplier(5);
+                scoreSpecimen.setZeroPowerAccelerationMultiplier(6);
                 // From Score to Pickup
-                Point newPickup = new Point(coords.pickupSpecimenPose.getX()+ 0.3*cycles, coords.pickupSpecimenPose.getY()+0.1*cycles);
+                Point newPickup = new Point(coords.pickupSpecimenPose.getX()+ 0.2*cycles, coords.pickupSpecimenPose.getY()+0.3*cycles);
                 pickUpSpecimen = new Path(new BezierCurve(
                         newScore,
 //                        new Point(newPickup.getX(), newScore.getY()),
+                        newScore,
 //                        new Point(newScore.getX(), newPickup.getY()),
                         newPickup
                 ));
                 pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
-                pickUpSpecimen.setZeroPowerAccelerationMultiplier(5);
+                pickUpSpecimen.setZeroPowerAccelerationMultiplier(6);
 
-                if (pathTimer.getElapsedTimeSeconds() > 0.1) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.2 && cycles > 0) {
                     follower.followPath(scoreSpecimen,true);
                     setPathState(6);
                 }
+//                else {
+//                    if (pathTimer.getElapsedTimeSeconds() > 0.4) {
+//                        follower.followPath(scoreSpecimen,true);
+//                        setPathState(6);
+//                    }
+//                }
                 break;
             case 6:
                 if (!follower.isBusy()) {
@@ -264,7 +272,7 @@ public class PPSpecimenAuto extends OpMode {
         armSubsystem.init(hardwareMap, false, true);
 
         telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
-        telemetryA.addLine("This opmode has a serious case of LIGMA. Ong, no cap.");
+        telemetryA.addLine("This opmode has a serious case of inconsistency. Press play and PRAY");
         telemetryA.update();
     }
 

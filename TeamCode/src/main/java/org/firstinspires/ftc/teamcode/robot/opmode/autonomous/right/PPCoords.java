@@ -18,23 +18,24 @@ public class PPCoords {
     public final Pose startPose = new Pose(10, 66, STRAIGHT);
 
     // From Start Pose
-    public final Pose push1Pose = new Pose(54, 26);
+    public final Pose push1Pose = new Pose(54, 28);
     public final Pose controlPush1 = new Pose(10, 20);
     public final Pose controlPush12 = new Pose(60, 48);
-    public final Pose observationPose1 = new Pose(26, 24);
-    public final Pose controlObservationPose1 = new Pose(observationPose1.getX() + 4, observationPose1.getY() + 8);
+    public final Pose observationPose1 = new Pose(26, 26);
+    public final Pose controlObservationPose1 = new Pose(observationPose1.getX() + 4, observationPose1.getY() - 8);
 
-    public final Pose push2Pose = new Pose(56, 20);
-    public final Pose controlPush2 = new Pose(push2Pose.getX() + 2, push2Pose.getY()+12);
+    public final Pose push2Pose = new Pose(56, 18);
+    public final Pose controlPush2 = new Pose(observationPose1.getX() + 10, observationPose1.getY()+12);
+    public final Pose controlPush22 = new Pose(push2Pose.getX(), observationPose1.getY()+12);
     public final Pose observationPose2 = new Pose(26, 16);
-    public final Pose controlObservationPose2 = new Pose(observationPose2.getX() + 4, observationPose2.getY() + 4);
+    public final Pose controlObservationPose2 = new Pose(observationPose2.getX() + 4, observationPose2.getY() - 8);
 
-    public final Pose push3Pose = new Pose(58, 12);
-    public final Pose controlPush3 = new Pose(push3Pose.getX() + 2, push3Pose.getY()+14);
-    public final Pose observationPose3 = new Pose(26, 12);
+    public final Pose push3Pose = new Pose(58, 14);
+    public final Pose controlPush3 = new Pose(observationPose2.getX() + 10, observationPose2.getY()+10);
+    public final Pose observationPose3 = new Pose(26, 13);
 
     public final Pose pickupSpecimenPose = new Pose(10, 37, ROTATED); // 0.5 in to the left of hole
     public final Pose controlSpecimen0 = new Pose(pickupSpecimenPose.getX() + 10, pickupSpecimenPose.getY() + 2); // Rotate -90 Degrees
 
-    public final Pose scorePose = new Pose(43, 66+9, ROTATED);
+    public final Pose scorePose = new Pose(41.5, 66+9, ROTATED); // 41.5, 10
 }

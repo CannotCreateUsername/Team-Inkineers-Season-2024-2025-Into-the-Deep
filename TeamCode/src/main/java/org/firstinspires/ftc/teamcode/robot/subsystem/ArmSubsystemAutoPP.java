@@ -39,9 +39,9 @@ public class ArmSubsystemAutoPP extends ArmSubsystem {
                 // 1. Close Claw
                 // 2. Ready Bar and Wrist to Score after 0.2 seconds
                 specimenClaw.setPosition(SPECIMEN_CLAW_CLOSED);
-                if (specimenSystemTimer.seconds() > 0.2) {
+                if (specimenSystemTimer.seconds() > 0.4) {
                     specimenBar.setPosition(SPECIMEN_BAR_OUTTAKE_ANGLE);
-                    if (specimenSystemTimer.seconds() > 0.4) {
+                    if (specimenSystemTimer.seconds() > 0.5) {
                         specimenWrist.setPosition(SPECIMEN_WRIST_TRANSITION_OFF);
                     } else {
                         specimenWrist.setPosition(SPECIMEN_WRIST_OUTTAKE_ANGLE);

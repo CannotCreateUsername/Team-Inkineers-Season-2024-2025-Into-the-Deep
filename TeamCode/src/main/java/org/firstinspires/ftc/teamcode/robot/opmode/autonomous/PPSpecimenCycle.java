@@ -74,7 +74,7 @@ public class PPSpecimenCycle extends OpMode {
                 } else if (!follower.isBusy()) {
                     follower.setPose(coords.pickupSpecimenPose);
                     // From Pickup to Score
-                    Point newScore = new Point(coords.scorePose.getX(), coords.scorePose.getY() + cycles);
+                    Point newScore = new Point(coords.scorePose.getX(), coords.scorePose.getY() - cycles);
                     scoreSpecimen = new Path(new BezierCurve(
                             new Point(coords.pickupSpecimenPose),
 //                            new Point(newScore.getX(), coords.pickupSpecimenPose.getY()),
@@ -92,7 +92,7 @@ public class PPSpecimenCycle extends OpMode {
                             newPickup
                     ));
                     pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
-                    pickUpSpecimen.setZeroPowerAccelerationMultiplier(4);
+                    pickUpSpecimen.setZeroPowerAccelerationMultiplier(6);
 
                     cycles++;
 

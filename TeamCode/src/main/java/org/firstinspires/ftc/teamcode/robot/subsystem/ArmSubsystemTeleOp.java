@@ -362,6 +362,7 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
 
     private final ElapsedTime hangTimer = new ElapsedTime();
     private boolean unhang = false;
+    private boolean lvl3 = false;
     private double releaseTime = 15;
     public void runHang(GamepadEx gamepad1, GamepadEx gamepad2) {
         switch (hangState) {
@@ -423,15 +424,19 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                 setSpecimenState(SpecimenState.HANG);
 
                 hangDisplayText = "X To Cancel";
-                releaseTime = 4.0;
+                releaseTime = 3.0;
 
-                if (hangTimer.seconds() > releaseTime) {
+                if (hangTimer.seconds() > 3 * releaseTime) {
+                    // Slowly Release
+                    hangDisplayText = "Finished";
+                    slidePower /= 1.1;
+                } else if (hangTimer.seconds() > releaseTime) {
                     wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    if (gamepad1.wasJustReleased(GamepadKeys.Button.BACK)) {
+                    if (lvl3) {
                         hangTimer.reset();
                         hangState = HangState.ASCENT_3;
                     }
-                } else if (hangTimer.seconds() > 3.5) {
+                } else if (hangTimer.seconds() > 2.5) {
                     targetSlidePosition = ASCENT_LV3_SLIDES;
                     hangMotor.setTargetPosition(HANG_REST);
                     wormMotor.setPower(0);
@@ -447,6 +452,10 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     hangMotor.setTargetPosition(HANG_DOWN);
                 }
 
+                // Auto go to lvl 3 ascent
+                if (gamepad1.wasJustPressed(GamepadKeys.Button.BACK)) {
+                    lvl3 = true;
+                }
                 // Pause Hanging IF NEEDED
                 if (gamepad1.wasJustReleased(GamepadKeys.Button.X)) {
                     hangState = HangState.PAUSE;
@@ -481,15 +490,15 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
                     wormMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     // Slowly Release
                     slidePower /= 1.1;
-                } else if (hangTimer.seconds() > 2) {
+                } else if (hangTimer.seconds() > 2.5) {
                     hangDisplayText = "Press Y to add +5.0 Seconds";
                     wormMotor.setTargetPosition(HANG_WORM_FINISH);
                     wormMotor.setPower(0.8);
                 } else {
                     hangDisplayText = "X To Cancel";
-                    targetSlidePosition = REST_POSITION_SLIDES;
                     wormMotor.setTargetPosition(0);
                     wormMotor.setPower(0.8);
+                    targetSlidePosition = REST_POSITION_SLIDES;
                     resetting = true;
                     if (slideSwitch.isPressed()) {
                         resetSlideEncoders();
