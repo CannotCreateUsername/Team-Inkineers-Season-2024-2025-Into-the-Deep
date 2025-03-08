@@ -94,6 +94,7 @@ public class PPSpecimenAuto extends OpMode {
                 .addPath(new BezierCurve(
                         new Point(coords.observationPose2),
                         new Point(coords.controlPush3),
+                        new Point(coords.controlPush32),
                         new Point(coords.push3Pose)
                 ))
                 .setConstantHeadingInterpolation(coords.STRAIGHT)
@@ -110,7 +111,7 @@ public class PPSpecimenAuto extends OpMode {
                 .addPath(new BezierCurve(
                         new Point(coords.observationPose3),
                         new Point(coords.controlSpecimen0),
-                        new Point(coords.pickupSpecimenPose.getX() + 2, coords.pickupSpecimenPose.getY() + 2)
+                        new Point(coords.pickupSpecimenPose.getX() + 1, coords.pickupSpecimenPose.getY() + 2)
                 ))
                 .setLinearHeadingInterpolation(coords.STRAIGHT, coords.ROTATED)
                 .build();
@@ -164,7 +165,7 @@ public class PPSpecimenAuto extends OpMode {
                     follower.setPose(coords.pickupSpecimenPose);
 
                     // Run to score OR Terminate when X cycles are complete
-                    if (cycles > 4) {
+                    if (cycles > 3) {
                         setPathState(-1);
                     } else {
                         // Position Score
@@ -189,7 +190,7 @@ public class PPSpecimenAuto extends OpMode {
                 scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
                 scoreSpecimen.setZeroPowerAccelerationMultiplier(6);
                 // From Score to Pickup
-                Point newPickup = new Point(coords.pickupSpecimenPose.getX()+ 0.2*cycles, coords.pickupSpecimenPose.getY()+0.3*cycles);
+                Point newPickup = new Point(coords.pickupSpecimenPose.getX()+ 0.2*cycles, coords.pickupSpecimenPose.getY()+0.15*cycles);
                 pickUpSpecimen = new Path(new BezierCurve(
                         newScore,
 //                        new Point(newPickup.getX(), newScore.getY()),

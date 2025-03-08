@@ -30,9 +30,10 @@ public class PPCoords {
     public final Pose observationPose2 = new Pose(26, 16);
     public final Pose controlObservationPose2 = new Pose(observationPose2.getX() + 4, observationPose2.getY() - 8);
 
-    public final Pose push3Pose = new Pose(58, 14);
+    public final Pose push3Pose = new Pose(60, 13);
     public final Pose controlPush3 = new Pose(observationPose2.getX() + 10, observationPose2.getY()+10);
-    public final Pose observationPose3 = new Pose(26, 13);
+    public final Pose controlPush32 = new Pose(push3Pose.getX(), observationPose2.getY()+10);
+    public final Pose observationPose3 = new Pose(26, 12);
 
     public final Pose pickupSpecimenPose = new Pose(10, 37, ROTATED); // 0.5 in to the left of hole
     public final Pose controlSpecimen0 = new Pose(pickupSpecimenPose.getX() + 10, pickupSpecimenPose.getY() + 2); // Rotate -90 Degrees
