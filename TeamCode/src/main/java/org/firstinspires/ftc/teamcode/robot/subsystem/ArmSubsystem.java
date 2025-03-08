@@ -123,7 +123,7 @@ public abstract class ArmSubsystem {
     // Lower servos. Axon, standard rotation of 180.98 degrees.
     protected final double MAX_LOWER_BAR_ROTATION = 200.5; // 144/255
     protected final double V4B_LOWER_CENTER = 0.5;
-    protected final double V4B_LOWER_REST = V4B_LOWER_CENTER + 45.0/MAX_LOWER_BAR_ROTATION;
+    protected final double V4B_LOWER_REST = V4B_LOWER_CENTER + 60.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_LEFT = V4B_LOWER_CENTER - 90.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_RIGHT = V4B_LOWER_CENTER + 90.0/MAX_LOWER_BAR_ROTATION;
     protected final double V4B_LOWER_INITIAL = V4B_LOWER_CENTER + 80.0/MAX_LOWER_BAR_ROTATION;
@@ -147,7 +147,7 @@ public abstract class ArmSubsystem {
 
     // Specimen Actuator Positions.
     private final double MAX_SPECIMEN_BAR_ROTATION = 355;
-    private final double MAX_SPECIMEN_WRIST_ROTATION = MAX_GOBILDA_ROTATION;
+    protected final double MAX_SPECIMEN_WRIST_ROTATION = MAX_GOBILDA_ROTATION;
 
     protected final double SPECIMEN_BAR_NEUTRAL = 0.5;
     protected final double SPECIMEN_BAR_INITIAL_ANGLE = SPECIMEN_BAR_NEUTRAL +(69.0+90.0)/MAX_SPECIMEN_BAR_ROTATION;
@@ -157,7 +157,7 @@ public abstract class ArmSubsystem {
 
     protected final double SPECIMEN_WRIST_NEUTRAL = 0.5;
     protected final double SPECIMEN_WRIST_INITIAL_ANGLE = SPECIMEN_WRIST_NEUTRAL -(90.0+30.0)/MAX_SPECIMEN_WRIST_ROTATION;
-    protected final double SPECIMEN_WRIST_INTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL -50.0/MAX_SPECIMEN_WRIST_ROTATION;
+    protected final double SPECIMEN_WRIST_INTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL -60.0/MAX_SPECIMEN_WRIST_ROTATION;
     protected final double SPECIMEN_WRIST_OUTTAKE_ANGLE = SPECIMEN_WRIST_NEUTRAL -85.0/MAX_SPECIMEN_WRIST_ROTATION; //+1.0/MAX_SPECIMEN_WRIST_ROTATION;
     protected final double SPECIMEN_WRIST_TRANSITION_OFF = SPECIMEN_WRIST_NEUTRAL; //-120.0/MAX_SPECIMEN_WRIST_ROTATION;
 

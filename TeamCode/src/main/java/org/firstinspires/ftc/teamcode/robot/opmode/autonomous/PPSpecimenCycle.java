@@ -36,7 +36,6 @@ public class PPSpecimenCycle extends OpMode {
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path scoreSpecimen, pickUpSpecimen;
-    private PathChain specimenRebound;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -58,17 +57,6 @@ public class PPSpecimenCycle extends OpMode {
 
         /* Here is an example for Constant Interpolation
         scorePreload.setConstantInterpolation(startPose.getHeading()); */
-
-        // RESET COORDS HERE
-        specimenRebound = follower.pathBuilder()
-                // Position robot for specimen pickup
-                .addPath(new BezierCurve(
-                        new Point(coords.observationPose3),
-                        new Point(coords.controlSpecimen0),
-                        new Point(coords.pickupSpecimenPose.getX(), coords.pickupSpecimenPose.getY() + 4)
-                ))
-                .setLinearHeadingInterpolation(coords.STRAIGHT, coords.ROTATED)
-                .build();
     }
 
     /** This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
@@ -89,18 +77,18 @@ public class PPSpecimenCycle extends OpMode {
                     Point newScore = new Point(coords.scorePose.getX(), coords.scorePose.getY() + cycles);
                     scoreSpecimen = new Path(new BezierCurve(
                             new Point(coords.pickupSpecimenPose),
-                            new Point(newScore.getX(), coords.pickupSpecimenPose.getY()),
-                            new Point(20, newScore.getY()),
+//                            new Point(newScore.getX(), coords.pickupSpecimenPose.getY()),
+//                            new Point(20, newScore.getY()),
                             newScore
                     ));
                     scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
-                    scoreSpecimen.setZeroPowerAccelerationMultiplier(4);
+                    scoreSpecimen.setZeroPowerAccelerationMultiplier(6);
                     // From Score to Pickup
                     Point newPickup = new Point(coords.pickupSpecimenPose.getX(), coords.pickupSpecimenPose.getY());
                     pickUpSpecimen = new Path(new BezierCurve(
                             newScore,
-                            new Point(newPickup.getX(), newScore.getY()),
-                            new Point(newScore.getX(), newPickup.getY()),
+//                            new Point(newPickup.getX(), newScore.getY()),
+//                            new Point(newScore.getX(), newPickup.getY()),
                             newPickup
                     ));
                     pickUpSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
