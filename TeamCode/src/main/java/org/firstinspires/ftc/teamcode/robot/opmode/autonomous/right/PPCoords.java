@@ -18,7 +18,7 @@ public class PPCoords {
     public final Pose startPose = new Pose(10, 66, STRAIGHT);
 
     // From Start Pose
-    public final Pose push1Pose = new Pose(54, 28);
+    public final Pose push1Pose = new Pose(58, 28);
     public final Pose controlPush1 = new Pose(10, 20);
     public final Pose controlPush12 = new Pose(60, 48);
     public final Pose observationPose1 = new Pose(26, 26);

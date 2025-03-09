@@ -190,7 +190,7 @@ public class PPSpecimenAuto extends OpMode {
                 scoreSpecimen.setConstantHeadingInterpolation(coords.ROTATED);
                 scoreSpecimen.setZeroPowerAccelerationMultiplier(6);
                 // From Score to Pickup
-                Point newPickup = new Point(coords.pickupSpecimenPose.getX()+ 0.2*cycles, coords.pickupSpecimenPose.getY()+0.15*cycles);
+                Point newPickup = new Point(coords.pickupSpecimenPose.getX()+ 0.175*cycles, coords.pickupSpecimenPose.getY()+0.05*cycles);
                 pickUpSpecimen = new Path(new BezierCurve(
                         newScore,
 //                        new Point(newPickup.getX(), newScore.getY()),
