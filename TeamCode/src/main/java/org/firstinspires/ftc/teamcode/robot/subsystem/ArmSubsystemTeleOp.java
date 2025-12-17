@@ -29,6 +29,20 @@ public class ArmSubsystemTeleOp extends ArmSubsystem {
         runLED();
     }
 
+    public void runSubsystemWithoutHang(GamepadEx gamepadEx1, GamepadEx gamepadEx2, Gamepad gamepad) {
+        if (hangState != HangState.ASCENT_2) {
+            runArm(gamepadEx1);
+            runIntake(gamepad);
+        }
+        runSlides(gamepadEx1);
+        runLED();
+
+        // Hang default code
+        hangDisplayText = "Not Hanging; In REST";
+        resetHangSwitches();
+        hangPID(1);
+    }
+
     public void runLED() {
         getColorDetections();
         if (getSampleDetected()) {
